@@ -125,8 +125,8 @@
 * add_user_for_write(user) - добавлет id пользователя user в список пользователей, которые могут просматривать и редактировать задачу
 * create_notification(title, start_time) - создаёт объект класса Notification для текущей задачи с указанным заголовком уведомления и относительным временем от начала задачи. При этом task.notification_id присваивается id созданного объекта класса Notification
 * set_category(category) - устанавливает для задачи категорию с заданным id: task.category_id = category.id
-* set_priority(priority) - устанавливает для задачи категорию с заданным id: task.priority_id = priority.id
-* set_status(status) - устанавливает для задачи категорию с заданным id: task.status_id = status.id
+* set_priority(priority) - устанавливает для задачи важность выполнения с заданным id: task.priority_id = priority.id
+* set_status(status) - устанавливает для задачи статус с заданным id: task.status_id = status.id
 * assign_user(user) - назначает на пользователя user текущую задачу: task.assigned_user_id = user.id
 
 #### Класс **Notification** - уведомление, которое напоминает пользователю о задаче
