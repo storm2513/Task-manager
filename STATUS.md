@@ -111,7 +111,7 @@
 * parent_task_id - id родительской задачи
 * start_time - крайний срок начала / время начала
 * end_time - крайний срок выполнения / время окончания
-* status - статус задачи, id объекта класса **Status**
+* status_id - id объекта класса **Status**
 * priority_id - id объекта класса **Priority**
 * notification_id - id объекта класса **Notification**
 * read_users_ids - id пользователей, которые могут просматривать задачу
