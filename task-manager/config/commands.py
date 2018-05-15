@@ -19,7 +19,7 @@ def update_task(task):
     Controllers.TASKS.update(task)
 
 def get_task_by_id(task_id):
-    Controllers.TASKS.get_by_id(task_id)
+    return Controllers.TASKS.get_by_id(task_id)
 
 def delete_task(task_id):
     Controllers.TASKS.delete(task_id)
@@ -29,6 +29,9 @@ def change_task_status(task, status):
 
 def create_inner_task(parent_task_id, task):
     Controllers.TASKS.create_inner_task(parent_task_id, task)
+
+def get_inner_tasks(task):
+    return Controllers.TASKS.inner(task)
 
 def assign_user_on_task(user_id, task):
     Controllers.TASKS.assign_user_on_task(user_id, task)

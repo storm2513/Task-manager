@@ -44,6 +44,9 @@ class TasksController:
         task.parent_task_id = parent_task_id
         self.update(task)
 
+    def inner(self, task):
+        return self.task_storage.inner(task)
+
     def assign_user_on_task(self, user_id, task):
         task.assigned_user_id = user_id
         self.update(task)

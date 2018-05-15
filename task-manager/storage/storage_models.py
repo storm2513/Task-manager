@@ -51,42 +51,6 @@ class Task(BaseModel):
         self.updated_at = datetime.datetime.now()
         return super(Task, self).save(*args, **kwargs)
 
-    def assign_user(self, user):
-        self.assigned_user = user
-        self.save()
-
-    def parent(self):
-        return Task.get(Task.id == self.parent_task_id)
-
-    def inner(self):
-        return list(Task.select().where(Task.parent_task_id == self.id))
-
-    def create_inner(self, **params):
-        task = Task.create(**params)
-        task.parent_task_id = self.id
-        task.user = self.user
-        task.save()
-
-    def add_user_for_read(self, user):
-        if UsersReadTasks.select().where(
-                UsersReadTasks.task == self and UsersReadTasks.user == user).count() == 0:
-            UsersReadTasks.create(task=self, user=user)
-
-    def add_user_for_write(self, user):
-        if UsersWriteTasks.select().where(
-                UsersWriteTasks.task == self and UsersWriteTasks.user == user).count() == 0:
-            UsersWriteTasks.create(task=self, user=user)
-
-    def remove_user_for_read(self, user):
-        query = UsersReadTasks.delete().where(
-            UsersReadTasks.task == self and UsersReadTasks.user == user)
-        query.execute()
-
-    def remove_user_for_write(self, user):
-        query = UsersWriteTasks.delete().where(
-            UsersWriteTasks.task == self and UsersWriteTasks.user == user)
-        query.execute()
-
 
 class UsersReadTasks(BaseModel):
     user = ForeignKeyField(User)

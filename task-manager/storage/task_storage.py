@@ -56,13 +56,22 @@ class TaskStorage:
         return self.to_task_instance(Task.get(Task.id == task_id))
 
     def user_tasks(self, user):
-        return list(Task.select().where(Task.user_id == user.id))
+        return list(map(self.to_task_instance, list(
+            Task.select().where(Task.user_id == user.id))))
+
+    def inner(self, task):
+        return list(map(self.to_task_instance, list(
+            Task.select().where(Task.parent_task_id == task.id))))
 
     def add_user_for_read(user_id, task_id):
-        UsersReadTasks.create(user_id=user_id, task_id=task_id)
+        if UsersReadTasks.select().where(UsersReadTasks.task_id ==
+                                         task_id and UsersReadTasks.user_id == user_id).count() == 0:
+            UsersReadTasks.create(user_id=user_id, task_id=task_id)
 
     def add_user_for_write(user_id, task_id):
-        UsersWriteTasks.create(user_id=user_id, task_id=task_id)
+        if UsersWriteTasks.select().where(UsersWriteTasks.task_id ==
+                                          task_id and UsersWriteTasks.user_id == user_id).count() == 0:
+            UsersWriteTasks.create(user_id=user_id, task_id=task_id)
 
     def remove_user_for_read(user_id, task_id):
         UsersReadTasks.delete().where(UsersReadTasks.user_id ==
