@@ -5,10 +5,10 @@ from enums.status import Status
 class Task:
     def __init__(
             self,
-            id,
             user_id,
             title,
             note="",
+            id=None,
             start_time=None,
             end_time=None,
             assigned_user_id=None,

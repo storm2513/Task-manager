@@ -1,5 +1,6 @@
 import math
 
+
 class Level:
     def __init__(id, experience=1):
         self.id = id

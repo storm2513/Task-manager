@@ -1,25 +1,23 @@
 from storage.storage_models import Level
 from models.level import Level as LevelInstance
 
+
 class LevelStorage:
-    @staticmethod
-    def create():
+    def create(self):
         return Level.create()
 
-    @staticmethod
-    def delete_by_id(level_id):
+    def delete_by_id(self, level_id):
         Level.delete().where(Level.id == level_id).execute()
 
-    @staticmethod
-    def update(level):
-        Level.update(experience=level.experience).where(Level.id == level.id).execute()
+    def update(self, level):
+        Level.update(
+            experience=level.experience).where(
+            Level.id == level.id).execute()
 
-    @staticmethod
-    def to_level_instance(level):
+    def to_level_instance(self, level):
         return LevelInstance(
-                id=level.id,
-                experience=level.experience)
+            id=level.id,
+            experience=level.experience)
 
-    @staticmethod
-    def get_by_id(level_id):
-        return LevelStorage.to_level_instance(Level.get(Level.id == level_id))
+    def get_by_id(self, level_id):
+        return self.to_level_instance(Level.get(Level.id == level_id))

@@ -1,39 +1,41 @@
 from storage.storage_models import User
 from models.user import User as UserInstance
+from peewee import *
+
 
 class UserStorage:
-    @staticmethod
-    def create(user):
-        User.create(id=user.id,
-                    email=user.email,
-                    name=user.name,
-                    password=user.password,
-                    level_id=user.level_id)
+    def create(self, user):
+        return self.to_user_instance(User.create(id=user.id,
+                                                 email=user.email,
+                                                 name=user.name,
+                                                 password=user.password,
+                                                 level_id=user.level_id))
 
-    @staticmethod
-    def delete(user):
+    def delete(self, user):
         User.delete().where(User.id == user.id).execute()
 
-    @staticmethod
-    def delete_by_id(user_id):
+    def delete_by_id(self, user_id):
         User.delete().where(User.id == user_id).execute()
 
-    @staticmethod
-    def update(user):
+    def update(self, user):
         User.update(
             email=user.email,
             name=user.name,
             password=user.password).where(User.id == user.id).execute()
 
-    @staticmethod
-    def to_user_instance(user):
+    def to_user_instance(self, user):
         return UserInstance(
-                id=user.id,
-                email=user.email,
-                name=user.name,
-                password=user.password,
-                level_id=user.level_id)
+            id=user.id,
+            email=user.email,
+            name=user.name,
+            password=user.password,
+            level_id=user.level_id)
 
-    @staticmethod
-    def get_by_id(user_id):
-        return UserStorage.to_user_instance(User.get(User.id == user_id))
+    def get_by_id(self, user_id):
+        return self.to_user_instance(User.get(User.id == user_id))
+
+    def get_by_email(self, email):
+        try:
+            return self.to_user_instance(User.get(User.email == email))
+        except DoesNotExist:
+            return None

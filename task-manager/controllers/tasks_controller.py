@@ -1,14 +1,21 @@
 from storage.task_storage import TaskStorage
 
+
 class TasksController:
     def __init__(self, task_storage):
         self.task_storage = task_storage
 
-    def create(task):
-        task_storage.create(task)
+    def create(self, task):
+        self.task_storage.create(task)
 
-    def update(task):
-        task_storage.update(task)
+    def update(self, task):
+        self.task_storage.update(task)
 
-    def delete(task_id):
-        task_storage.delete_by_id(task_id)
+    def delete(self, task_id):
+        self.task_storage.delete_by_id(task_id)
+
+    def user_tasks(self, user):
+        return self.task_storage.user_tasks(user)
+
+    def get_by_id(self, task_id):
+        return self.task_storage.get_by_id(task_id)

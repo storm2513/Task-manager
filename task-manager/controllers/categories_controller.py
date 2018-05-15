@@ -1,4 +1,5 @@
-from storage.task_storage import CategoryStorage
+from storage.category_storage import CategoryStorage
+
 
 class CategoriesController:
     def __init__(self, category_storage):
