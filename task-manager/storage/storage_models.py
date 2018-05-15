@@ -1,6 +1,8 @@
 from peewee import *
-import math
 import datetime
+
+from enums.status import Status
+from enums.priority import Priority
 
 db = SqliteDatabase('task_manager.db')
 
@@ -11,21 +13,8 @@ class BaseModel(Model):
 
 
 class Level(BaseModel):
-    TASK_COMPLETED_SCORE = 1
-
     id = PrimaryKeyField(null=False)
     experience = IntegerField(default=1)
-
-    def increase_experience(self):
-        self.experience += self.TASK_COMPLETED_SCORE
-        self.save()
-
-    def current_level(self):
-        return math.floor((-1 + math.sqrt(self.experience * 8 + 1)) / 2)
-
-    def next_level_experience(self):
-        level = self.current_level()
-        return math.floor((level + 1) * (level + 2) / 2)
 
 
 class User(BaseModel):
@@ -42,13 +31,6 @@ class Category(BaseModel):
     user = ForeignKeyField(User, backref='categories')
 
 
-class Priority(BaseModel):
-    id = PrimaryKeyField(null=False)
-    name = CharField()
-    weight = IntegerField(default=0)
-    user = ForeignKeyField(User, backref='priorities')
-
-
 class Task(BaseModel):
     id = PrimaryKeyField(null=False)
     user = ForeignKeyField(User, backref='tasks', null=True)
@@ -60,7 +42,8 @@ class Task(BaseModel):
     parent_task_id = IntegerField(null=True)
     is_event = BooleanField(default=False)
     category = ForeignKeyField(Category, backref='tasks', null=True)
-    priority = ForeignKeyField(Priority, backref='tasks', null=True)
+    priority = IntegerField(default=Priority.MEDIUM)
+    status = IntegerField(default=Status.TODO)
     created_at = DateTimeField(default=datetime.datetime.now)
     updated_at = DateTimeField
 
@@ -117,4 +100,4 @@ class UsersWriteTasks(BaseModel):
 
 db.connect()
 db.create_tables([User, Level, Task, UsersReadTasks,
-                  UsersWriteTasks, Category, Priority])
+                  UsersWriteTasks, Category])
