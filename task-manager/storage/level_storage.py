@@ -21,3 +21,9 @@ class LevelStorage:
 
     def get_by_id(self, level_id):
         return self.to_level_instance(Level.get(Level.id == level_id))
+
+    def get_by_user_id(self, user_id):
+        level_id = User.select(
+            User.level_id).where(
+            User.id == user_id).first().level_id
+        return self.get_by_id(level_id)

@@ -1,4 +1,4 @@
-from storage.storage_models import Task
+from storage.storage_models import Task, UsersReadTasks, UsersWriteTasks
 from models.task import Task as TaskInstance
 
 
@@ -57,3 +57,17 @@ class TaskStorage:
 
     def user_tasks(self, user):
         return list(Task.select().where(Task.user_id == user.id))
+
+    def add_user_for_read(user_id, task_id):
+        UsersReadTasks.create(user_id=user_id, task_id=task_id)
+
+    def add_user_for_write(user_id, task_id):
+        UsersWriteTasks.create(user_id=user_id, task_id=task_id)
+
+    def remove_user_for_read(user_id, task_id):
+        UsersReadTasks.delete().where(UsersReadTasks.user_id ==
+                                      user_id and UsersReadTasks.task_id == task_id).execute()
+
+    def remove_user_for_write(user_id, task_id):
+        UsersWriteTasks.delete().where(UsersWriteTasks.user_id ==
+                                       user_id and UsersWriteTasks.task_id == task_id).execute()
