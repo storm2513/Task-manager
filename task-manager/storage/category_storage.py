@@ -4,10 +4,11 @@ from models.category import Category as CategoryInstance
 
 class CategoryStorage:
     def create(self, category):
-        return Category.create(
-            id=category.id,
-            name=category.name,
-            user_id=category.user_id)
+        return self.to_category_instance(
+            Category.create(
+                id=category.id,
+                name=category.name,
+                user_id=category.user_id))
 
     def delete_by_id(self, category_id):
         Category.delete().where(Category.id == category_id).execute()
@@ -20,7 +21,7 @@ class CategoryStorage:
     def to_category_instance(self, category):
         return CategoryInstance(
             id=category.id,
-            experience=category.experience,
+            name=category.name,
             user_id=category.user_id)
 
     def get_by_id(self, category_id):

@@ -1,4 +1,4 @@
-from storage.storage_models import Level
+from storage.storage_models import Level, User
 from models.level import Level as LevelInstance
 
 

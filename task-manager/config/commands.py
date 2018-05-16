@@ -30,8 +30,8 @@ def change_task_status(task, status):
 def create_inner_task(parent_task_id, task):
     Controllers.TASKS.create_inner_task(parent_task_id, task)
 
-def get_inner_tasks(task):
-    return Controllers.TASKS.inner(task)
+def get_inner_tasks(task_id):
+    return Controllers.TASKS.inner(task_id)
 
 def assign_user_on_task(user_id, task):
     Controllers.TASKS.assign_user_on_task(user_id, task)
@@ -48,8 +48,8 @@ def remove_user_for_read(user_id, task_id):
 def remove_user_for_write(user_id, task_id):
     Controllers.TASKS.add_user_for_write(user_id, task_id)
 
-def get_user_tasks(user=Global.USER):
-    return Controllers.TASKS.user_tasks(Global.USER)
+def get_user_tasks(self):
+    return Controllers.TASKS.user_tasks(Global.USER.id)
 
 def set_task_as_to_do(self, task):
     Controllers.TASKS.set_as_to_do(task)

@@ -11,9 +11,6 @@ class UserStorage:
                                                  password=user.password,
                                                  level_id=user.level_id))
 
-    def delete(self, user):
-        User.delete().where(User.id == user.id).execute()
-
     def delete_by_id(self, user_id):
         User.delete().where(User.id == user_id).execute()
 

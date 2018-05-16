@@ -4,4 +4,4 @@ class User:
         self.email = email
         self.name = name
         self.password = password
-        self.level = level_id
+        self.level_id = level_id

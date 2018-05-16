@@ -19,9 +19,6 @@ class TaskStorage:
                 priority=task.priority,
                 status=task.status))
 
-    def delete(self, task):
-        Task.delete().where(Task.id == task.id).execute()
-
     def delete_by_id(self, task_id):
         Task.delete().where(Task.id == task_id).execute()
 
@@ -55,28 +52,28 @@ class TaskStorage:
     def get_by_id(self, task_id):
         return self.to_task_instance(Task.get(Task.id == task_id))
 
-    def user_tasks(self, user):
+    def user_tasks(self, user_id):
         return list(map(self.to_task_instance, list(
-            Task.select().where(Task.user_id == user.id))))
+            Task.select().where(Task.user_id == user_id))))
 
-    def inner(self, task):
+    def inner(self, task_id):
         return list(map(self.to_task_instance, list(
-            Task.select().where(Task.parent_task_id == task.id))))
+            Task.select().where(Task.parent_task_id == task_id))))
 
-    def add_user_for_read(user_id, task_id):
+    def add_user_for_read(self, user_id, task_id):
         if UsersReadTasks.select().where(UsersReadTasks.task_id ==
                                          task_id and UsersReadTasks.user_id == user_id).count() == 0:
             UsersReadTasks.create(user_id=user_id, task_id=task_id)
 
-    def add_user_for_write(user_id, task_id):
+    def add_user_for_write(self, user_id, task_id):
         if UsersWriteTasks.select().where(UsersWriteTasks.task_id ==
                                           task_id and UsersWriteTasks.user_id == user_id).count() == 0:
             UsersWriteTasks.create(user_id=user_id, task_id=task_id)
 
-    def remove_user_for_read(user_id, task_id):
+    def remove_user_for_read(self, user_id, task_id):
         UsersReadTasks.delete().where(UsersReadTasks.user_id ==
                                       user_id and UsersReadTasks.task_id == task_id).execute()
 
-    def remove_user_for_write(user_id, task_id):
+    def remove_user_for_write(self, user_id, task_id):
         UsersWriteTasks.delete().where(UsersWriteTasks.user_id ==
                                        user_id and UsersWriteTasks.task_id == task_id).execute()

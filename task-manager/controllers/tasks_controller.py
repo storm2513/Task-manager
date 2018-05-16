@@ -34,8 +34,8 @@ class TasksController:
         task.status = Status.ARCHIVED
         self.update(task)
 
-    def user_tasks(self, user):
-        return self.task_storage.user_tasks(user)
+    def user_tasks(self, user_id):
+        return self.task_storage.user_tasks(user_id)
 
     def get_by_id(self, task_id):
         return self.task_storage.get_by_id(task_id)
@@ -44,8 +44,8 @@ class TasksController:
         task.parent_task_id = parent_task_id
         self.update(task)
 
-    def inner(self, task):
-        return self.task_storage.inner(task)
+    def inner(self, task_id):
+        return self.task_storage.inner(task_id)
 
     def assign_user_on_task(self, user_id, task):
         task.assigned_user_id = user_id
