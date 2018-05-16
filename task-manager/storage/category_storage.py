@@ -1,5 +1,6 @@
 from storage.storage_models import Category
 from models.category import Category as CategoryInstance
+from peewee import *
 
 
 class CategoryStorage:
@@ -25,5 +26,8 @@ class CategoryStorage:
             user_id=category.user_id)
 
     def get_by_id(self, category_id):
-        return self.to_category_instance(
-            Category.get(Category.id == category_id))
+        try:
+            return self.to_category_instance(
+                Category.get(Category.id == category_id))
+        except DoesNotExist:
+            return None

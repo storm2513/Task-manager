@@ -62,7 +62,7 @@ class StorageTest(unittest.TestCase):
         self.assertEqual(level.experience, level_from_db.experience)
 
     def test_deletes_level_by_id(self):
-        level_id = level_storage.create()
+        level_id = level_storage.create().id
         level_storage.delete_by_id(level_id)
         self.assertEqual(Level.select().where(Level.id == level_id).count(), 0)
 

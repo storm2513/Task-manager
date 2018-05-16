@@ -26,6 +26,6 @@ class Task:
         self.assigned_user_id = assigned_user_id
         self.parent_task_id = parent_task_id
         self.is_event = is_event
-        self.category = category_id
+        self.category_id = category_id
         self.priority = priority
-        self.status = Status.TODO
+        self.status = status

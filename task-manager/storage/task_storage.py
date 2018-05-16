@@ -1,5 +1,6 @@
 from storage.storage_models import Task, UsersReadTasks, UsersWriteTasks
 from models.task import Task as TaskInstance
+from peewee import *
 
 
 class TaskStorage:
@@ -15,7 +16,7 @@ class TaskStorage:
                 assigned_user_id=task.assigned_user_id,
                 parent_task_id=task.parent_task_id,
                 is_event=task.is_event,
-                category=task.category,
+                category_id=task.category_id,
                 priority=task.priority,
                 status=task.status))
 
@@ -30,9 +31,11 @@ class TaskStorage:
             end_time=task.end_time,
             assigned_user_id=task.assigned_user_id,
             is_event=task.is_event,
-            category=task.category,
+            category_id=task.category_id,
             priority=task.priority,
-            status=task.status).where(Task.id == task.id).execute()
+            status=task.status,
+            parent_task_id=task.parent_task_id).where(
+            Task.id == task.id).execute()
 
     def to_task_instance(self, task):
         return TaskInstance(
@@ -50,7 +53,10 @@ class TaskStorage:
             status=task.status)
 
     def get_by_id(self, task_id):
-        return self.to_task_instance(Task.get(Task.id == task_id))
+        try:
+            return self.to_task_instance(Task.get(Task.id == task_id))
+        except DoesNotExist:
+            return None
 
     def user_tasks(self, user_id):
         return list(map(self.to_task_instance, list(

@@ -33,8 +33,8 @@ def create_inner_task(parent_task_id, task):
 def get_inner_tasks(task_id):
     return Controllers.TASKS.inner(task_id)
 
-def assign_user_on_task(user_id, task):
-    Controllers.TASKS.assign_user_on_task(user_id, task)
+def assign_task_on_user(task_id, user_id):
+    Controllers.TASKS.assign_task_on_user(task_id, user_id)
 
 def add_user_for_read(user_id, task_id):
     Controllers.TASKS.add_user_for_read(user_id, task_id)
@@ -43,25 +43,25 @@ def add_user_for_write(user_id, task_id):
     Controllers.TASKS.add_user_for_write(user_id, task_id)
 
 def remove_user_for_read(user_id, task_id):
-    Controllers.TASKS.add_user_for_read(user_id, task_id)
+    Controllers.TASKS.remove_user_for_read(user_id, task_id)
 
 def remove_user_for_write(user_id, task_id):
-    Controllers.TASKS.add_user_for_write(user_id, task_id)
+    Controllers.TASKS.remove_user_for_write(user_id, task_id)
 
 def get_user_tasks(self):
     return Controllers.TASKS.user_tasks(Global.USER.id)
 
-def set_task_as_to_do(self, task):
-    Controllers.TASKS.set_as_to_do(task)
+def set_task_as_to_do(self, task_id):
+    Controllers.TASKS.set_as_to_do(task_id)
 
-def set_task_as_in_progress(self, task):
-    Controllers.TASKS.set_as_in_progress(task)
+def set_task_as_in_progress(self, task_id):
+    Controllers.TASKS.set_as_in_progress(task_id)
 
-def set_task_as_complete(self, task):
-    Controllers.TASKS.set_as_complete(task)
+def set_task_as_done(self, task_id):
+    Controllers.TASKS.set_as_done(task_id)
 
-def set_task_as_archive(self, task):
-    Controllers.TASKS.set_as_archive(task)
+def set_task_as_archived(self, task_id):
+    Controllers.TASKS.set_as_archived(task_id)
 
 def create_category(self, category):
     Controllers.CATEGORIES.create(category, Global.USER.id)

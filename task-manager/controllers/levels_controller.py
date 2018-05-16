@@ -17,5 +17,5 @@ class LevelsController:
     def delete(self, level_id):
         self.level_storage.delete_by_id(level_id)
 
-    def get_by_user_id(user_id):
-        self.level_storage.get_by_user_id(user_id)
+    def get_by_user_id(self, user_id):
+        return self.level_storage.get_by_user_id(user_id)

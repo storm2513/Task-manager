@@ -29,7 +29,10 @@ class UserStorage:
             level_id=user.level_id)
 
     def get_by_id(self, user_id):
-        return self.to_user_instance(User.get(User.id == user_id))
+        try:
+            return self.to_user_instance(User.get(User.id == user_id))
+        except DoesNotExist:
+            return None
 
     def get_by_email(self, email):
         try:
