@@ -31,3 +31,6 @@ class CategoryStorage:
                 Category.get(Category.id == category_id))
         except DoesNotExist:
             return None
+
+    def all_user_categories(self, user_id):
+        return list(map(self.to_category_instance, list(Category.select().where(Category.user_id == user_id))))

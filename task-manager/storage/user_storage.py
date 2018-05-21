@@ -39,3 +39,6 @@ class UserStorage:
             return self.to_user_instance(User.get(User.email == email))
         except DoesNotExist:
             return None
+
+    def all_users(self):
+        return list(map(self.to_user_instance, list(User.select(User.id, User.email, User.name))))

@@ -24,3 +24,6 @@ class UsersController:
 
     def get_by_email(self, email):
         return self.user_storage.get_by_email(email)
+
+    def all(self):
+        return self.user_storage.all_users()

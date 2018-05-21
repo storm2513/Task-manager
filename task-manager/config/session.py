@@ -7,13 +7,14 @@ from controllers.levels_controller import LevelsController
 from controllers.tasks_controller import TasksController
 from controllers.users_controller import UsersController
 from models.user import User
+from config.config_parser import *
 
 def start_session():
     Controllers.TASKS = TasksController(TaskStorage())
     Controllers.USERS = UsersController(UserStorage())
     Controllers.LEVELS = LevelsController(LevelStorage())
     Controllers.CATEGORIES = CategoriesController(CategoryStorage())
-    Global.USER = None
+    authorize_user_from_config()
 
 class Controllers:
     TASKS = None

@@ -17,3 +17,6 @@ class CategoriesController:
 
     def get_by_id(self, category_id):
         return self.category_storage.get_by_id(category_id)
+
+    def all(self, user_id):
+        return self.category_storage.all_user_categories(user_id)
