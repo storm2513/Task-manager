@@ -1,3 +1,5 @@
 __pycache__/
 *.py[cod]
 task-manager/task_manager.db
+config.ini
+log.log

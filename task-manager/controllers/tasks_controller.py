@@ -19,24 +19,24 @@ class TasksController:
 
     def set_as_to_do(self, task_id):
         task = self.get_by_id(task_id)
-        task.status = Status.TODO
+        task.status = Status.TODO.value
         self.update(task)
 
     def set_as_in_progress(self, task_id):
         task = self.get_by_id(task_id)
-        task.status = Status.IN_PROGRESS
+        task.status = Status.IN_PROGRESS.value
         self.update(task)
 
     def set_as_done(self, task_id):
         task = self.get_by_id(task_id)
-        task.status = Status.DONE
+        task.status = Status.DONE.value
         self.update(task)
         level = LevelsController(LevelStorage()).get_by_user_id(task.user_id)
         LevelsController(LevelStorage()).increase_experience(level)
 
     def set_as_archived(self, task_id):
         task = self.get_by_id(task_id)
-        task.status = Status.ARCHIVED
+        task.status = Status.ARCHIVED.value
         self.update(task)
 
     def user_tasks(self, user_id):

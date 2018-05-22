@@ -42,8 +42,8 @@ class Task(BaseModel):
     parent_task_id = IntegerField(null=True)
     is_event = BooleanField(default=False)
     category = ForeignKeyField(Category, backref='tasks', null=True)
-    priority = IntegerField(default=Priority.MEDIUM)
-    status = IntegerField(default=Status.TODO)
+    priority = IntegerField(default=Priority.MEDIUM.value)
+    status = IntegerField(default=Status.TODO.value)
     created_at = DateTimeField(default=datetime.datetime.now)
     updated_at = DateTimeField
 

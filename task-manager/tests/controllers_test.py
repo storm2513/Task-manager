@@ -169,34 +169,34 @@ class ControllersTest(unittest.TestCase):
         self.assertEqual(task_with_id.title, task_from_test_method.title)
 
     def test_sets_task_as_todo(self):
-        task.status = Status.IN_PROGRESS
+        task.status = Status.IN_PROGRESS.value
         task_id = tasks_controller.create(task).id
         tasks_controller.set_as_to_do(task_id)
         task_from_test_method = tasks_controller.get_by_id(task_id)
-        self.assertEqual(task_from_test_method.status, Status.TODO)
+        self.assertEqual(task_from_test_method.status, Status.TODO.value)
 
     def test_sets_task_as_in_progress(self):
-        task.status = Status.TODO
+        task.status = Status.TODO.value
         task_id = tasks_controller.create(task).id
         tasks_controller.set_as_in_progress(task_id)
         task_from_test_method = tasks_controller.get_by_id(task_id)
-        self.assertEqual(task_from_test_method.status, Status.IN_PROGRESS)
+        self.assertEqual(task_from_test_method.status, Status.IN_PROGRESS.value)
 
     def test_sets_task_as_done(self):
         user_with_id = users_controller.create(user)
         task.user_id = user_with_id.id
-        task.status = Status.TODO
+        task.status = Status.TODO.value
         task_id = tasks_controller.create(task).id
         tasks_controller.set_as_done(task_id)
         task_from_test_method = tasks_controller.get_by_id(task_id)
-        self.assertEqual(task_from_test_method.status, Status.DONE)
+        self.assertEqual(task_from_test_method.status, Status.DONE.value)
 
     def test_sets_task_as_archive(self):
-        task.status = Status.TODO
+        task.status = Status.TODO.value
         task_id = tasks_controller.create(task).id
         tasks_controller.set_as_archived(task_id)
         task_from_test_method = tasks_controller.get_by_id(task_id)
-        self.assertEqual(task_from_test_method.status, Status.ARCHIVED)
+        self.assertEqual(task_from_test_method.status, Status.ARCHIVED.value)
 
     def test_returns_user_tasks(self):
         user_id = users_controller.create(user).id

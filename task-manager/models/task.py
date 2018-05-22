@@ -15,8 +15,8 @@ class Task:
             parent_task_id=None,
             is_event=False,
             category_id=None,
-            priority=Priority.MEDIUM,
-            status=Status.TODO):
+            priority=Priority.MEDIUM.value,
+            status=Status.TODO.value):
         self.id = id
         self.user_id = user_id
         self.title = title

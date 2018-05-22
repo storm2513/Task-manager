@@ -30,6 +30,9 @@ def logout_user():
 def current_user():
     return Global.USER
 
+def get_level_by_user_id(user_id):
+    return Controllers.LEVELS.get_by_user_id(user_id)
+
 def update_user(user):
     Controllers.USERS.update(user)
     write_user_to_config(user)
@@ -49,9 +52,6 @@ def get_task_by_id(task_id):
 
 def delete_task(task_id):
     Controllers.TASKS.delete(task_id)
-
-def change_task_status(task, status):
-    Controllers.TASKS.change_status(task, status)
 
 def create_inner_task(parent_task_id, task):
     Controllers.TASKS.create_inner_task(parent_task_id, task)
