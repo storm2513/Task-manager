@@ -62,6 +62,18 @@ class TaskStorage:
         return list(map(self.to_task_instance, list(
             Task.select().where(Task.user_id == user_id))))
 
+    def assigned(self, user_id):
+        return list(map(self.to_task_instance, list(
+            Task.select().where(Task.assigned_user_id == user_id))))
+
+    def can_read(self, user_id):
+        return list(map(self.to_task_instance, list(
+            Task.select().join(UsersReadTasks).where(UsersReadTasks.task_id == Task.id and UsersReadTasks.user_id == user_id))))
+
+    def can_write(self, user_id):
+        return list(map(self.to_task_instance, list(
+            Task.select().join(UsersWriteTasks).where(UsersWriteTasks.task_id == Task.id and UsersWriteTasks.user_id == user_id))))
+
     def inner(self, task_id):
         return list(map(self.to_task_instance, list(
             Task.select().where(Task.parent_task_id == task_id))))
@@ -83,3 +95,11 @@ class TaskStorage:
     def remove_user_for_write(self, user_id, task_id):
         UsersWriteTasks.delete().where(UsersWriteTasks.user_id ==
                                        user_id and UsersWriteTasks.task_id == task_id).execute()
+
+    def user_can_read(self, user_id, task_id):
+        return UsersReadTasks.select().where(UsersReadTasks.task_id ==
+                                             task_id and UsersReadTasks.user_id == user_id).count() == 1
+
+    def user_can_write(self, user_id, task_id):
+        return UsersWriteTasks.select().where(UsersWriteTasks.task_id ==
+                                              task_id and UsersWriteTasks.user_id == user_id).count() == 1

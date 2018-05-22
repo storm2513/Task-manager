@@ -57,6 +57,15 @@ class TasksController:
         task.assigned_user_id = user_id
         self.update(task)
 
+    def assigned(self, user_id):
+        return self.task_storage.assigned(user_id)
+
+    def can_read(self, user_id):
+        return self.task_storage.can_read(user_id)
+
+    def can_write(self, user_id):
+        return self.task_storage.can_write(user_id)
+
     def add_user_for_read(self, user_id, task_id):
         self.task_storage.add_user_for_read(user_id=user_id, task_id=task_id)
 

@@ -92,7 +92,7 @@ def create_category_parser(parser):
     show_category_parser = parser.add_parser(
         'show', help='Shows category by ID')
     show_category_parser.add_argument(
-        '-id', '--id', help="category's ID", required=True)
+        'id', help="category's ID")
 
     update_category_parser = parser.add_parser(
         'edit', help='Edits category by ID')
@@ -104,7 +104,7 @@ def create_category_parser(parser):
     delete_category_parser = parser.add_parser(
         'delete', help='Deletes category by ID')
     delete_category_parser.add_argument(
-        '-id', '--id', help="category's ID", required=True)
+        'id', help="category's ID")
 
     parser.add_parser('all', help='Shows all categories')
 
@@ -158,31 +158,161 @@ def create_task_parser(parser):
         choices=Priority.__members__,
         help="task's priority")
 
+    show_task_parser = parser.add_parser('show', help='Shows tasks')
+    show_task_subparser = show_task_parser.add_subparsers(
+        dest='show_action',
+        title='Shows tasks',
+        description='Commands to show tasks',
+        metavar='')
+    create_show_task_parser(show_task_subparser)
+
     delete_task_parser = parser.add_parser('delete', help='Deletes task by ID')
     delete_task_parser.add_argument(
-        '-id', '--id', help="task's ID")
+        'id', help="task's ID")
 
     set_task_as_to_do_parser = parser.add_parser(
         'set_as_to_do', help='Sets task as TODO by ID')
     set_task_as_to_do_parser.add_argument(
-        '-id', '--id', help="task's ID")
+        'id', help="task's ID")
 
     set_task_as_in_progress_parser = parser.add_parser(
         'set_as_in_progress', help='Sets task as IN_PROGRESS by ID')
     set_task_as_in_progress_parser.add_argument(
-        '-id', '--id', help="task's ID")
+        'id', help="task's ID")
 
     set_task_as_done_parser = parser.add_parser(
         'set_as_done', help='Sets task as DONE by ID')
     set_task_as_done_parser.add_argument(
-        '-id', '--id', help="task's ID")
+        'id', help="task's ID")
 
     set_task_as_archived_parser = parser.add_parser(
         'set_as_archived', help='Sets task as ARCHIVED by ID')
     set_task_as_archived_parser.add_argument(
-        '-id', '--id', help="task's ID")
+        'id', help="task's ID")
 
-    parser.add_parser('all', help='Shows all tasks')
+    create_inner_task_parser = parser.add_parser(
+        'add_inner', help="Adds inner task by parent task's ID")
+    required_create_inner_task_arguments = create_inner_task_parser.add_argument_group(
+        'required arguments')
+    optional_create_inner_task_arguments = create_inner_task_parser.add_argument_group(
+        'optional arguments')
+
+    required_create_inner_task_arguments.add_argument(
+        '-pid', '--parent_task_id', help="parent task's ID", required=True)
+    required_create_inner_task_arguments.add_argument(
+        '-t', '--title', help="task's title", required=True)
+    optional_create_inner_task_arguments.add_argument(
+        '-n', '--note', help="task's note")
+    optional_create_inner_task_arguments.add_argument(
+        '-st', '--start_time', help="task's start time")
+    optional_create_inner_task_arguments.add_argument(
+        '-et', '--end_time', help="task's end time")
+    optional_create_inner_task_arguments.add_argument(
+        '-e', '--is_event', help="is task event", choices=['yes', 'no'])
+    optional_create_inner_task_arguments.add_argument(
+        '-c', '--category_id', help="task's category_id")
+    optional_create_inner_task_arguments.add_argument(
+        '-p',
+        '--priority',
+        choices=Priority.__members__,
+        help="task's priority")
+
+    assign_task_parser = parser.add_parser(
+        'assign', help="Assigns task on user")
+    assign_task_parser.add_argument(
+        '-tid',
+        '--task_id',
+        help="assigned task's ID",
+        required=True)
+    assign_task_parser.add_argument(
+        '-uid',
+        '--user_id',
+        help="user's ID",
+        required=True)
+
+    rights_parser = parser.add_parser('rights', help="Manages user's rights")
+    rights_subparser = rights_parser.add_subparsers(
+        dest='rights_action',
+        title='Manages rights',
+        description='Commands to manage rights',
+        metavar='')
+    create_rights_parser(rights_subparser)
+
+
+def create_show_task_parser(parser):
+    id_parser = parser.add_parser(
+        'id',
+        help='Shows task by id',
+        usage='task_manager task show id ')
+    id_parser.add_argument('id', help="task's ID")
+
+    parser.add_parser('all', help="Shows all user's tasks")
+
+    show_inner_tasks_parser = parser.add_parser(
+        'inner', help="Shows inner tasks by parent task's ID")
+    show_inner_tasks_parser.add_argument('pid', help="parent task's ID")
+
+    show_parent_task_parser = parser.add_parser(
+        'parent', help="Shows parent task by inner task's ID")
+    show_parent_task_parser.add_argument('id', help="inner task's ID")
+
+    parser.add_parser('assigned', help="Shows tasks assigned on current user")
+
+    parser.add_parser(
+        'can_read',
+        help="Shows tasks that current user can read")
+
+    parser.add_parser(
+        'can_write',
+        help="Shows tasks that current user can read and write")
+
+
+def create_rights_parser(parser):
+    add_right_parser = parser.add_parser(
+        'add', help='Adds right', usage='task_manager task rights add ')
+    add_right_subparser = add_right_parser.add_subparsers(
+        dest='rights_add_action',
+        title='Adds rights',
+        description='Commands to add read or write rights',
+        metavar='')
+
+    add_user_for_read_parser = add_right_subparser.add_parser(
+        'read', help='Gives user right for read task')
+    add_user_for_read_parser.add_argument(
+        '-tid', '--task_id', help="task's ID", required=True)
+    add_user_for_read_parser.add_argument(
+        '-uid', '--user_id', help="user's ID", required=True)
+
+    add_user_for_write_parser = add_right_subparser.add_parser(
+        'write', help='Gives user right for read and write task')
+    add_user_for_write_parser.add_argument(
+        '-tid', '--task_id', help="task's ID", required=True)
+    add_user_for_write_parser.add_argument(
+        '-uid', '--user_id', help="user's ID", required=True)
+
+    remove_right_parser = parser.add_parser(
+        'remove',
+        help='Removes right',
+        usage='task_manager task rights remove ')
+    remove_right_subparser = remove_right_parser.add_subparsers(
+        dest='rights_remove_action',
+        title='Removes rights',
+        description='Commands to remove read or write rights',
+        metavar='')
+
+    remove_user_for_read_parser = remove_right_subparser.add_parser(
+        'read', help='Removes user right for read task')
+    remove_user_for_read_parser.add_argument(
+        '-tid', '--task_id', help="task's ID", required=True)
+    remove_user_for_read_parser.add_argument(
+        '-uid', '--user_id', help="user's ID", required=True)
+
+    remove_user_for_write_parser = remove_right_subparser.add_parser(
+        'write', help='Removes user right for read and write task')
+    remove_user_for_write_parser.add_argument(
+        '-tid', '--task_id', help="task's ID", required=True)
+    remove_user_for_write_parser.add_argument(
+        '-uid', '--user_id', help="user's ID", required=True)
 
 
 def check_user_authorized():
@@ -222,33 +352,61 @@ def parse_user_action(args):
 def parse_category_action(args):
     if args.action == 'add':
         add_category(args)
-    if args.action == 'show':
+    elif args.action == 'show':
         show_category(args)
-    if args.action == 'delete':
+    elif args.action == 'delete':
         delete_category(args)
-    if args.action == 'edit':
+    elif args.action == 'edit':
         update_category(args)
-    if args.action == 'all':
+    elif args.action == 'all':
         show_all_categories()
 
 
 def parse_task_action(args):
     if args.action == 'add':
         add_task(args)
-    if args.action == 'all':
-        all_tasks()
-    if args.action == 'edit':
+    elif args.action == 'edit':
         edit_task(args)
-    if args.action == 'set_as_to_do':
+    elif args.action == 'show':
+        if args.show_action == 'id':
+            show_task(args)
+        elif args.show_action == 'all':
+            show_all_tasks()
+        elif args.show_action == 'inner':
+            show_inner_tasks(args)
+        elif args.show_action == 'parent':
+            show_parent_task(args)
+        elif args.show_action == 'assigned':
+            show_assigned_tasks()
+        elif args.show_action == 'can_read':
+            show_can_read_tasks()
+        elif args.show_action == 'can_write':
+            show_can_write_tasks()
+    elif args.action == 'set_as_to_do':
         set_task_as_to_do(args)
-    if args.action == 'set_as_in_progress':
+    elif args.action == 'set_as_in_progress':
         set_task_as_in_progress(args)
-    if args.action == 'set_as_done':
+    elif args.action == 'set_as_done':
         set_task_as_done(args)
-    if args.action == 'set_as_archived':
+    elif args.action == 'set_as_archived':
         set_task_as_archived(args)
-    if args.action == 'delete':
+    elif args.action == 'delete':
         delete_task(args)
+    elif args.action == 'add_inner':
+        create_inner_task(args)
+    elif args.action == 'assign':
+        assign_task_on_user(args)
+    elif args.action == 'rights':
+        if args.rights_action == 'add':
+            if args.rights_add_action == 'read':
+                add_user_for_read(args)
+            elif args.rights_add_action == 'write':
+                add_user_for_write(args)
+        elif args.rights_action == 'remove':
+            if args.rights_remove_action == 'read':
+                remove_user_for_read(args)
+            elif args.rights_remove_action == 'write':
+                remove_user_for_write(args)
 
 
 def add_user(args):
@@ -374,6 +532,11 @@ def edit_task(args):
     commands.update_task(task)
 
 
+def show_task(args):
+    task = commands.get_task_by_id(args.id)
+    print_task(task)
+
+
 def delete_task(args):
     commands.delete_task(args.id)
 
@@ -394,11 +557,90 @@ def set_task_as_archived(args):
     commands.set_task_as_archived(args.id)
 
 
-def all_tasks():
+def create_inner_task(args):
+    user_id = Global.USER.id
+    task = Task(title=args.title, user_id=user_id)
+    if args.note is not None:
+        task.note = args.note
+    if args.start_time is not None:
+        task.start_time = date_parser.parse(args.start_time)
+    if args.end_time is not None:
+        task.end_time = date_parser.parse(args.end_time)
+        validate_time_in_task(task.start_time, task.end_time)
+    if args.is_event is not None:
+        task.is_event = args.is_event == 'yes'
+    if args.category_id is not None:
+        task.category_id = args.category_id
+    if args.priority is not None:
+        task.priority = Priority[args.priority.upper()].value
+    commands.create_inner_task(args.parent_task_id, task)
+
+
+def show_inner_tasks(args):
+    print('Inner tasks:')
+    tasks = commands.get_inner_tasks(args.pid)
+    print_task_list(tasks)
+
+
+def show_parent_task(args):
+    print('Parent task:')
+    task = commands.get_parent_task(args.id)
+    print_task(task)
+
+
+def assign_task_on_user(args):
+    commands.assign_task_on_user(task_id=args.task_id, user_id=args.user_id)
+
+
+def add_user_for_read(args):
+    commands.add_user_for_read(user_id=args.user_id, task_id=args.task_id)
+
+
+def add_user_for_write(args):
+    commands.add_user_for_write(user_id=args.user_id, task_id=args.task_id)
+
+
+def remove_user_for_read(args):
+    commands.remove_user_for_read(user_id=args.user_id, task_id=args.task_id)
+
+
+def remove_user_for_write(args):
+    commands.remove_user_for_write(user_id=args.user_id, task_id=args.task_id)
+
+
+def show_all_tasks():
     print('Tasks:')
     tasks = commands.user_tasks()
-    for task in tasks:
-        result = "ID: {}, title: {}".format(task.id, task.title)
+    print_task_list(tasks)
+
+
+def show_assigned_tasks():
+    print('Assigned tasks:')
+    tasks = commands.assigned_tasks()
+    print_task_list(tasks)
+
+
+def show_can_read_tasks():
+    print('Can read tasks:')
+    tasks = commands.can_read_tasks()
+    print_task_list(tasks)
+
+
+def show_can_write_tasks():
+    print('Can write tasks:')
+    tasks = commands.can_write_tasks()
+    print_task_list(tasks)
+
+
+def print_task(task):
+    if task is not None:
+        result = "ID: {}".format(task.id)
+        if task.parent_task_id is not None:
+            result += ", parent task's id: {}".format(task.parent_task_id)
+        if task.assigned_user_id is not None:
+            result += ", assigned to user: {}".format(
+                commands.get_user_email_by_id(task.assigned_user_id))
+        result += ", title: {}".format(task.title)
         if task.note is not "":
             result += ", note: {}".format(task.note)
         if task.start_time is not None:
@@ -416,6 +658,11 @@ def all_tasks():
                 task.priority).name, Status(
                 task.status).name)
         print(result)
+
+
+def print_task_list(task_list):
+    for task in task_list:
+        print_task(task)
 
 
 def process_args():
