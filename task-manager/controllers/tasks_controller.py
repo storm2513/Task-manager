@@ -42,6 +42,9 @@ class TasksController:
     def user_tasks(self, user_id):
         return self.task_storage.user_tasks(user_id)
 
+    def with_status(self, user_id, status):
+        return self.task_storage.with_status(user_id, status)
+
     def get_by_id(self, task_id):
         return self.task_storage.get_by_id(task_id)
 
@@ -79,3 +82,9 @@ class TasksController:
     def remove_user_for_write(self, user_id, task_id):
         self.task_storage.remove_user_for_write(
             user_id=user_id, task_id=task_id)
+
+    def user_can_read(self, user_id, task_id):
+        return self.task_storage.user_can_read(user_id, task_id)
+
+    def user_can_write(self, user_id, task_id):
+        return self.task_storage.user_can_write(user_id, task_id)

@@ -137,6 +137,7 @@ def remove_user_for_write(user_id, task_id):
     else:
         logger.info('User has no rights')
 
+
 def remove_user_for_read(user_id, task_id):
     if user_can_write_task(Global.USER.id, task_id):
         Controllers.TASKS.remove_user_for_read(user_id, task_id)
@@ -165,6 +166,10 @@ def can_read_tasks():
 
 def can_write_tasks():
     return Controllers.TASKS.can_write(Global.USER.id)
+
+
+def tasks_with_status(status):
+    return Controllers.TASKS.with_status(Global.USER.id, status)
 
 
 def set_task_as_to_do(task_id):

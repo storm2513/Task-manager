@@ -89,9 +89,8 @@ def create_category_parser(parser):
     add_category_parser.add_argument(
         '-n', '--name', help="category's name", required=True)
 
-    show_category_parser = parser.add_parser(
-        'show', help='Shows category by ID')
-    show_category_parser.add_argument(
+    parser.add_parser(
+        'show', help='Shows category by ID').add_argument(
         'id', help="category's ID")
 
     update_category_parser = parser.add_parser(
@@ -101,9 +100,8 @@ def create_category_parser(parser):
     update_category_parser.add_argument(
         '-n', '--name', help="category's name", required=True)
 
-    delete_category_parser = parser.add_parser(
-        'delete', help='Deletes category by ID')
-    delete_category_parser.add_argument(
+    parser.add_parser(
+        'delete', help='Deletes category by ID').add_argument(
         'id', help="category's ID")
 
     parser.add_parser('all', help='Shows all categories')
@@ -166,28 +164,29 @@ def create_task_parser(parser):
         metavar='')
     create_show_task_parser(show_task_subparser)
 
-    delete_task_parser = parser.add_parser('delete', help='Deletes task by ID')
-    delete_task_parser.add_argument(
+    parser.add_parser('delete', help='Deletes task by ID').add_argument(
         'id', help="task's ID")
 
-    set_task_as_to_do_parser = parser.add_parser(
-        'set_as_to_do', help='Sets task as TODO by ID')
-    set_task_as_to_do_parser.add_argument(
+    set_status_parser = parser.add_parser(
+        'set_status', help='Sets status to task')
+    set_status_subparser = set_status_parser.add_subparsers(
+        dest='set_status_action',
+        title='Set status',
+        description='Sets status to task',
+        metavar='')
+    set_status_subparser.add_parser(
+        'todo', help='Sets task as TODO by ID').add_argument(
         'id', help="task's ID")
-
-    set_task_as_in_progress_parser = parser.add_parser(
-        'set_as_in_progress', help='Sets task as IN_PROGRESS by ID')
-    set_task_as_in_progress_parser.add_argument(
+    set_status_subparser.add_parser(
+        'in_progress',
+        help='Sets task as IN_PROGRESS by ID').add_argument(
+        'id',
+        help="task's ID")
+    set_status_subparser.add_parser(
+        'done', help='Sets task as DONE by ID').add_argument(
         'id', help="task's ID")
-
-    set_task_as_done_parser = parser.add_parser(
-        'set_as_done', help='Sets task as DONE by ID')
-    set_task_as_done_parser.add_argument(
-        'id', help="task's ID")
-
-    set_task_as_archived_parser = parser.add_parser(
-        'set_as_archived', help='Sets task as ARCHIVED by ID')
-    set_task_as_archived_parser.add_argument(
+    set_status_subparser.add_parser(
+        'archived', help='Sets task as ARCHIVED by ID').add_argument(
         'id', help="task's ID")
 
     create_inner_task_parser = parser.add_parser(
@@ -240,11 +239,12 @@ def create_task_parser(parser):
 
 
 def create_show_task_parser(parser):
-    id_parser = parser.add_parser(
+    parser.add_parser(
         'id',
         help='Shows task by id',
-        usage='task_manager task show id ')
-    id_parser.add_argument('id', help="task's ID")
+        usage='task_manager task show id ').add_argument(
+        'id',
+        help="task's ID")
 
     parser.add_parser('all', help="Shows all user's tasks")
 
@@ -252,11 +252,18 @@ def create_show_task_parser(parser):
         'inner', help="Shows inner tasks by parent task's ID")
     show_inner_tasks_parser.add_argument('pid', help="parent task's ID")
 
-    show_parent_task_parser = parser.add_parser(
-        'parent', help="Shows parent task by inner task's ID")
-    show_parent_task_parser.add_argument('id', help="inner task's ID")
+    parser.add_parser(
+        'parent',
+        help="Shows parent task by inner task's ID").add_argument(
+        'id',
+        help="inner task's ID")
 
     parser.add_parser('assigned', help="Shows tasks assigned on current user")
+
+    parser.add_parser('todo', help="Shows user's todo tasks")
+    parser.add_parser('in_progress', help="Shows user's in progress tasks")
+    parser.add_parser('done', help="Shows user's done tasks")
+    parser.add_parser('archived', help="Shows user's archived tasks")
 
     parser.add_parser(
         'can_read',
@@ -378,18 +385,27 @@ def parse_task_action(args):
             show_parent_task(args)
         elif args.show_action == 'assigned':
             show_assigned_tasks()
+        elif args.show_action == 'todo':
+            show_to_do_tasks()
+        elif args.show_action == 'in_progress':
+            show_in_progress_tasks()
+        elif args.show_action == 'done':
+            show_done_tasks()
+        elif args.show_action == 'archived':
+            show_archived_tasks()
         elif args.show_action == 'can_read':
             show_can_read_tasks()
         elif args.show_action == 'can_write':
             show_can_write_tasks()
-    elif args.action == 'set_as_to_do':
-        set_task_as_to_do(args)
-    elif args.action == 'set_as_in_progress':
-        set_task_as_in_progress(args)
-    elif args.action == 'set_as_done':
-        set_task_as_done(args)
-    elif args.action == 'set_as_archived':
-        set_task_as_archived(args)
+    elif args.action == 'set_status':
+        if args.set_status_action == 'todo':
+            set_task_as_to_do(args)
+        elif args.set_status_action == 'in_progress':
+            set_task_as_in_progress(args)
+        elif args.set_status_action == 'done':
+            set_task_as_done(args)
+        elif args.set_status_action == 'archived':
+            set_task_as_archived(args)
     elif args.action == 'delete':
         delete_task(args)
     elif args.action == 'add_inner':
@@ -629,6 +645,30 @@ def show_can_read_tasks():
 def show_can_write_tasks():
     print('Can write tasks:')
     tasks = commands.can_write_tasks()
+    print_task_list(tasks)
+
+
+def show_to_do_tasks():
+    print('TODO:')
+    tasks = commands.tasks_with_status(Status.TODO.value)
+    print_task_list(tasks)
+
+
+def show_in_progress_tasks():
+    print('IN_PROGRESS:')
+    tasks = commands.tasks_with_status(Status.IN_PROGRESS.value)
+    print_task_list(tasks)
+
+
+def show_done_tasks():
+    print('DONE:')
+    tasks = commands.tasks_with_status(Status.DONE.value)
+    print_task_list(tasks)
+
+
+def show_archived_tasks():
+    print('ARCHIVED:')
+    tasks = commands.tasks_with_status(Status.ARCHIVED.value)
     print_task_list(tasks)
 
 

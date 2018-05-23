@@ -66,40 +66,50 @@ class TaskStorage:
         return list(map(self.to_task_instance, list(
             Task.select().where(Task.assigned_user_id == user_id))))
 
-    def can_read(self, user_id):
+    def with_status(self, user_id, status):
         return list(map(self.to_task_instance, list(
-            Task.select().join(UsersReadTasks).where(UsersReadTasks.task_id == Task.id and UsersReadTasks.user_id == user_id))))
+            Task.select().where(Task.user_id == user_id, Task.status == status))))
+
+    def can_read(self, user_id):
+        return list(map(self.to_task_instance, list(Task.select().join(UsersReadTasks).where(
+            UsersReadTasks.task_id == Task.id, UsersReadTasks.user_id == user_id))))
 
     def can_write(self, user_id):
-        return list(map(self.to_task_instance, list(
-            Task.select().join(UsersWriteTasks).where(UsersWriteTasks.task_id == Task.id and UsersWriteTasks.user_id == user_id))))
+        return list(map(self.to_task_instance, list(Task.select().join(UsersWriteTasks).where(
+            UsersWriteTasks.task_id == Task.id, UsersWriteTasks.user_id == user_id))))
 
     def inner(self, task_id):
         return list(map(self.to_task_instance, list(
             Task.select().where(Task.parent_task_id == task_id))))
 
     def add_user_for_read(self, user_id, task_id):
-        if UsersReadTasks.select().where(UsersReadTasks.task_id ==
-                                         task_id and UsersReadTasks.user_id == user_id).count() == 0:
+        if UsersReadTasks.select().where(
+                UsersReadTasks.task_id == task_id,
+                UsersReadTasks.user_id == user_id).count() == 0:
             UsersReadTasks.create(user_id=user_id, task_id=task_id)
 
     def add_user_for_write(self, user_id, task_id):
-        if UsersWriteTasks.select().where(UsersWriteTasks.task_id ==
-                                          task_id and UsersWriteTasks.user_id == user_id).count() == 0:
+        if UsersWriteTasks.select().where(
+                UsersWriteTasks.task_id == task_id,
+                UsersWriteTasks.user_id == user_id).count() == 0:
             UsersWriteTasks.create(user_id=user_id, task_id=task_id)
 
     def remove_user_for_read(self, user_id, task_id):
-        UsersReadTasks.delete().where(UsersReadTasks.user_id ==
-                                      user_id and UsersReadTasks.task_id == task_id).execute()
+        UsersReadTasks.delete().where(
+            UsersReadTasks.user_id == user_id,
+            UsersReadTasks.task_id == task_id).execute()
 
     def remove_user_for_write(self, user_id, task_id):
-        UsersWriteTasks.delete().where(UsersWriteTasks.user_id ==
-                                       user_id and UsersWriteTasks.task_id == task_id).execute()
+        UsersWriteTasks.delete().where(
+            UsersWriteTasks.user_id == user_id,
+            UsersWriteTasks.task_id == task_id).execute()
 
     def user_can_read(self, user_id, task_id):
-        return UsersReadTasks.select().where(UsersReadTasks.task_id ==
-                                             task_id and UsersReadTasks.user_id == user_id).count() == 1
+        return UsersReadTasks.select().where(
+            UsersReadTasks.task_id == task_id,
+            UsersReadTasks.user_id == user_id).count() == 1
 
     def user_can_write(self, user_id, task_id):
-        return UsersWriteTasks.select().where(UsersWriteTasks.task_id ==
-                                              task_id and UsersWriteTasks.user_id == user_id).count() == 1
+        return UsersWriteTasks.select().where(
+            UsersWriteTasks.task_id == task_id,
+            UsersWriteTasks.user_id == user_id).count() == 1
