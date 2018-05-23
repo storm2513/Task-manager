@@ -4,9 +4,13 @@ from config.session import Global
 from models.user import User
 from models.category import Category
 from models.task import Task
+from models.notification import Notification
 from enums.priority import Priority
 from enums.status import Status
-from dateutil import parser as date_parser
+from enums.notification_status import NotificationStatus
+import datetime
+import dateparser
+import humanize
 
 
 def init_parser():
@@ -51,6 +55,17 @@ def init_parser():
         description='Commands to work with tasks',
         metavar='')
     create_task_parser(task_parser)
+
+    notification = subparser.add_parser(
+        'notification',
+        help='Manage notifications',
+        usage='task_manager notification ')
+    notification_parser = notification.add_subparsers(
+        dest='action',
+        title='Manage notifications',
+        description='Commands to work with notifications',
+        metavar='')
+    create_notification_parser(notification_parser)
     return parser
 
 
@@ -322,6 +337,63 @@ def create_rights_parser(parser):
         '-uid', '--user_id', help="user's ID", required=True)
 
 
+def create_notification_parser(parser):
+    add_notification_parser = parser.add_parser(
+        'add', help='Adds notification', usage='task_manager task rights add ')
+
+    required_add_notification_arguments = add_notification_parser.add_argument_group(
+        'required arguments')
+    required_add_notification_arguments.add_argument(
+        '-tid', '--task_id', help="task's ID", required=True)
+    required_add_notification_arguments.add_argument(
+        '-t', '--title', help="notification's title")
+    required_add_notification_arguments.add_argument(
+        '-st', '--relative_start_time', help="notification's relative start time")
+
+    edit_notification_parser = parser.add_parser(
+        'edit', help='Edits notification')
+    required_edit_notification_arguments = edit_notification_parser.add_argument_group(
+        'required arguments')
+    optional_edit_notification_arguments = edit_notification_parser.add_argument_group(
+        'optional arguments')
+    required_edit_notification_arguments.add_argument(
+        '-id', '--id', help="notification's ID")
+    optional_edit_notification_arguments.add_argument(
+        '-t', '--title', help="notification's title")
+    optional_edit_notification_arguments.add_argument(
+        '-n', '--note', help="notification's note")
+    optional_edit_notification_arguments.add_argument(
+        '-st', '--relative_start_time', help="notification's relative start time")
+
+    show_notification_parser = parser.add_parser(
+        'show', help='Shows notifications')
+    show_notification_subparser = show_notification_parser.add_subparsers(
+        dest='show_action',
+        title='Shows notifications',
+        description='Commands to show notification',
+        metavar='')
+    create_show_notification_parser(show_notification_subparser)
+
+    parser.add_parser(
+        'delete', help='Deletes notification by ID').add_argument(
+        'id', help="notification's ID")
+
+
+def create_show_notification_parser(parser):
+    parser.add_parser(
+        'id',
+        help='Shows notification by id',
+        usage='task_manager notification show id ').add_argument(
+        'id',
+        help="notification's ID")
+
+    parser.add_parser(
+        'created',
+        help="Shows user's created notifications (not shown)")
+    parser.add_parser('shown', help="Shows user's shown notifications")
+    parser.add_parser('all', help="Shows all user's notifications")
+
+
 def check_user_authorized():
     if Global.USER is None:
         print("You should login before this action")
@@ -337,6 +409,9 @@ def parse_object(args):
     elif args.object == 'task':
         check_user_authorized()
         parse_task_action(args)
+    elif args.object == 'notification':
+        check_user_authorized()
+        parse_notification_action(args)
 
 
 def parse_user_action(args):
@@ -423,6 +498,24 @@ def parse_task_action(args):
                 remove_user_for_read(args)
             elif args.rights_remove_action == 'write':
                 remove_user_for_write(args)
+
+
+def parse_notification_action(args):
+    if args.action == 'add':
+        add_notification(args)
+    elif args.action == 'show':
+        if args.show_action == 'id':
+            show_notification(args)
+        elif args.show_action == 'all':
+            show_all_notifications()
+        elif args.show_action == 'created':
+            show_created_notifications()
+        elif args.show_action == 'shown':
+            show_shown_notifications()
+    elif args.action == 'edit':
+        edit_notification(args)
+    elif args.action == 'delete':
+        delete_notification(args)
 
 
 def add_user(args):
@@ -515,9 +608,9 @@ def add_task(args):
     if args.note is not None:
         task.note = args.note
     if args.start_time is not None:
-        task.start_time = date_parser.parse(args.start_time)
+        task.start_time = dateparser.parse(args.start_time)
     if args.end_time is not None:
-        task.end_time = date_parser.parse(args.end_time)
+        task.end_time = dateparser.parse(args.end_time)
         validate_time_in_task(task.start_time, task.end_time)
     if args.is_event is not None:
         task.is_event = args.is_event == 'yes'
@@ -535,9 +628,9 @@ def edit_task(args):
     if args.note is not None:
         task.note = args.note
     if args.start_time is not None:
-        task.start_time = date_parser.parse(args.start_time)
+        task.start_time = dateparser.parse(args.start_time)
     if args.end_time is not None:
-        task.end_time = date_parser.parse(args.end_time)
+        task.end_time = dateparser.parse(args.end_time)
         validate_time_in_task(task.start_time, task.end_time)
     if args.is_event is not None:
         task.is_event = args.is_event == 'yes'
@@ -579,9 +672,9 @@ def create_inner_task(args):
     if args.note is not None:
         task.note = args.note
     if args.start_time is not None:
-        task.start_time = date_parser.parse(args.start_time)
+        task.start_time = dateparser.parse(args.start_time)
     if args.end_time is not None:
-        task.end_time = date_parser.parse(args.end_time)
+        task.end_time = dateparser.parse(args.end_time)
         validate_time_in_task(task.start_time, task.end_time)
     if args.is_event is not None:
         task.is_event = args.is_event == 'yes'
@@ -703,11 +796,94 @@ def print_task(task):
 
 
 def print_task_list(task_list):
-    for task in task_list:
-        print_task(task)
+    if task_list is not None:
+        for task in task_list:
+            print_task(task)
+
+
+def add_notification(args):
+    task = commands.get_task_by_id(args.task_id)
+    parsed_time = dateparser.parse(args.relative_start_time)
+    if task.start_time is not None and parsed_time is not None:
+        relative_start_time = (
+            datetime.datetime.now() -
+            parsed_time).total_seconds()
+        notification = Notification(
+            task_id=task.id,
+            title=args.title,
+            relative_start_time=relative_start_time)
+        commands.add_notification(notification)
+    else:
+        print("Task should have start time and notification's relative start time should be correct")
+
+
+def edit_notification(args):
+    notification = commands.get_notification_by_id(args.id)
+    if args.title is not None:
+        notification.title = args.title
+    parsed_time = dateparser.parse(args.relative_start_time)
+    if parsed_time is not None:
+        notification.relative_start_time = (
+            datetime.datetime.now() -
+            parsed_time).total_seconds()
+    commands.update_notification(notification)
+
+
+def delete_notification(args):
+    commands.delete_notification(args.id)
+
+
+def show_notification(args):
+    notification = commands.get_notification_by_id(args.id)
+    print_notification(notification)
+
+
+def show_all_notifications():
+    notifications = commands.user_notifications()
+    print_notification_list(notifications)
+
+
+def show_created_notifications():
+    notifications = commands.user_created_notifications()
+    print_notification_list(notifications)
+
+
+def show_shown_notifications():
+    notifications = commands.user_shown_notifications()
+    print_notification_list(notifications)
+
+
+def print_notification(notification):
+    print(
+        "ID: {}, task_id: {}, title: {}, relative_start_time: {}, status: {}".format(
+            notification.id,
+            notification.task_id,
+            notification.title,
+            humanize.naturaldelta(
+                datetime.timedelta(
+                    seconds=notification.relative_start_time)),
+            NotificationStatus(
+                notification.status).name))
+
+
+def print_notification_list(notifications):
+    if notifications is not None:
+        for notification in notifications:
+            print_notification(notification)
+
+
+def show_pending_notifications():
+    check_user_authorized()
+    notifications = commands.pending_notifications()
+    if notifications:
+        print('Notifications')
+        for notification in notifications:
+            commands.set_notification_as_shown(notification.id)
+            print_notification(notification)
 
 
 def process_args():
+    show_pending_notifications()
     parser = init_parser()
     args = parser.parse_args()
     parse_object(args)

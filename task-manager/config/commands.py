@@ -246,3 +246,39 @@ def user_can_write_task(user_id, task_id):
             Controllers.TASKS.user_can_write(user_id, task_id)
     else:
         return None
+
+
+def add_notification(notification):
+    Controllers.NOTIFICATIONS.create(notification, Global.USER.id)
+
+
+def get_notification_by_id(notification_id):
+    return Controllers.NOTIFICATIONS.get_by_id(notification_id)
+
+
+def delete_notification(notification_id):
+    Controllers.NOTIFICATIONS.delete(notification_id)
+
+
+def user_notifications():
+    return Controllers.NOTIFICATIONS.all(Global.USER.id)
+
+
+def update_notification(notification):
+    Controllers.NOTIFICATIONS.update(notification)
+
+
+def pending_notifications():
+    return Controllers.NOTIFICATIONS.pending(Global.USER.id)
+
+
+def user_created_notifications():
+    return Controllers.NOTIFICATIONS.created(Global.USER.id)
+
+
+def user_shown_notifications():
+    return Controllers.NOTIFICATIONS.shown(Global.USER.id)
+
+
+def set_notification_as_shown(notification_id):
+    Controllers.NOTIFICATIONS.set_as_shown(notification_id)

@@ -3,6 +3,7 @@ import datetime
 
 from enums.status import Status
 from enums.priority import Priority
+from enums.notification_status import NotificationStatus
 
 db = SqliteDatabase('task_manager.db')
 
@@ -52,6 +53,15 @@ class Task(BaseModel):
         return super(Task, self).save(*args, **kwargs)
 
 
+class Notification(BaseModel):
+    id = PrimaryKeyField(null=False)
+    task = ForeignKeyField(Task, backref='notifications', null=True)
+    user = ForeignKeyField(User, backref='notifications', null=True)
+    title = CharField()
+    relative_start_time = IntegerField()
+    status = IntegerField(default=NotificationStatus.CREATED.value)
+
+
 class UsersReadTasks(BaseModel):
     user = ForeignKeyField(User)
     task = ForeignKeyField(Task)
@@ -64,4 +74,4 @@ class UsersWriteTasks(BaseModel):
 
 db.connect()
 db.create_tables([User, Level, Task, UsersReadTasks,
-                  UsersWriteTasks, Category])
+                  UsersWriteTasks, Category, Notification])
