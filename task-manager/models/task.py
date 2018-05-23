@@ -16,7 +16,9 @@ class Task:
             is_event=False,
             category_id=None,
             priority=Priority.MEDIUM.value,
-            status=Status.TODO.value):
+            status=Status.TODO.value,
+            created_at=None,
+            updated_at=None):
         self.id = id
         self.user_id = user_id
         self.title = title
@@ -29,3 +31,5 @@ class Task:
         self.category_id = category_id
         self.priority = priority
         self.status = status
+        self.created_at = created_at
+        self.updated_at = updated_at

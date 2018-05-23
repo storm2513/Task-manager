@@ -697,6 +697,8 @@ def print_task(task):
             task.is_event, Priority(
                 task.priority).name, Status(
                 task.status).name)
+        result += ", created at: {}, updated_at: {}".format(
+            task.created_at, task.updated_at)
         print(result)
 
 

@@ -1,6 +1,7 @@
 from storage.storage_models import Task, UsersReadTasks, UsersWriteTasks
 from models.task import Task as TaskInstance
 from peewee import *
+import datetime
 
 
 class TaskStorage:
@@ -34,7 +35,8 @@ class TaskStorage:
             category_id=task.category_id,
             priority=task.priority,
             status=task.status,
-            parent_task_id=task.parent_task_id).where(
+            parent_task_id=task.parent_task_id,
+            updated_at=datetime.datetime.now()).where(
             Task.id == task.id).execute()
 
     def to_task_instance(self, task):
@@ -50,7 +52,9 @@ class TaskStorage:
             is_event=task.is_event,
             category_id=task.category_id,
             priority=task.priority,
-            status=task.status)
+            status=task.status,
+            created_at=task.created_at,
+            updated_at=task.updated_at)
 
     def get_by_id(self, task_id):
         try:

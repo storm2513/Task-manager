@@ -45,7 +45,7 @@ class Task(BaseModel):
     priority = IntegerField(default=Priority.MEDIUM.value)
     status = IntegerField(default=Status.TODO.value)
     created_at = DateTimeField(default=datetime.datetime.now)
-    updated_at = DateTimeField
+    updated_at = DateTimeField(default=datetime.datetime.now)
 
     def save(self, *args, **kwargs):
         self.updated_at = datetime.datetime.now()
