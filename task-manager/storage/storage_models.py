@@ -9,16 +9,28 @@ db = SqliteDatabase('task_manager.db')
 
 
 class BaseModel(Model):
+    """
+    Base class for classes that work with peewee library
+    """
+
     class Meta:
         database = db
 
 
 class Level(BaseModel):
+    """
+    User's level model
+    """
+
     id = PrimaryKeyField(null=False)
     experience = IntegerField(default=1)
 
 
 class User(BaseModel):
+    """
+    User model
+    """
+
     id = PrimaryKeyField(null=False)
     email = CharField()
     name = CharField()
@@ -27,12 +39,20 @@ class User(BaseModel):
 
 
 class Category(BaseModel):
+    """
+    Category model
+    """
+
     id = PrimaryKeyField(null=False)
     name = CharField()
     user = ForeignKeyField(User, backref='categories')
 
 
 class Task(BaseModel):
+    """
+    Task model
+    """
+
     id = PrimaryKeyField(null=False)
     user = ForeignKeyField(User, backref='tasks', null=True)
     title = CharField()
@@ -54,6 +74,10 @@ class Task(BaseModel):
 
 
 class TaskPlan(BaseModel):
+    """
+    TaskPlan model
+    """
+
     id = PrimaryKeyField(null=False)
     user = ForeignKeyField(User, backref='task_plans', null=True)
     task = ForeignKeyField(Task, null=True)
@@ -62,6 +86,10 @@ class TaskPlan(BaseModel):
 
 
 class Notification(BaseModel):
+    """
+    Notification model
+    """
+
     id = PrimaryKeyField(null=False)
     task = ForeignKeyField(Task, backref='notifications', null=True)
     user = ForeignKeyField(User, backref='notifications', null=True)
@@ -71,11 +99,19 @@ class Notification(BaseModel):
 
 
 class UsersReadTasks(BaseModel):
+    """
+    UsersReadTasks model. If there is an entry with user and task it means that user can read this task
+    """
+
     user = ForeignKeyField(User)
     task = ForeignKeyField(Task)
 
 
 class UsersWriteTasks(BaseModel):
+    """
+    UsersWriteTasks model. If there is an entry with user and task it means that user can read and change this task
+    """
+
     user = ForeignKeyField(User)
     task = ForeignKeyField(Task)
 

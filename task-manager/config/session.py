@@ -15,6 +15,10 @@ from config.config_parser import *
 
 
 def start_session():
+    """
+    Initializes controllers, authorizes user from config
+    """
+
     Controllers.TASKS = TasksController(TaskStorage())
     Controllers.USERS = UsersController(UserStorage())
     Controllers.LEVELS = LevelsController(LevelStorage())

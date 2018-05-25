@@ -897,7 +897,8 @@ def add_notification(args):
                 relative_start_time=relative_start_time)
             commands.add_notification(notification)
         else:
-            print("Task should have start time and notification's relative start time should be correct")
+            print(
+                "Task should have start time and notification's relative start time should be correct")
     else:
         print("Task doesn't exist")
 

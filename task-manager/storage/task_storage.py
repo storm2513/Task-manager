@@ -5,7 +5,15 @@ import datetime
 
 
 class TaskStorage:
+    """
+    Class for managing tasks in database
+    """
+
     def create(self, task):
+        """
+        Creates task
+        """
+
         return self.to_task_instance(
             Task.create(
                 id=task.id,
@@ -22,10 +30,18 @@ class TaskStorage:
                 status=task.status))
 
     def delete_by_id(self, task_id):
+        """
+        Deletes task by ID and it's task plan (task plan cannot work without template task)
+        """
+
         Task.delete().where(Task.id == task_id).execute()
         TaskPlan.delete().where(TaskPlan.task_id == task_id).execute()
 
     def update(self, task):
+        """
+        Updates task
+        """
+
         Task.update(
             title=task.title,
             note=task.note,
@@ -41,6 +57,10 @@ class TaskStorage:
             Task.id == task.id).execute()
 
     def to_task_instance(self, task):
+        """
+        Makes cast from Task class to TaskInstance class
+        """
+
         return TaskInstance(
             id=task.id,
             user_id=task.user_id,
@@ -58,63 +78,117 @@ class TaskStorage:
             updated_at=task.updated_at)
 
     def get_by_id(self, task_id):
+        """
+        Returns task by it's ID
+        """
+
         try:
             return self.to_task_instance(Task.get(Task.id == task_id))
         except DoesNotExist:
             return None
 
     def user_tasks(self, user_id):
+        """
+        Returns user's tasks
+        """
+
         return list(map(self.to_task_instance, list(
             Task.select().where(Task.user_id == user_id))))
 
     def assigned(self, user_id):
+        """
+        Returns user's assigned tasks
+        """
+
         return list(map(self.to_task_instance, list(
             Task.select().where(Task.assigned_user_id == user_id))))
 
     def with_status(self, user_id, status):
+        """
+        Returns user's tasks with some status
+        """
+
         return list(map(self.to_task_instance, list(
             Task.select().where(Task.user_id == user_id, Task.status == status))))
 
     def can_read(self, user_id):
+        """
+        Returns tasks that user can read
+        """
+
         return list(map(self.to_task_instance, list(Task.select().join(UsersReadTasks).where(
             UsersReadTasks.task_id == Task.id, UsersReadTasks.user_id == user_id))))
 
     def can_write(self, user_id):
+        """
+        Returns tasks that user can read and change
+        """
+
         return list(map(self.to_task_instance, list(Task.select().join(UsersWriteTasks).where(
             UsersWriteTasks.task_id == Task.id, UsersWriteTasks.user_id == user_id))))
 
     def inner(self, task_id):
+        """
+        Returns inner tasks for task with ID == task_id
+        """
+
         return list(map(self.to_task_instance, list(
             Task.select().where(Task.parent_task_id == task_id))))
 
     def add_user_for_read(self, user_id, task_id):
+        """
+        Allows user with ID == user_id to read task with ID == task_id
+        """
+
         if UsersReadTasks.select().where(
                 UsersReadTasks.task_id == task_id,
                 UsersReadTasks.user_id == user_id).count() == 0:
             UsersReadTasks.create(user_id=user_id, task_id=task_id)
 
     def add_user_for_write(self, user_id, task_id):
+        """
+        Allows user with ID == user_id to read and change task with ID == task_id
+        """
+
         if UsersWriteTasks.select().where(
                 UsersWriteTasks.task_id == task_id,
                 UsersWriteTasks.user_id == user_id).count() == 0:
             UsersWriteTasks.create(user_id=user_id, task_id=task_id)
 
     def remove_user_for_read(self, user_id, task_id):
+        """
+        Removes permission to read task with ID == task_id from user with ID == user_id
+        """
+
         UsersReadTasks.delete().where(
             UsersReadTasks.user_id == user_id,
             UsersReadTasks.task_id == task_id).execute()
 
     def remove_user_for_write(self, user_id, task_id):
+        """
+        Removes permission to read and change task with ID == task_id from user with ID == user_id
+        """
+
         UsersWriteTasks.delete().where(
             UsersWriteTasks.user_id == user_id,
             UsersWriteTasks.task_id == task_id).execute()
 
     def user_can_read(self, user_id, task_id):
+        """
+        Returns True if user with ID == user_id can read task with ID == task_id.
+        Otherwise returns False
+        """
+
         return UsersReadTasks.select().where(
             UsersReadTasks.task_id == task_id,
             UsersReadTasks.user_id == user_id).count() == 1
 
     def user_can_write(self, user_id, task_id):
+        """
+        Returns True if user with ID == user_id can read and change task with ID == task_id.
+        Otherwise returns False
+        """
+
         return UsersWriteTasks.select().where(
             UsersWriteTasks.task_id == task_id,
             UsersWriteTasks.user_id == user_id).count() == 1

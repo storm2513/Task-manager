@@ -2,6 +2,10 @@ from enums.notification_status import NotificationStatus
 
 
 class Notification:
+    """
+    Notification class that should remind user about task
+    """
+
     def __init__(
             self,
             task_id,

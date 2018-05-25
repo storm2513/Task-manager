@@ -1,4 +1,8 @@
 class User:
+    """
+    Class for storing user
+    """
+
     def __init__(self, email, name, password, level_id=None, id=None):
         self.id = id
         self.email = email
