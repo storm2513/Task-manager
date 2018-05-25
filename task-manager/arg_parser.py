@@ -12,6 +12,7 @@ from enums.notification_status import NotificationStatus
 import datetime
 import dateparser
 import humanize
+from exceptions.exceptions import *
 
 
 def init_parser():
@@ -565,11 +566,21 @@ def parse_task_plan_action(args):
 
 def add_user(args):
     user = User(email=args.email, name=args.name, password=args.password)
-    commands.add_user(user)
+    try:
+        commands.add_user(user)
+    except InvalidEmailError as e:
+        print('Error. Email "{}" is invalid'.format(e.email))
+    except UserAlreadyExistsError as e:
+        print('Error. User with email {} already exists'.format(e.email))
 
 
 def login_user(args):
-    commands.login_user(email=args.email, password=args.password)
+    try:
+        commands.login_user(email=args.email, password=args.password)
+    except IncorrectPasswordError as e:
+        print('Password "{}" is incorrect'.format(args.password))
+    except UserDoesNotExistError as e:
+        print('User does not exist')
 
 
 def update_user(args):
@@ -875,17 +886,20 @@ def print_task_list(task_list):
 def add_notification(args):
     task = commands.get_task_by_id(args.task_id)
     parsed_time = dateparser.parse(args.relative_start_time)
-    if task.start_time is not None and parsed_time is not None:
-        relative_start_time = (
-            datetime.datetime.now() -
-            parsed_time).total_seconds()
-        notification = Notification(
-            task_id=task.id,
-            title=args.title,
-            relative_start_time=relative_start_time)
-        commands.add_notification(notification)
+    if task is not None:
+        if task.start_time is not None and parsed_time is not None:
+            relative_start_time = (
+                datetime.datetime.now() -
+                parsed_time).total_seconds()
+            notification = Notification(
+                task_id=task.id,
+                title=args.title,
+                relative_start_time=relative_start_time)
+            commands.add_notification(notification)
+        else:
+            print("Task should have start time and notification's relative start time should be correct")
     else:
-        print("Task should have start time and notification's relative start time should be correct")
+        print("Task doesn't exist")
 
 
 def edit_notification(args):
@@ -999,7 +1013,8 @@ def print_task_plan_list(plans):
 
 
 def process_args():
-    show_pending_notifications()
+    if Global.USER is not None:
+        show_pending_notifications()
     parser = init_parser()
     args = parser.parse_args()
     parse_object(args)

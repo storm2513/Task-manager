@@ -2,6 +2,7 @@ from config.session import *
 from enums.priority import Priority
 from enums.status import Status
 from models.task import Task
+from models.validator import *
 from config.logger import *
 from config.config_parser import *
 
@@ -10,26 +11,34 @@ logger = init_logger('commands')
 
 def login_user(email, password):
     user = Controllers.USERS.get_by_email(email)
-    logger.debug('Got user')
-    if user.password == password:
-        logger.info('User authorized')
-        write_user_to_config(user)
-        Global.USER = user
+    if user is not None:
+        logger.debug('Got user')
+        if user.password == password:
+            logger.info('User authorized')
+            write_user_to_config(user)
+            Global.USER = user
+        else:
+            logger.debug(
+                'Current password: {}, password: {}'.format(
+                    user.password, password))
+            logger.warn('Wrong password')
+            raise IncorrectPasswordError(password)
     else:
-        logger.debug(
-            'Current password: {}, password: {}'.format(
-                user.password, password))
-        logger.warn('Wrong password')
+        raise UserDoesNotExistError
 
 
 def add_user(user):
-    logger.info(
-        "Added user with email: {}, name: {}, password:{}".format(
-            user.email,
-            user.name,
-            user.password))
-    Controllers.USERS.create(user)
-    write_user_to_config(user)
+    validate_user(user)
+    if Controllers.USERS.get_by_email(user.email) is not None:
+        raise UserAlreadyExistsError(user.email)
+    else:
+        logger.info(
+            "Added user with email: {}, name: {}, password:{}".format(
+                user.email,
+                user.name,
+                user.password))
+        Controllers.USERS.create(user)
+        write_user_to_config(user)
 
 
 def logout_user():
@@ -42,7 +51,10 @@ def current_user():
 
 
 def get_user_email_by_id(user_id):
-    return Controllers.USERS.get_by_id(user_id).email
+    user = Controllers.USERS.get_by_id(user_id)
+    if user is None:
+        raise UserDoesNotExistError
+    return user.email
 
 
 def get_level_by_user_id(user_id):
@@ -50,6 +62,7 @@ def get_level_by_user_id(user_id):
 
 
 def update_user(user):
+    validate_user(user)
     Controllers.USERS.update(user)
     write_user_to_config(user)
 
@@ -59,11 +72,13 @@ def all_users():
 
 
 def add_task(task):
+    validate_task(task)
     return Controllers.TASKS.create(task)
     logger.info('Added task')
 
 
 def add_task_plan(plan):
+    validate_task_plan(plan)
     Controllers.TASK_PLANS.create(plan)
 
 
@@ -76,13 +91,15 @@ def get_task_plans():
 
 
 def update_task(task):
+    validate_task(task)
     if user_can_write_task(Global.USER.id, task.id):
         Controllers.TASKS.update(task)
     else:
-        logger.info('User has no rights')
+        raise UserHasNoRightError
 
 
 def update_task_plan(plan):
+    validate_task_plan(plan)
     Controllers.TASK_PLANS.update(plan)
 
 
@@ -97,75 +114,93 @@ def delete_task(task_id):
     if user_can_write_task(Global.USER.id, task_id):
         Controllers.TASKS.delete(task_id)
     else:
-        logger.info('User has no rights')
+        raise UserHasNoRightError
 
 
 def create_inner_task(parent_task_id, task):
+    parent_task = get_task_by_id(parent_task)
+    if parent_task is None:
+        raise TaskDoesNotExistError
+    validate_task(task)
     if user_can_write_task(Global.USER.id, task.id):
         Controllers.TASKS.create_inner_task(parent_task_id, task)
     else:
-        logger.info('User has no rights')
+        raise UserHasNoRightError
 
 
 def get_inner_tasks(task_id):
     if user_can_read_task(Global.USER.id, task_id):
         return Controllers.TASKS.inner(task_id)
     else:
-        logger.info('User has no rights')
-        return None
+        raise UserHasNoRightError
 
 
 def get_parent_task(task_id):
-    return get_task_by_id(get_task_by_id(task_id).parent_task_id)
+    task = get_task_by_id(task_id)
+    if task is not None and task.parent_task_id is not None:
+        return get_task_by_id(task.parent_task_id)
 
 
+def validate_user_exists(user_id):
+    user = Controllers.USERS.get_by_id(user_id)
+    if user is None:
+        raise UserDoesNotExistError
+
+# validate user exists
 def assign_task_on_user(task_id, user_id):
     if user_can_write_task(Global.USER.id, task_id):
+        validate_user_exists(user_id)
         Controllers.TASKS.assign_task_on_user(task_id, user_id)
     else:
-        logger.info('User has no rights')
+        raise UserHasNoRightError
 
 
 def add_user_for_read(user_id, task_id):
     if user_can_write_task(Global.USER.id, task_id):
+        validate_user_exists(user_id)
         Controllers.TASKS.add_user_for_read(user_id, task_id)
     else:
-        logger.info('User has no rights')
+        raise UserHasNoRightError
 
 
 def add_user_for_write(user_id, task_id):
     if user_can_write_task(Global.USER.id, task_id):
+        validate_user_exists(user_id)
         Controllers.TASKS.add_user_for_write(user_id, task_id)
     else:
-        logger.info('User has no rights')
+        raise UserHasNoRightError
 
 
 def remove_user_for_read(user_id, task_id):
     if user_can_write_task(Global.USER.id, task_id):
+        validate_user_exists(user_id)
         Controllers.TASKS.remove_user_for_read(user_id, task_id)
     else:
-        logger.info('User has no rights')
+        raise UserHasNoRightError
 
 
 def remove_user_for_write(user_id, task_id):
     if user_can_write_task(Global.USER.id, task_id):
+        validate_user_exists(user_id)
         Controllers.TASKS.remove_user_for_write(user_id, task_id)
     else:
-        logger.info('User has no rights')
+        raise UserHasNoRightError
 
 
 def remove_user_for_read(user_id, task_id):
     if user_can_write_task(Global.USER.id, task_id):
+        validate_user_exists(user_id)
         Controllers.TASKS.remove_user_for_read(user_id, task_id)
     else:
-        logger.info('User has no rights')
+        raise UserHasNoRightError
 
 
-def remove_user_for_write(user_Id, task_id):
+def remove_user_for_write(user_id, task_id):
     if user_can_write_task(Global.USER.id, task_id):
+        validate_user_exists(user_id)
         Controllers.TASKS.remove_user_for_write(user_id, task_id)
     else:
-        logger.info('User has no rights')
+        raise UserHasNoRightError
 
 
 def user_tasks():
@@ -226,8 +261,7 @@ def all_categories():
 
 
 def update_category(category):
-    category = Controllers.CATEGORIES.get_by_id(category_id)
-    if category.user_id == Global.USER.id:
+    if Controllers.CATEGORIES.get_by_id(category.id).user_id == Global.USER.id:
         Controllers.CATEGORIES.update(category)
     else:
         logger.info('User has no rights')
@@ -265,6 +299,9 @@ def user_can_write_task(user_id, task_id):
 
 
 def add_notification(notification):
+    task = commands.get_task_by_id(notification.task_id)
+    if task is None:
+        raise TaskDoesNotExistError
     Controllers.NOTIFICATIONS.create(notification, Global.USER.id)
 
 
@@ -281,6 +318,9 @@ def user_notifications():
 
 
 def update_notification(notification):
+    task = commands.get_task_by_id(notification.task_id)
+    if task is None:
+        raise TaskDoesNotExistError
     Controllers.NOTIFICATIONS.update(notification)
 
 
