@@ -53,6 +53,14 @@ class Task(BaseModel):
         return super(Task, self).save(*args, **kwargs)
 
 
+class TaskPlan(BaseModel):
+    id = PrimaryKeyField(null=False)
+    user = ForeignKeyField(User, backref='task_plans', null=True)
+    task = ForeignKeyField(Task, null=True)
+    interval = IntegerField()
+    last_created_at = DateTimeField()
+
+
 class Notification(BaseModel):
     id = PrimaryKeyField(null=False)
     task = ForeignKeyField(Task, backref='notifications', null=True)
@@ -74,4 +82,4 @@ class UsersWriteTasks(BaseModel):
 
 db.connect()
 db.create_tables([User, Level, Task, UsersReadTasks,
-                  UsersWriteTasks, Category, Notification])
+                  UsersWriteTasks, Category, Notification, TaskPlan])

@@ -6,3 +6,4 @@ class Status(enum.Enum):
     IN_PROGRESS = 1
     DONE = 2
     ARCHIVED = 3
+    TEMPLATE = 4

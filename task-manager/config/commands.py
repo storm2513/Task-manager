@@ -59,8 +59,20 @@ def all_users():
 
 
 def add_task(task):
-    Controllers.TASKS.create(task)
+    return Controllers.TASKS.create(task)
     logger.info('Added task')
+
+
+def add_task_plan(plan):
+    Controllers.TASK_PLANS.create(plan)
+
+
+def get_task_plan_by_id(plan_id):
+    return Controllers.TASK_PLANS.get_by_id(plan_id)
+
+
+def get_task_plans():
+    return Controllers.TASK_PLANS.all(Global.USER.id)
 
 
 def update_task(task):
@@ -68,6 +80,10 @@ def update_task(task):
         Controllers.TASKS.update(task)
     else:
         logger.info('User has no rights')
+
+
+def update_task_plan(plan):
+    Controllers.TASK_PLANS.update(plan)
 
 
 def get_task_by_id(task_id):

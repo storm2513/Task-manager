@@ -4,6 +4,7 @@ from config.session import Global
 from models.user import User
 from models.category import Category
 from models.task import Task
+from models.task_plan import TaskPlan
 from models.notification import Notification
 from enums.priority import Priority
 from enums.status import Status
@@ -55,6 +56,17 @@ def init_parser():
         description='Commands to work with tasks',
         metavar='')
     create_task_parser(task_parser)
+
+    task_plan = subparser.add_parser(
+        'plan',
+        help='Manage task plans',
+        usage='task_manager plan ')
+    task_plan_parser = task_plan.add_subparsers(
+        dest='action',
+        title='Manage task plans',
+        description='Commands to work with task plans',
+        metavar='')
+    create_task_plan_parser(task_plan_parser)
 
     notification = subparser.add_parser(
         'notification',
@@ -145,6 +157,14 @@ def create_task_parser(parser):
         '--priority',
         choices=Priority.__members__,
         help="task's priority")
+    optional_add_task_arguments.add_argument(
+        '-r',
+        '--repeat',
+        help="Creates repeated task according to interval. E.g. --repeat 'every 1 week'")
+    optional_add_task_arguments.add_argument(
+        '-sa',
+        '--start_repeat_at',
+        help="Start date time for repeated task. E.g. --sa 'in 3 days'")
 
     edit_task_parser = parser.add_parser('edit', help='Edits task')
     required_edit_task_arguments = edit_task_parser.add_argument_group(
@@ -289,6 +309,21 @@ def create_show_task_parser(parser):
         help="Shows tasks that current user can read and write")
 
 
+def create_task_plan_parser(parser):
+    edit_task_plan_parser = parser.add_parser('edit', help='Edits task plan')
+    edit_task_plan_parser.add_argument('id', help="Plan's ID")
+    edit_task_plan_parser.add_argument(
+        '-r',
+        '--repeat',
+        help="Creates repeated task according to interval. E.g. --repeat 'every 1 week'")
+    edit_task_plan_parser.add_argument(
+        '-sa',
+        '--start_repeat_at',
+        help="Start date time for repeated task. E.g. --sa 'in 3 days'")
+
+    parser.add_parser('all', help='Shows all plans')
+
+
 def create_rights_parser(parser):
     add_right_parser = parser.add_parser(
         'add', help='Adds right', usage='task_manager task rights add ')
@@ -412,6 +447,9 @@ def parse_object(args):
     elif args.object == 'notification':
         check_user_authorized()
         parse_notification_action(args)
+    elif args.object == 'plan':
+        check_user_authorized()
+        parse_task_plan_action(args)
 
 
 def parse_user_action(args):
@@ -518,6 +556,13 @@ def parse_notification_action(args):
         delete_notification(args)
 
 
+def parse_task_plan_action(args):
+    if args.action == 'edit':
+        edit_task_plan(args)
+    elif args.action == 'all':
+        show_all_task_plans()
+
+
 def add_user(args):
     user = User(email=args.email, name=args.name, password=args.password)
     commands.add_user(user)
@@ -618,7 +663,33 @@ def add_task(args):
         task.category_id = args.category_id
     if args.priority is not None:
         task.priority = Priority[args.priority.upper()].value
-    commands.add_task(task)
+    if args.repeat is not None:
+        parsed_time = dateparser.parse(args.repeat)
+        if parsed_time is None:
+            print("Repeat time is incorrect")
+            quit()
+        else:
+            interval = (datetime.datetime.now() - parsed_time).total_seconds()
+            last_created_at = datetime.datetime.now() - datetime.timedelta(seconds=interval)
+            if interval < 300:  # 5 minutes
+                print("task's interval is incorrect")
+            else:
+                if args.start_repeat_at is not None:
+                    start_date = dateparser.parse(args.start_repeat_at)
+                    if start_date is not None:
+                        time_delta = interval - \
+                            (start_date - datetime.datetime.now()).total_seconds()
+                        last_created_at = datetime.datetime.now() - datetime.timedelta(seconds=time_delta)
+            task.status = Status.TEMPLATE.value
+            task_id = commands.add_task(task).id
+            plan = TaskPlan(
+                task_id=task_id,
+                user_id=Global.USER.id,
+                interval=interval,
+                last_created_at=last_created_at)
+            commands.add_task_plan(plan)
+    else:
+        commands.add_task(task)
 
 
 def edit_task(args):
@@ -880,6 +951,51 @@ def show_pending_notifications():
         for notification in notifications:
             commands.set_notification_as_shown(notification.id)
             print_notification(notification)
+
+
+def edit_task_plan(args):
+    plan = commands.get_task_plan_by_id(args.id)
+    if args.repeat is not None:
+        parsed_time = dateparser.parse(args.repeat)
+        if parsed_time is None:
+            print("Repeat time is incorrect")
+        else:
+            interval = (datetime.datetime.now() - parsed_time).total_seconds()
+            last_created_at = datetime.datetime.now() - datetime.timedelta(seconds=interval)
+            if interval < 300:  # 5 minutes
+                print("task's interval is incorrect")
+            else:
+                plan.interval = interval
+    if args.start_repeat_at is not None:
+        start_date = dateparser.parse(args.start_repeat_at)
+        if start_date is not None:
+            time_delta = interval - \
+                (start_date - datetime.datetime.now()).total_seconds()
+            last_created_at = datetime.datetime.now() - datetime.timedelta(seconds=time_delta)
+            plan.last_created_at = last_created_at
+    commands.update_task_plan(plan)
+
+
+def show_all_task_plans():
+    plans = commands.get_task_plans()
+    print_task_plan_list(plans)
+
+
+def print_task_plan(plan):
+    print(
+        "ID: {}, task ID: {}, interval: {}, last created at: {}".format(
+            plan.id,
+            plan.task_id,
+            humanize.naturaldelta(
+                datetime.timedelta(
+                    seconds=plan.interval)),
+            plan.last_created_at))
+
+
+def print_task_plan_list(plans):
+    if plans is not None:
+        for plan in plans:
+            print_task_plan(plan)
 
 
 def process_args():

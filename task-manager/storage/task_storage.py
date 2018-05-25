@@ -1,4 +1,4 @@
-from storage.storage_models import Task, UsersReadTasks, UsersWriteTasks
+from storage.storage_models import Task, UsersReadTasks, UsersWriteTasks, TaskPlan
 from models.task import Task as TaskInstance
 from peewee import *
 import datetime
@@ -23,6 +23,7 @@ class TaskStorage:
 
     def delete_by_id(self, task_id):
         Task.delete().where(Task.id == task_id).execute()
+        TaskPlan.delete().where(TaskPlan.task_id == task_id).execute()
 
     def update(self, task):
         Task.update(
