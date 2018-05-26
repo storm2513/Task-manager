@@ -8,4 +8,5 @@ setup(
     install_requires=['peewee'],
     entry_points='''
     [console_scripts]
-    task-manager=cli.main:run''')
+    task-manager=cli.main:run''',
+    test_suite='tests.run')
