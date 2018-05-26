@@ -1,14 +1,16 @@
 import unittest
 from peewee import *
-from storage.storage_models import User, Level, Task, UsersReadTasks, UsersWriteTasks, Category
+from storage.storage_models import User, Level, Task, UsersReadTasks, UsersWriteTasks, Category, TaskPlan
 from storage.category_storage import CategoryStorage
 from storage.level_storage import LevelStorage
 from storage.task_storage import TaskStorage
 from storage.user_storage import UserStorage
+from storage.task_plan_storage import TaskPlanStorage
 from models.task import Task as TaskInstance
 from models.level import Level as LevelInstance
 from models.user import User as UserInstance
 from models.category import Category as CategoryInstance
+from models.task_plan import TaskPlan as TaskPlanInstance
 from tests.factories import *
 
 # use an in-memory SQLite for tests.
@@ -20,9 +22,11 @@ level_storage = LevelStorage()
 user_storage = UserStorage()
 category_storage = CategoryStorage()
 task_storage = TaskStorage()
+task_plan_storage = TaskPlanStorage()
 user = UserFactory()
 category = CategoryFactory(user_id=10)
 task = TaskFactory()
+task_plan = TaskPlanFactory()
 
 
 class StorageTest(unittest.TestCase):
@@ -224,3 +228,16 @@ class StorageTest(unittest.TestCase):
             UsersWriteTasks.select().where(
                 UsersWriteTasks.task_id == task_id and UsersWriteTasks.user_id == user_id).count(),
             0)
+
+    # TaskPlanStorage tests
+
+    def test_creates_task_plan(self):
+        before_plans_count = TaskPlan.select().count()
+        task_plan_storage.create(task_plan)
+        after_plans_count = TaskPlan.select().count()
+        self.assertEqual(before_plans_count + 1, after_plans_count)
+
+    def test_deletes_task_plan_by_id(self):
+        task_plan_id = task_plan_storage.create(task_plan).id
+        task_plan_storage.delete_by_id(task_plan_id)
+        self.assertEqual(TaskPlan.select().where(TaskPlan.id == task_plan_id).count(), 0)

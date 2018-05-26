@@ -5,6 +5,8 @@ from models.task import Task
 from models.level import Level
 from models.user import User
 from models.category import Category
+from models.task_plan import TaskPlan
+from models.notification import Notification
 
 
 class ModelsTest(unittest.TestCase):
@@ -70,3 +72,46 @@ class ModelsTest(unittest.TestCase):
         category = self.create_category()
         self.assertIsInstance(category, Category)
         self.assertEqual(category.name, self.category_name)
+
+    def create_notification(
+            self,
+            task_id=1,
+            title="Some title",
+            relative_start_time="1 week"):
+        self.task_id = task_id
+        self.title = "Some title"
+        self.relative_start_time = relative_start_time
+        return Notification(
+            task_id=task_id,
+            title=title,
+            relative_start_time=relative_start_time)
+
+    def test_notification_creation(self):
+        notification = self.create_notification()
+        self.assertEqual(notification.task_id, self.task_id)
+        self.assertEqual(notification.title, self.title)
+        self.assertEqual(
+            notification.relative_start_time,
+            self.relative_start_time)
+
+    def create_task_plan(self,
+                         interval=500,
+                         user_id=1,
+                         task_id=1,
+                         last_created_at=datetime.datetime.now()):
+        self.interval = interval
+        self.user_id = user_id
+        self.task_id = task_id
+        self.last_created_at = last_created_at
+        return TaskPlan(
+            interval=interval,
+            user_id=user_id,
+            task_id=task_id,
+            last_created_at=last_created_at)
+
+    def test_task_plan_creation(self):
+        plan = self.create_task_plan()
+        self.assertEqual(plan.interval, self.interval)
+        self.assertEqual(plan.user_id, self.user_id)
+        self.assertEqual(plan.task_id, self.task_id)
+        self.assertEqual(plan.last_created_at, self.last_created_at)
