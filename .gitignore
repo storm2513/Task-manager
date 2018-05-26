@@ -1,5 +1,8 @@
 __pycache__/
 *.py[cod]
 task-manager/task_manager.db
+task-manager/build
+task-manager/dist
+task-manager/task_manager.egg-info
 config.ini
 log.log
