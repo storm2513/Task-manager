@@ -79,6 +79,13 @@ def init_parser():
         description='Commands to work with notifications',
         metavar='')
     create_notification_parser(notification_parser)
+
+    logging = subparser.add_parser(
+        'logging',
+        help='Manage logging',
+        usage='task_manager logging ')
+    logging.add_argument('enabled', choices=['on', 'off'], help='Enables or disables logging')
+
     return parser
 
 
@@ -451,6 +458,8 @@ def parse_object(args):
     elif args.object == 'plan':
         check_user_authorized()
         parse_task_plan_action(args)
+    elif args.object == 'logging':
+        change_logging_level(args)
 
 
 def parse_user_action(args):
@@ -577,6 +586,7 @@ def add_user(args):
 def login_user(args):
     try:
         commands.login_user(email=args.email, password=args.password)
+        print('User {} logged in'.format(args.email))
     except IncorrectPasswordError as e:
         print('Password "{}" is incorrect'.format(args.password))
     except UserDoesNotExistError as e:
@@ -590,10 +600,12 @@ def update_user(args):
     if args.password is not None:
         user.password = args.password
     commands.update_user(user)
+    print('User updated')
 
 
 def logout_user():
     commands.logout_user()
+    print('User logged out')
 
 
 def current_user():
@@ -699,8 +711,10 @@ def add_task(args):
                 interval=interval,
                 last_created_at=last_created_at)
             commands.add_task_plan(plan)
+            print('Planned task added')
     else:
         commands.add_task(task)
+        print('Task added')
 
 
 def edit_task(args):
@@ -729,7 +743,11 @@ def show_task(args):
 
 
 def delete_task(args):
-    commands.delete_task(args.id)
+    try:
+        commands.delete_task(args.id)
+        print('Task with id {} deleted'.format(args.id))
+    except:
+        print("User has no rights for this action")
 
 
 def set_task_as_to_do(args):
@@ -1011,6 +1029,15 @@ def print_task_plan_list(plans):
     if plans is not None:
         for plan in plans:
             print_task_plan(plan)
+
+
+def change_logging_level(args):
+    if args.enabled == 'on':
+        commands.enable_logging(True)
+        print('Logging enabled')
+    elif args.enabled == 'off':
+        commands.enable_logging(False)
+        print('Logging disabled')
 
 
 def process_args():

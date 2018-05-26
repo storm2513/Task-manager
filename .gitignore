@@ -5,4 +5,4 @@ task-manager/build
 task-manager/dist
 task-manager/task_manager.egg-info
 config.ini
-log.log
+task-manager/logs/

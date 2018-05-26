@@ -2,16 +2,18 @@ from config.session import *
 from enums.priority import Priority
 from enums.status import Status
 from models.task import Task
+from enums.logging_level import LoggingLevel
 from models.validator import *
-from config.logger import *
+import config.logger as logging
 from config.config_parser import *
-
-logger = init_logger('commands')
 
 
 """
 This module provides all methods to work with library
 """
+
+_log_tag = 'Commands'
+
 
 def login_user(email, password):
     """
@@ -22,18 +24,20 @@ def login_user(email, password):
 
     user = Controllers.USERS.get_by_email(email)
     if user is not None:
-        logger.debug('Got user')
+        logging.get_logger(_log_tag).debug(
+            'Got user from db by email')
         if user.password == password:
-            logger.info('User authorized')
             write_user_to_config(user)
+            logging.get_logger(_log_tag).debug(
+                'User authorized')
             Global.USER = user
         else:
-            logger.debug(
-                'Current password: {}, password: {}'.format(
-                    user.password, password))
-            logger.warn('Wrong password')
+            logging.get_logger(_log_tag).error(
+                'Wrong password')
             raise IncorrectPasswordError(password)
     else:
+        logging.get_logger(_log_tag).error(
+            'User does not exist')
         raise UserDoesNotExistError
 
 
@@ -45,9 +49,11 @@ def add_user(user):
 
     validate_user(user)
     if Controllers.USERS.get_by_email(user.email) is not None:
+        logging.get_logger(_log_tag).error(
+            'User already exists')
         raise UserAlreadyExistsError(user.email)
     else:
-        logger.info(
+        logging.get_logger(_log_tag).info(
             "Added user with email: {}, name: {}, password:{}".format(
                 user.email,
                 user.name,
@@ -62,7 +68,7 @@ def logout_user():
     """
 
     remove_user_from_config()
-    logger.info('User logged out')
+    logging.get_logger(_log_tag).info('User logged out')
 
 
 def current_user():
@@ -80,6 +86,7 @@ def get_user_email_by_id(user_id):
 
     user = Controllers.USERS.get_by_id(user_id)
     if user is None:
+        logging.get_logger(_log_tag).error('User does not exist')
         raise UserDoesNotExistError
     return user.email
 
@@ -98,6 +105,7 @@ def update_user(user):
     """
 
     validate_user(user)
+    logging.get_logger(_log_tag).info('Updated user')
     Controllers.USERS.update(user)
     write_user_to_config(user)
 
@@ -117,7 +125,7 @@ def add_task(task):
 
     validate_task(task)
     return Controllers.TASKS.create(task)
-    logger.info('Added task')
+    logging.get_logger(_log_tag).info('Added task')
 
 
 def add_task_plan(plan):
@@ -127,6 +135,7 @@ def add_task_plan(plan):
 
     validate_task_plan(plan)
     Controllers.TASK_PLANS.create(plan)
+    logging.get_logger(_log_tag).info('Added task plan')
 
 
 def get_task_plan_by_id(plan_id):
@@ -153,7 +162,10 @@ def update_task(task):
     validate_task(task)
     if user_can_write_task(Global.USER.id, task.id):
         Controllers.TASKS.update(task)
+        logging.get_logger(_log_tag).info('Updated task')
     else:
+        logging.get_logger(_log_tag).error(
+            'User has no rights for updating task')
         raise UserHasNoRightError
 
 
@@ -164,6 +176,7 @@ def update_task_plan(plan):
 
     validate_task_plan(plan)
     Controllers.TASK_PLANS.update(plan)
+    logging.get_logger(_log_tag).info('Updated task plan')
 
 
 def get_task_by_id(task_id):
@@ -184,7 +197,10 @@ def delete_task(task_id):
 
     if user_can_write_task(Global.USER.id, task_id):
         Controllers.TASKS.delete(task_id)
+        logging.get_logger(_log_tag).info('Deleted task with ID {}'.format(task_id))
     else:
+        logging.get_logger(_log_tag).error(
+            'User has no right for deleting task')
         raise UserHasNoRightError
 
 
@@ -195,11 +211,16 @@ def create_inner_task(parent_task_id, task):
 
     parent_task = get_task_by_id(parent_task)
     if parent_task is None:
+        logging.get_logger(_log_tag).error('Task does not exist')
         raise TaskDoesNotExistError
     validate_task(task)
     if user_can_write_task(Global.USER.id, task.id):
         Controllers.TASKS.create_inner_task(parent_task_id, task)
+        logging.get_logger(_log_tag).info(
+            'Created inner task for task with ID: {}'.format(task.id))
     else:
+        logging.get_logger(_log_tag).error(
+            'User has no right for creating inner task')
         raise UserHasNoRightError
 
 
@@ -211,6 +232,8 @@ def get_inner_tasks(task_id):
     if user_can_read_task(Global.USER.id, task_id):
         return Controllers.TASKS.inner(task_id)
     else:
+        logging.get_logger(_log_tag).error(
+            'User has no right for getting inner task')
         raise UserHasNoRightError
 
 
@@ -231,6 +254,7 @@ def validate_user_exists(user_id):
 
     user = Controllers.USERS.get_by_id(user_id)
     if user is None:
+        logging.get_logger(_log_tag).error('User does not exist')
         raise UserDoesNotExistError
 
 
@@ -242,7 +266,11 @@ def assign_task_on_user(task_id, user_id):
     if user_can_write_task(Global.USER.id, task_id):
         validate_user_exists(user_id)
         Controllers.TASKS.assign_task_on_user(task_id, user_id)
+        logging.get_logger(_log_tag).info(
+            'Assigned task with ID: {} on user with ID: {}'.format(task_id, user_id))
     else:
+        logging.get_logger(_log_tag).error(
+            'User has no right for assigning this task')
         raise UserHasNoRightError
 
 
@@ -254,7 +282,11 @@ def add_user_for_read(user_id, task_id):
     if user_can_write_task(Global.USER.id, task_id):
         validate_user_exists(user_id)
         Controllers.TASKS.add_user_for_read(user_id, task_id)
+        logging.get_logger(_log_tag).info(
+            'Gave user with ID: {} read access to task with ID: {}'.format(user_id, task_id))
     else:
+        logging.get_logger(_log_tag).error(
+            'User has no right for giving access for this task')
         raise UserHasNoRightError
 
 
@@ -266,7 +298,11 @@ def add_user_for_write(user_id, task_id):
     if user_can_write_task(Global.USER.id, task_id):
         validate_user_exists(user_id)
         Controllers.TASKS.add_user_for_write(user_id, task_id)
+        logging.get_logger(_log_tag).info(
+            'Gave user with ID: {} read and write access to task with ID: {}'.format(user_id, task_id))
     else:
+        logging.get_logger(_log_tag).error(
+            'User has no right for giving access for this task')
         raise UserHasNoRightError
 
 
@@ -278,7 +314,11 @@ def remove_user_for_read(user_id, task_id):
     if user_can_write_task(Global.USER.id, task_id):
         validate_user_exists(user_id)
         Controllers.TASKS.remove_user_for_read(user_id, task_id)
+        logging.get_logger(_log_tag).info(
+            'Removed from user with ID: {} read access to task with ID: {}'.format(user_id, task_id))
     else:
+        logging.get_logger(_log_tag).error(
+            'User has no right for removing access for this task')
         raise UserHasNoRightError
 
 
@@ -290,7 +330,11 @@ def remove_user_for_write(user_id, task_id):
     if user_can_write_task(Global.USER.id, task_id):
         validate_user_exists(user_id)
         Controllers.TASKS.remove_user_for_write(user_id, task_id)
+        logging.get_logger(_log_tag).info(
+            'Removed from user with ID: {} read and write access to task with ID: {}'.format(user_id, task_id))
     else:
+        logging.get_logger(_log_tag).error(
+            'User has no right for removing access for this task')
         raise UserHasNoRightError
 
 
@@ -341,8 +385,12 @@ def set_task_as_to_do(task_id):
 
     if user_can_write_task(Global.USER.id, task_id):
         Controllers.TASKS.set_as_to_do(task_id)
+        logging.get_logger(_log_tag).info(
+            "Set task's status with ID {} as TODO".format(task_id))
     else:
-        logger.info('User has no rights')
+        logging.get_logger(_log_tag).error(
+            'User has no right for changing status for this task')
+        raise UserHasNoRightError
 
 
 def set_task_as_in_progress(task_id):
@@ -352,8 +400,12 @@ def set_task_as_in_progress(task_id):
 
     if user_can_write_task(Global.USER.id, task_id):
         Controllers.TASKS.set_as_in_progress(task_id)
+        logging.get_logger(_log_tag).info(
+            "Set task's status with ID {} as IN_PROGRESS".format(task_id))
     else:
-        logger.info('User has no rights')
+        logging.get_logger(_log_tag).error(
+            'User has no right for changing status for this task')
+        raise UserHasNoRightError
 
 
 def set_task_as_done(task_id):
@@ -363,8 +415,12 @@ def set_task_as_done(task_id):
 
     if user_can_write_task(Global.USER.id, task_id):
         Controllers.TASKS.set_as_done(task_id)
+        logging.get_logger(_log_tag).info(
+            "Set task's status with ID {} as DONE".format(task_id))
     else:
-        logger.info('User has no rights')
+        logging.get_logger(_log_tag).error(
+            'User has no right for changing status for this task')
+        raise UserHasNoRightError
 
 
 def set_task_as_archived(task_id):
@@ -374,8 +430,12 @@ def set_task_as_archived(task_id):
 
     if user_can_write_task(Global.USER.id, task_id):
         Controllers.TASKS.set_as_archived(task_id)
+        logging.get_logger(_log_tag).info(
+            "Set task's status with ID {} as ARCHIVED".format(task_id))
     else:
-        logger.info('User has no rights')
+        logging.get_logger(_log_tag).error(
+            'User has no right for changing status for this task')
+        raise UserHasNoRightError
 
 
 def add_category(category):
@@ -384,7 +444,8 @@ def add_category(category):
     """
 
     Controllers.CATEGORIES.create(category, Global.USER.id)
-    logger.info('Category {} added'.format(category.name))
+    logging.get_logger(_log_tag).info(
+        'Category {} added'.format(category.name))
 
 
 def all_categories():
@@ -403,7 +464,8 @@ def update_category(category):
     if Controllers.CATEGORIES.get_by_id(category.id).user_id == Global.USER.id:
         Controllers.CATEGORIES.update(category)
     else:
-        logger.info('User has no rights')
+        logging.get_logger(_log_tag).error('User has no rights')
+        raise UserHasNoRightError
 
 
 def get_category_by_id(category_id):
@@ -422,6 +484,7 @@ def delete_category(category_id):
     category = Controllers.CATEGORIES.get_by_id(category_id)
     if category.user_id == Global.USER.id:
         Controllers.CATEGORIES.delete(category_id)
+        logging.get_logger(_log_tag).info('Deleted category')
 
 
 def user_can_read_task(user_id, task_id):
@@ -460,8 +523,10 @@ def add_notification(notification):
 
     task = commands.get_task_by_id(notification.task_id)
     if task is None:
+        logging.get_logger(_log_tag).error('Task does not exist')
         raise TaskDoesNotExistError
     Controllers.NOTIFICATIONS.create(notification, Global.USER.id)
+    logging.get_logger(_log_tag).info('Created notification')
 
 
 def get_notification_by_id(notification_id):
@@ -478,6 +543,7 @@ def delete_notification(notification_id):
     """
 
     Controllers.NOTIFICATIONS.delete(notification_id)
+    logging.get_logger(_log_tag).info('Deleted notification')
 
 
 def user_notifications():
@@ -495,8 +561,10 @@ def update_notification(notification):
 
     task = commands.get_task_by_id(notification.task_id)
     if task is None:
+        logging.get_logger(_log_tag).error('Task does not exist')
         raise TaskDoesNotExistError
     Controllers.NOTIFICATIONS.update(notification)
+    logging.get_logger(_log_tag).info('Updated notification')
 
 
 def pending_notifications():
@@ -529,3 +597,12 @@ def set_notification_as_shown(notification_id):
     """
 
     Controllers.NOTIFICATIONS.set_as_shown(notification_id)
+    logging.get_logger(_log_tag).info(
+        "Set notification's status with ID {} as SHOWN".format(notification_id))
+
+
+def enable_logging(should_enable):
+    if should_enable:
+        write_logging_level_to_config(LoggingLevel.ON.value)
+    else:
+        write_logging_level_to_config(LoggingLevel.OFF.value)
