@@ -6,3 +6,4 @@ task-manager/dist
 task-manager/task_manager.egg-info
 config.ini
 task-manager/logs/
+.idea

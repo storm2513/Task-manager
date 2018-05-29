@@ -1,10 +1,7 @@
-from cli.arg_parser import *
-from lib.config.commands import *
-from lib.config.session import *
+from cli.arg_parser import process_args
 
 
 def run():
-    start_session()
     process_args()
 
 

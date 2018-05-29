@@ -1,19 +1,15 @@
-from lib.storage.storage_models import Notification, Task
+from lib.storage.storage_models import Notification, Task, Adapter
 from lib.models.notification import Notification as NotificationInstance, Status as NotificationStatus
 import datetime
 from peewee import *
 
 
-class NotificationStorage:
+class NotificationStorage(Adapter):
     """
     Class for managing notifications in database
     """
 
     def create(self, notification):
-        """
-        Creates notification
-        """
-
         return self.to_notification_instance(
             Notification.create(
                 id=notification.id,
@@ -24,17 +20,9 @@ class NotificationStorage:
                 relative_start_time=notification.relative_start_time))
 
     def delete_by_id(self, notification_id):
-        """
-        Deletes notification by ID
-        """
-
         Notification.delete().where(Notification.id == notification_id).execute()
 
     def update(self, notification):
-        """
-        Updates notification title, status and relative_start_time
-        """
-
         Notification.update(
             title=notification.title,
             status=notification.status,
@@ -42,10 +30,6 @@ class NotificationStorage:
             Notification.id == notification.id).execute()
 
     def to_notification_instance(self, notification):
-        """
-        Makes cast from Notification class to NotificationInstance class
-        """
-
         return NotificationInstance(
             id=notification.id,
             title=notification.title,
@@ -55,10 +39,6 @@ class NotificationStorage:
             relative_start_time=notification.relative_start_time)
 
     def get_by_id(self, notification_id):
-        """
-        Returns notification by it's ID
-        """
-
         try:
             return self.to_notification_instance(
                 Notification.get(Notification.id == notification_id))
@@ -93,10 +73,6 @@ class NotificationStorage:
                                                          Notification.status == NotificationStatus.SHOWN.value))))
 
     def all_user_notifications(self, user_id):
-        """
-        Returns all user's notifications
-        """
-
         return list(map(self.to_notification_instance, list(
             Notification.select().where(Notification.user_id == user_id))))
 

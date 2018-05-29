@@ -4,7 +4,7 @@ import datetime
 from lib.models.task import Status, Priority
 from lib.models.notification import Status as NotificationStatus
 
-db = SqliteDatabase('task_manager.db')
+database_proxy = Proxy()
 
 
 class BaseModel(Model):
@@ -13,7 +13,7 @@ class BaseModel(Model):
     """
 
     class Meta:
-        database = db
+        database = database_proxy
 
 
 class Level(BaseModel):
@@ -115,6 +115,13 @@ class UsersWriteTasks(BaseModel):
     task = ForeignKeyField(Task)
 
 
-db.connect()
-db.create_tables([User, Level, Task, UsersReadTasks,
-                  UsersWriteTasks, Category, Notification, TaskPlan])
+class Adapter:
+    def __init__(self, database_name='task_manager'):
+        database = SqliteDatabase(database_name)
+        database_proxy.initialize(database)
+        self.create_tables(database)
+
+    def create_tables(self, database):
+        database.connect()
+        database.create_tables([Task, UsersReadTasks,
+                                UsersWriteTasks, Category, Notification, TaskPlan])

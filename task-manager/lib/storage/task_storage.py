@@ -1,19 +1,15 @@
-from lib.storage.storage_models import Task, UsersReadTasks, UsersWriteTasks, TaskPlan
+from lib.storage.storage_models import Task, UsersReadTasks, UsersWriteTasks, TaskPlan, Adapter
 from lib.models.task import Task as TaskInstance
 from peewee import *
 import datetime
 
 
-class TaskStorage:
+class TaskStorage(Adapter):
     """
     Class for managing tasks in database
     """
 
     def create(self, task):
-        """
-        Creates task
-        """
-
         return self.to_task_instance(
             Task.create(
                 id=task.id,
@@ -30,18 +26,10 @@ class TaskStorage:
                 status=task.status))
 
     def delete_by_id(self, task_id):
-        """
-        Deletes task by ID and it's task plan (task plan cannot work without template task)
-        """
-
         Task.delete().where(Task.id == task_id).execute()
         TaskPlan.delete().where(TaskPlan.task_id == task_id).execute()
 
     def update(self, task):
-        """
-        Updates task
-        """
-
         Task.update(
             title=task.title,
             note=task.note,
@@ -57,10 +45,6 @@ class TaskStorage:
             Task.id == task.id).execute()
 
     def to_task_instance(self, task):
-        """
-        Makes cast from Task class to TaskInstance class
-        """
-
         return TaskInstance(
             id=task.id,
             user_id=task.user_id,
@@ -78,36 +62,20 @@ class TaskStorage:
             updated_at=task.updated_at)
 
     def get_by_id(self, task_id):
-        """
-        Returns task by it's ID
-        """
-
         try:
             return self.to_task_instance(Task.get(Task.id == task_id))
         except DoesNotExist:
             return None
 
     def user_tasks(self, user_id):
-        """
-        Returns user's tasks
-        """
-
         return list(map(self.to_task_instance, list(
             Task.select().where(Task.user_id == user_id))))
 
     def assigned(self, user_id):
-        """
-        Returns user's assigned tasks
-        """
-
         return list(map(self.to_task_instance, list(
             Task.select().where(Task.assigned_user_id == user_id))))
 
     def with_status(self, user_id, status):
-        """
-        Returns user's tasks with some status
-        """
-
         return list(map(self.to_task_instance, list(
             Task.select().where(Task.user_id == user_id, Task.status == status))))
 

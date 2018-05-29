@@ -1,6 +1,5 @@
 import logging
 import os
-from lib.config.config_parser import logging_enabled
 
 DEFAULT_PATH_HIGH = 'logs/high.log'
 DEFAULT_PATH_LOW = 'logs/low.log'
@@ -40,12 +39,12 @@ def get_logger(name):
     if (log.hasHandlers()):
         log.handlers.clear()
 
-    if logging_enabled() == True:
-        log.disabled = False
-        log.addHandler(file_high_logging_handler)
-        log.addHandler(file_low_logging_handler)
-    else:
-        log.disabled = True
+    # if logging_enabled() == True:
+    #     log.disabled = False
+    log.addHandler(file_high_logging_handler)
+    log.addHandler(file_low_logging_handler)
+    # else:
+    # log.disabled = True
 
     return log
 
