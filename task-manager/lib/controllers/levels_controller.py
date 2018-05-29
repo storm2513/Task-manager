@@ -1,4 +1,4 @@
-from storage.level_storage import LevelStorage
+from lib.storage.level_storage import LevelStorage
 
 
 class LevelsController:

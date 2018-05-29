@@ -1,11 +1,8 @@
-from config.session import *
-from enums.priority import Priority
-from enums.status import Status
-from models.task import Task
-from enums.logging_level import LoggingLevel
-from models.validator import *
-import config.logger as logging
-from config.config_parser import *
+from lib.config.session import *
+from lib.models.task import Task, Status, Priority
+from lib.models.validator import *
+import lib.config.logger as logging
+from lib.config.config_parser import *
 
 
 """
@@ -601,8 +598,5 @@ def set_notification_as_shown(notification_id):
         "Set notification's status with ID {} as SHOWN".format(notification_id))
 
 
-def enable_logging(should_enable):
-    if should_enable:
-        write_logging_level_to_config(LoggingLevel.ON.value)
-    else:
-        write_logging_level_to_config(LoggingLevel.OFF.value)
+def enable_logging(enabled):
+    write_logging_status_to_config(enabled)

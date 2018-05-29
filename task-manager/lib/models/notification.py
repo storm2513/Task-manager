@@ -1,4 +1,17 @@
-from enums.notification_status import NotificationStatus
+import enum
+
+
+class Status(enum.Enum):
+    """
+    Enum that stores values of notification's statuses
+    CREATED - Notification was created
+    PENDING - Notification should be shown
+    SHOWN - Notification was shown
+    """
+
+    CREATED = 0
+    PENDING = 1
+    SHOWN = 2
 
 
 class Notification:
@@ -11,7 +24,7 @@ class Notification:
             task_id,
             title,
             relative_start_time,
-            status=NotificationStatus.CREATED.value,
+            status=Status.CREATED.value,
             id=None,
             user_id=None,):
         self.id = id

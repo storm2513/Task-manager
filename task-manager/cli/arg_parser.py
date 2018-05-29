@@ -1,18 +1,15 @@
 import argparse
-from config import commands
-from config.session import Global
-from models.user import User
-from models.category import Category
-from models.task import Task
-from models.task_plan import TaskPlan
-from models.notification import Notification
-from enums.priority import Priority
-from enums.status import Status
-from enums.notification_status import NotificationStatus
+from lib.config import commands
+from lib.config.session import Global
+from lib.models.user import User
+from lib.models.category import Category
+from lib.models.task import Task, Status, Priority
+from lib.models.task_plan import TaskPlan
+from lib.models.notification import Notification, Status as NotificationStatus
 import datetime
 import dateparser
 import humanize
-from exceptions.exceptions import *
+from lib.exceptions.exceptions import *
 
 
 def init_parser():

@@ -1,6 +1,6 @@
-from storage.user_storage import UserStorage
-from controllers.levels_controller import LevelsController
-from storage.level_storage import LevelStorage
+from lib.storage.user_storage import UserStorage
+from lib.controllers.levels_controller import LevelsController
+from lib.storage.level_storage import LevelStorage
 
 
 class UsersController:

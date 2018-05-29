@@ -1,7 +1,6 @@
 import configparser
-from storage.storage_models import User
-from enums.logging_level import LoggingLevel
-from config import commands
+from lib.storage.storage_models import User
+from lib.config import commands
 
 CONFIG_NAME = 'config.ini'
 config = configparser.ConfigParser()
@@ -46,27 +45,27 @@ def remove_user_from_config():
         config.write(configfile)
 
 
-def write_logging_level_to_config(level):
+def write_logging_status_to_config(enabled):
     """
-    Writes to config file logging level
+    Writes to config if logging enabled or not
     """
 
     config['logging'] = {}
-    config['logging']['level'] = str(level)
+    config['logging']['enabled'] = str(enabled)
     with open(CONFIG_NAME, 'w') as configfile:
         config.write(configfile)
 
 
-def get_logging_level_from_config():
+def logging_enabled():
     """
-    Returns logging level from config file
+    Returns True if logging enabled
     """
 
     try:
         config.read(CONFIG_NAME)
-        level = int(config['logging']['level'])
-        return level
+        level = config['logging']['enabled']
+        return level.lower() in ("yes", "true", "t", "1")
     except:
         # write default logging level to config
-        write_logging_level_to_config(LoggingLevel.ON.value)
-        return LoggingLevel.ON.value
+        write_logging_status_to_config(True)
+        return True

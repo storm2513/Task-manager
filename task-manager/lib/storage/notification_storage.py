@@ -1,6 +1,5 @@
-from storage.storage_models import Notification, Task
-from models.notification import Notification as NotificationInstance
-from enums.notification_status import NotificationStatus
+from lib.storage.storage_models import Notification, Task
+from lib.models.notification import Notification as NotificationInstance, Status as NotificationStatus
 import datetime
 from peewee import *
 

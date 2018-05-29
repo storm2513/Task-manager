@@ -1,5 +1,5 @@
-from storage.storage_models import User
-from models.user import User as UserInstance
+from lib.storage.storage_models import User
+from lib.models.user import User as UserInstance
 from peewee import *
 
 

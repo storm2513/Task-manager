@@ -1,5 +1,5 @@
-from storage.storage_models import Level, User
-from models.level import Level as LevelInstance
+from lib.storage.storage_models import Level, User
+from lib.models.level import Level as LevelInstance
 from peewee import *
 
 

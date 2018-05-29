@@ -1,5 +1,5 @@
-from storage.storage_models import Category
-from models.category import Category as CategoryInstance
+from lib.storage.storage_models import Category
+from lib.models.category import Category as CategoryInstance
 from peewee import *
 
 

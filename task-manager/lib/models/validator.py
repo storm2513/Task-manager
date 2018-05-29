@@ -1,5 +1,5 @@
 import re
-from exceptions.exceptions import *
+from lib.exceptions.exceptions import *
 import dateparser
 
 

@@ -1,5 +1,28 @@
-from enums.priority import Priority
-from enums.status import Status
+import enum
+
+
+class Priority(enum.Enum):
+    """
+    Enum that stores values of task's priorities
+    """
+
+    MIN = 0
+    LOW = 1
+    MEDIUM = 2
+    HIGH = 3
+    MAX = 4
+
+
+class Status(enum.Enum):
+    """
+    Enum that stores values of task's statuses
+    """
+
+    TODO = 0
+    IN_PROGRESS = 1
+    DONE = 2
+    ARCHIVED = 3
+    TEMPLATE = 4
 
 
 class Task:

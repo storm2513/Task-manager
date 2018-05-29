@@ -1,7 +1,7 @@
-from storage.task_storage import TaskStorage
-from enums.status import Status
-from controllers.levels_controller import LevelsController
-from storage.level_storage import LevelStorage
+from lib.storage.task_storage import TaskStorage
+from lib.models.task import Status
+from lib.controllers.levels_controller import LevelsController
+from lib.storage.level_storage import LevelStorage
 
 
 class TasksController:

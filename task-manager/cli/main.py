@@ -1,6 +1,6 @@
 from cli.arg_parser import *
-from config.commands import *
-from config.session import *
+from lib.config.commands import *
+from lib.config.session import *
 
 
 def run():

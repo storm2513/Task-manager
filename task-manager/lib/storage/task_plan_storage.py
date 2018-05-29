@@ -1,7 +1,7 @@
-from storage.storage_models import Task, TaskPlan
-from storage.task_storage import TaskStorage
-from models.task_plan import TaskPlan as TaskPlanInstance
-from enums.status import Status
+from lib.storage.storage_models import Task, TaskPlan
+from lib.storage.task_storage import TaskStorage
+from lib.models.task_plan import TaskPlan as TaskPlanInstance
+from lib.models.task import Status
 import datetime
 from peewee import *
 

@@ -1,9 +1,8 @@
 from peewee import *
 import datetime
 
-from enums.status import Status
-from enums.priority import Priority
-from enums.notification_status import NotificationStatus
+from lib.models.task import Status, Priority
+from lib.models.notification import Status as NotificationStatus
 
 db = SqliteDatabase('task_manager.db')
 

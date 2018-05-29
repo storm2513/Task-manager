@@ -1,17 +1,17 @@
-from storage.user_storage import UserStorage
-from storage.task_storage import TaskStorage
-from storage.level_storage import LevelStorage
-from storage.category_storage import CategoryStorage
-from storage.notification_storage import NotificationStorage
-from storage.task_plan_storage import TaskPlanStorage
-from controllers.categories_controller import CategoriesController
-from controllers.levels_controller import LevelsController
-from controllers.tasks_controller import TasksController
-from controllers.users_controller import UsersController
-from controllers.notifications_controller import NotificationsController
-from controllers.task_plans_controller import TaskPlansController
-from models.user import User
-from config.config_parser import *
+from lib.storage.user_storage import UserStorage
+from lib.storage.task_storage import TaskStorage
+from lib.storage.level_storage import LevelStorage
+from lib.storage.category_storage import CategoryStorage
+from lib.storage.notification_storage import NotificationStorage
+from lib.storage.task_plan_storage import TaskPlanStorage
+from lib.controllers.categories_controller import CategoriesController
+from lib.controllers.levels_controller import LevelsController
+from lib.controllers.tasks_controller import TasksController
+from lib.controllers.users_controller import UsersController
+from lib.controllers.notifications_controller import NotificationsController
+from lib.controllers.task_plans_controller import TaskPlansController
+from lib.models.user import User
+from lib.config.config_parser import *
 
 
 def start_session():

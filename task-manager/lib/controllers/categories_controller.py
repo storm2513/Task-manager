@@ -1,4 +1,4 @@
-from storage.category_storage import CategoryStorage
+from lib.storage.category_storage import CategoryStorage
 
 
 class CategoriesController:

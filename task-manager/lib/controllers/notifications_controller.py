@@ -1,5 +1,5 @@
-from storage.notification_storage import NotificationStorage
-from enums.notification_status import NotificationStatus
+from lib.storage.notification_storage import NotificationStorage
+from lib.models.notification import Status as NotificationStatus
 
 
 class NotificationsController:
