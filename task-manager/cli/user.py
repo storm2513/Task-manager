@@ -1,5 +1,5 @@
 from peewee import Model, SqliteDatabase, PrimaryKeyField, CharField, Proxy, DoesNotExist
-
+import config.config as config
 
 database_proxy = Proxy()
 
@@ -27,7 +27,7 @@ class User(Model):
 
 
 class Adapter:
-    def __init__(self, database_name='task_manager'):
+    def __init__(self, database_name=config.DATABASE):
         database = SqliteDatabase(database_name)
         database_proxy.initialize(database)
         User.create_table()

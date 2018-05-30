@@ -1,6 +1,7 @@
 import argparse
 from cli.session import login_user, current_user, logout_user
 from cli.user import UserStorage, UserInstance as User
+import config.config as config
 from lib import commands
 from lib.models.category import Category
 from lib.models.task import Task, Status, Priority
@@ -80,13 +81,6 @@ def init_parser():
         description='Commands to work with notifications',
         metavar='')
     create_notification_parser(notification_parser)
-
-    logging = subparser.add_parser(
-        'logging',
-        help='Manage logging',
-        usage='task_manager logging ')
-    logging.add_argument('enabled', choices=[
-                         'on', 'off'], help='Enables or disables logging')
 
     return parser
 
@@ -442,8 +436,6 @@ def parse_object(args):
     elif args.object == 'plan':
         check_user_authorized()
         parse_task_plan_action(args)
-    elif args.object == 'logging':
-        change_logging_level(args)
 
 
 def parse_user_action(args):
@@ -770,28 +762,28 @@ def assign_task_on_user(args):
 def add_user_for_read(args):
     commands.add_user_for_read(
         tasks_controller=tasks_controller(),
-        added_user_id=args.user_id,
+        user_id=args.user_id,
         task_id=args.task_id)
 
 
 def add_user_for_write(args):
     commands.add_user_for_write(
         tasks_controller=tasks_controller(),
-        added_user_id=args.user_id,
+        user_id=args.user_id,
         task_id=args.task_id)
 
 
 def remove_user_for_read(args):
     commands.remove_user_for_read(
         tasks_controller=tasks_controller(),
-        removed_user_id=args.user_id,
+        user_id=args.user_id,
         task_id=args.task_id)
 
 
 def remove_user_for_write(args):
     commands.remove_user_for_write(
         tasks_controller=tasks_controller(),
-        removed_user_id=args.user_id,
+        user_id=args.user_id,
         task_id=args.task_id)
 
 
@@ -1027,28 +1019,19 @@ def print_task_plan_list(plans):
             print_task_plan(plan)
 
 
-def change_logging_level(args):
-    if args.enabled == 'on':
-        commands.enable_logging(True)
-        print('Logging enabled')
-    elif args.enabled == 'off':
-        commands.enable_logging(False)
-        print('Logging disabled')
-
-
-def tasks_controller(database_name='task_manager'):
+def tasks_controller(database_name=config.DATABASE):
     return create_tasks_controller(current_user().id, database_name)
 
 
-def categories_controller(database_name='task_manager'):
+def categories_controller(database_name=config.DATABASE):
     return create_categories_controller(current_user().id, database_name)
 
 
-def notifications_controller(database_name='task_manager'):
+def notifications_controller(database_name=config.DATABASE):
     return create_notifications_controller(current_user().id, database_name)
 
 
-def task_plans_controller(database_name='task_manager'):
+def task_plans_controller(database_name=config.DATABASE):
     return create_task_plans_controller(current_user().id, database_name)
 
 

@@ -11,6 +11,7 @@ from peewee import (
 import datetime
 from lib.models.task import Status, Priority
 from lib.models.notification import Status as NotificationStatus
+import config.config as config
 
 database_proxy = Proxy()
 
@@ -103,7 +104,7 @@ class UsersWriteTasks(BaseModel):
 
 
 class Adapter:
-    def __init__(self, database_name='task_manager'):
+    def __init__(self, database_name=config.DATABASE):
         self.database_name = database_name
         self.database = SqliteDatabase(database_name)
         self.connected = False
@@ -121,10 +122,8 @@ class Adapter:
         UsersReadTasks.create_table(True)
         UsersWriteTasks.create_table(True)
 
-
     def drop_tables(self):
         self.database.drop_tables(
             [Task, UsersReadTasks, UsersWriteTasks, Category, Notification, TaskPlan])
         self.database.close()
         self.connected = False
-
