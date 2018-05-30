@@ -1,5 +1,5 @@
 from lib.models.task import Task, Status, Priority
-from lib.models.validator import *
+from lib.models.validator import validate_task, validate_task_plan
 import lib.config.logger as logging
 
 
@@ -116,7 +116,8 @@ def assign_task_on_user(tasks_controller, task_id, user_id):
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.assign_task_on_user(task_id, user_id)
         logging.get_logger(_log_tag).info(
-            'Assigned task with ID: {} on user with ID: {}'.format(task_id, user_id))
+            'Assigned task with ID: {} on user with ID: {}'.format(
+                task_id, user_id))
     else:
         logging.get_logger(_log_tag).error(
             'User has no right for assigning this task')
@@ -131,7 +132,8 @@ def add_user_for_read(tasks_controller, user_id, task_id):
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.add_user_for_read(user_id, task_id)
         logging.get_logger(_log_tag).info(
-            'Gave user with ID: {} read access to task with ID: {}'.format(user_id, task_id))
+            'Gave user with ID: {} read access to task with ID: {}'.format(
+                user_id, task_id))
     else:
         logging.get_logger(_log_tag).error(
             'User has no right for giving access for this task')
@@ -146,7 +148,8 @@ def add_user_for_write(tasks_controller, user_id, task_id):
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.add_user_for_write(user_id, task_id)
         logging.get_logger(_log_tag).info(
-            'Gave user with ID: {} read and write access to task with ID: {}'.format(user_id, task_id))
+            'Gave user with ID: {} read and write access to task with ID: {}'.format(
+                user_id, task_id))
     else:
         logging.get_logger(_log_tag).error(
             'User has no right for giving access for this task')
@@ -161,7 +164,8 @@ def remove_user_for_read(tasks_controller, user_id, task_id):
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.remove_user_for_read(user_id, task_id)
         logging.get_logger(_log_tag).info(
-            'Removed from user with ID: {} read access to task with ID: {}'.format(user_id, task_id))
+            'Removed from user with ID: {} read access to task with ID: {}'.format(
+                user_id, task_id))
     else:
         logging.get_logger(_log_tag).error(
             'User has no right for removing access for this task')
@@ -176,7 +180,8 @@ def remove_user_for_write(tasks_controller, user_id, task_id):
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.remove_user_for_write(user_id, task_id)
         logging.get_logger(_log_tag).info(
-            'Removed from user with ID: {} read and write access to task with ID: {}'.format(user_id, task_id))
+            'Removed from user with ID: {} read and write access to task with ID: {}'.format(
+                user_id, task_id))
     else:
         logging.get_logger(_log_tag).error(
             'User has no right for removing access for this task')
@@ -274,7 +279,8 @@ def all_categories(categories_controller):
 
 
 def update_category(categories_controller, category):
-    if categories_controller.get_by_id(category.id).user_id == categories_controller.user_id:
+    if categories_controller.get_by_id(
+            category.id).user_id == categories_controller.user_id:
         categories_controller.update(category)
     else:
         logging.get_logger(_log_tag).error('User has no rights')
@@ -331,7 +337,10 @@ def user_notifications(notifications_controller):
     return notifications_controller.all()
 
 
-def update_notification(tasks_controller, notifications_controller, notification):
+def update_notification(
+        tasks_controller,
+        notifications_controller,
+        notification):
     task = get_task_by_id(tasks_controller, notification.task_id)
     if task is None:
         logging.get_logger(_log_tag).error('Task does not exist')

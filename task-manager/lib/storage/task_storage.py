@@ -1,6 +1,6 @@
 from lib.storage.storage_models import Task, UsersReadTasks, UsersWriteTasks, TaskPlan, Adapter
 from lib.models.task import Task as TaskInstance
-from peewee import *
+from peewee import DoesNotExist
 import datetime
 
 

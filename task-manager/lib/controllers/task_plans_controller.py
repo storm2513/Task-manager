@@ -28,7 +28,7 @@ class TaskPlansController(BaseController):
 
     def process_plans(self):
         """
-        Creates tasks according to task plans. 
+        Creates tasks according to task plans.
         """
 
         self.storage.process_plans()

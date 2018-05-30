@@ -1,7 +1,7 @@
 import argparse
-from cli.config.session import login_user, current_user, logout_user
+from cli.session import login_user, current_user, logout_user
 from cli.user import UserStorage, UserInstance as User
-from lib.config import commands
+from lib import commands
 from lib.models.category import Category
 from lib.models.task import Task, Status, Priority
 from lib.models.task_plan import TaskPlan
@@ -10,10 +10,10 @@ from lib.controllers.categories_controller import create_categories_controller
 from lib.controllers.notifications_controller import create_notifications_controller
 from lib.controllers.task_plans_controller import create_task_plans_controller
 from lib.controllers.tasks_controller import create_tasks_controller
+from lib.exceptions.exceptions import UserHasNoRightError
 import datetime
 import dateparser
 import humanize
-from lib.exceptions.exceptions import *
 
 
 def init_parser():
@@ -95,8 +95,9 @@ def create_user_parser(parser):
     parser.add_parser('add', help='Adds new user').add_argument(
         'username')
 
-    parser.add_parser('login', help='Authorizes user by username').add_argument(
-        'username')
+    parser.add_parser(
+        'login',
+        help='Authorizes user by username').add_argument('username')
 
     parser.add_parser('logout', help='Logouts user')
     parser.add_parser('current', help='Shows current user')
@@ -678,22 +679,25 @@ def add_task(args):
 
 def edit_task(args):
     task = commands.get_task_by_id(tasks_controller(), args.id)
-    if args.title is not None:
-        task.title = args.title
-    if args.note is not None:
-        task.note = args.note
-    if args.start_time is not None:
-        task.start_time = dateparser.parse(args.start_time)
-    if args.end_time is not None:
-        task.end_time = dateparser.parse(args.end_time)
-        validate_time_in_task(task.start_time, task.end_time)
-    if args.is_event is not None:
-        task.is_event = args.is_event == 'yes'
-    if args.category_id is not None:
-        task.category_id = args.category_id
-    if args.priority is not None:
-        task.priority = Priority[args.priority.upper()].value
-    commands.update_task(tasks_controller(), task)
+    if task is not None:
+        if args.title is not None:
+            task.title = args.title
+        if args.note is not None:
+            task.note = args.note
+        if args.start_time is not None:
+            task.start_time = dateparser.parse(args.start_time)
+        if args.end_time is not None:
+            task.end_time = dateparser.parse(args.end_time)
+            validate_time_in_task(task.start_time, task.end_time)
+        if args.is_event is not None:
+            task.is_event = args.is_event == 'yes'
+        if args.category_id is not None:
+            task.category_id = args.category_id
+        if args.priority is not None:
+            task.priority = Priority[args.priority.upper()].value
+        commands.update_task(tasks_controller(), task)
+    else:
+        print("Error. There is no task with such ID")
 
 
 def show_task(args):
@@ -705,7 +709,7 @@ def delete_task(args):
     try:
         commands.delete_task(tasks_controller(), args.id)
         print('Task with id {} deleted'.format(args.id))
-    except:
+    except UserHasNoRightError:
         print("User has no rights for this action")
 
 
@@ -757,28 +761,38 @@ def show_parent_task(args):
 
 
 def assign_task_on_user(args):
-    commands.assign_task_on_user(tasks_controller=tasks_controller(),
-                                 task_id=args.task_id, assigned_user_id=args.user_id)
+    commands.assign_task_on_user(
+        tasks_controller=tasks_controller(),
+        task_id=args.task_id,
+        assigned_user_id=args.user_id)
 
 
 def add_user_for_read(args):
-    commands.add_user_for_read(tasks_controller=tasks_controller(),
-                               added_user_id=args.user_id, task_id=args.task_id)
+    commands.add_user_for_read(
+        tasks_controller=tasks_controller(),
+        added_user_id=args.user_id,
+        task_id=args.task_id)
 
 
 def add_user_for_write(args):
-    commands.add_user_for_write(tasks_controller=tasks_controller(),
-                                added_user_id=args.user_id, task_id=args.task_id)
+    commands.add_user_for_write(
+        tasks_controller=tasks_controller(),
+        added_user_id=args.user_id,
+        task_id=args.task_id)
 
 
 def remove_user_for_read(args):
-    commands.remove_user_for_read(tasks_controller=tasks_controller(),
-                                  removed_user_id=args.user_id, task_id=args.task_id)
+    commands.remove_user_for_read(
+        tasks_controller=tasks_controller(),
+        removed_user_id=args.user_id,
+        task_id=args.task_id)
 
 
 def remove_user_for_write(args):
-    commands.remove_user_for_write(tasks_controller=tasks_controller(),
-                                   removed_user_id=args.user_id, task_id=args.task_id)
+    commands.remove_user_for_write(
+        tasks_controller=tasks_controller(),
+        removed_user_id=args.user_id,
+        task_id=args.task_id)
 
 
 def show_all_tasks():
@@ -879,7 +893,8 @@ def add_notification(args):
                 task_id=task.id,
                 title=args.title,
                 relative_start_time=relative_start_time)
-            commands.add_notification(tasks_controller(), notifications_controller(), notification)
+            commands.add_notification(
+                tasks_controller(), notifications_controller(), notification)
         else:
             print(
                 "Task should have start time and notification's relative start time should be correct")
@@ -890,15 +905,19 @@ def add_notification(args):
 def edit_notification(args):
     notification = commands.get_notification_by_id(
         notifications_controller(), args.id)
-    if args.title is not None:
-        notification.title = args.title
-    if args.relative_start_time is not None:
-        parsed_time = dateparser.parse(args.relative_start_time)
-        if parsed_time is not None:
-            notification.relative_start_time = (
-                datetime.datetime.now() -
-                parsed_time).total_seconds()
-    commands.update_notification(tasks_controller(), notifications_controller(), notification)
+    if notification is not None:
+        if args.title is not None:
+            notification.title = args.title
+        if args.relative_start_time is not None:
+            parsed_time = dateparser.parse(args.relative_start_time)
+            if parsed_time is not None:
+                notification.relative_start_time = (
+                    datetime.datetime.now() -
+                    parsed_time).total_seconds()
+        commands.update_notification(
+            tasks_controller(), notifications_controller(), notification)
+    else:
+        print("Error. There is not notification with such ID")
 
 
 def delete_notification(args):
@@ -960,25 +979,30 @@ def show_pending_notifications():
 
 def edit_task_plan(args):
     plan = commands.get_task_plan_by_id(task_plans_controller(), args.id)
-    if args.repeat is not None:
-        parsed_time = dateparser.parse(args.repeat)
-        if parsed_time is None:
-            print("Repeat time is incorrect")
-        else:
-            interval = (datetime.datetime.now() - parsed_time).total_seconds()
-            last_created_at = datetime.datetime.now() - datetime.timedelta(seconds=interval)
-            if interval < 300:  # 5 minutes
-                print("task's interval is incorrect")
+    if plan is not None:
+        if args.repeat is not None:
+            parsed_time = dateparser.parse(args.repeat)
+            if parsed_time is None:
+                print("Repeat time is incorrect")
             else:
-                plan.interval = interval
-    if args.start_repeat_at is not None:
-        start_date = dateparser.parse(args.start_repeat_at)
-        if start_date is not None:
-            time_delta = interval - \
-                (start_date - datetime.datetime.now()).total_seconds()
-            last_created_at = datetime.datetime.now() - datetime.timedelta(seconds=time_delta)
-            plan.last_created_at = last_created_at
-    commands.update_task_plan(task_plans_controller(), plan)
+                interval = (
+                    datetime.datetime.now() -
+                    parsed_time).total_seconds()
+                last_created_at = datetime.datetime.now() - datetime.timedelta(seconds=interval)
+                if interval < 300:  # 5 minutes
+                    print("task's interval is incorrect")
+                else:
+                    plan.interval = interval
+        if args.start_repeat_at is not None:
+            start_date = dateparser.parse(args.start_repeat_at)
+            if start_date is not None:
+                time_delta = interval - \
+                    (start_date - datetime.datetime.now()).total_seconds()
+                last_created_at = datetime.datetime.now() - datetime.timedelta(seconds=time_delta)
+                plan.last_created_at = last_created_at
+        commands.update_task_plan(task_plans_controller(), plan)
+    else:
+        print("Error. There is no task plan with such ID")
 
 
 def show_all_task_plans():

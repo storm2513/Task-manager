@@ -3,7 +3,7 @@ from lib.storage.task_storage import TaskStorage
 from lib.models.task_plan import TaskPlan as TaskPlanInstance
 from lib.models.task import Status
 import datetime
-from peewee import *
+from peewee import DoesNotExist
 
 
 class TaskPlanStorage(Adapter):
@@ -50,11 +50,12 @@ class TaskPlanStorage(Adapter):
 
     def process_plans(self):
         """
-        Creates tasks according to task plans. 
+        Creates tasks according to task plans.
         """
 
         for plan in TaskPlan.select():
-            if plan.last_created_at + datetime.timedelta(seconds=plan.interval) < datetime.datetime.now():
+            if plan.last_created_at + \
+                    datetime.timedelta(seconds=plan.interval) < datetime.datetime.now():
                 try:
                     task_storage = TaskStorage()
                     task = task_storage.get_by_id(
@@ -63,14 +64,15 @@ class TaskPlanStorage(Adapter):
                     task.status = Status.TODO.value  # change status from TEMPLATE to TODO
                     task_storage.create(task)
                     """
-                    last_created_at shouldn't offset the interval. 
-                    E.g. user wants to plan task for every monday on 10:00. 
-                    If this method called on tuesday in last_created_at should be monday 
+                    last_created_at shouldn't offset the interval.
+                    E.g. user wants to plan task for every monday on 10:00.
+                    If this method called on tuesday in last_created_at should be monday
                     in order to save the rule that it creates task every monday on 10:00.
                     """
                     last_created_at = plan.last_created_at + \
                         datetime.timedelta(seconds=plan.interval)
-                    while last_created_at + datetime.timedelta(seconds=plan.interval) < datetime.datetime.now():
+                    while last_created_at + \
+                            datetime.timedelta(seconds=plan.interval) < datetime.datetime.now():
                         last_created_at += datetime.timedelta(
                             seconds=plan.interval)
                     plan.last_created_at = last_created_at

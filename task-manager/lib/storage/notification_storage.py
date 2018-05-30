@@ -1,7 +1,7 @@
 from lib.storage.storage_models import Notification, Task, Adapter
 from lib.models.notification import Notification as NotificationInstance, Status as NotificationStatus
 import datetime
-from peewee import *
+from peewee import DoesNotExist
 
 
 class NotificationStorage(Adapter):

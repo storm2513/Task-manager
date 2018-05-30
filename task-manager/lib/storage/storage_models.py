@@ -1,6 +1,14 @@
-from peewee import *
+from peewee import (
+    Proxy,
+    Model,
+    PrimaryKeyField,
+    IntegerField,
+    CharField,
+    ForeignKeyField,
+    DateTimeField,
+    BooleanField,
+    SqliteDatabase)
 import datetime
-
 from lib.models.task import Status, Priority
 from lib.models.notification import Status as NotificationStatus
 
@@ -16,27 +24,6 @@ class BaseModel(Model):
         database = database_proxy
 
 
-class Level(BaseModel):
-    """
-    User's level model
-    """
-
-    id = PrimaryKeyField(null=False)
-    experience = IntegerField(default=1)
-
-
-class User(BaseModel):
-    """
-    User model
-    """
-
-    id = PrimaryKeyField(null=False)
-    email = CharField()
-    name = CharField()
-    password = CharField()
-    level = ForeignKeyField(Level, backref='user')
-
-
 class Category(BaseModel):
     """
     Category model
@@ -44,7 +31,7 @@ class Category(BaseModel):
 
     id = PrimaryKeyField(null=False)
     name = CharField()
-    user = ForeignKeyField(User, backref='categories')
+    user_id = IntegerField(null=True)
 
 
 class Task(BaseModel):
@@ -53,12 +40,12 @@ class Task(BaseModel):
     """
 
     id = PrimaryKeyField(null=False)
-    user = ForeignKeyField(User, backref='tasks', null=True)
+    user_id = IntegerField(null=True)
     title = CharField()
     note = CharField(default="")
     start_time = DateTimeField(null=True)
     end_time = DateTimeField(null=True)
-    assigned_user = ForeignKeyField(User, null=True)
+    assigned_user_id = IntegerField(null=True)
     parent_task_id = IntegerField(null=True)
     is_event = BooleanField(default=False)
     category = ForeignKeyField(Category, backref='tasks', null=True)
@@ -78,7 +65,7 @@ class TaskPlan(BaseModel):
     """
 
     id = PrimaryKeyField(null=False)
-    user = ForeignKeyField(User, backref='task_plans', null=True)
+    user_id = IntegerField(null=True)
     task = ForeignKeyField(Task, null=True)
     interval = IntegerField()
     last_created_at = DateTimeField()
@@ -91,7 +78,7 @@ class Notification(BaseModel):
 
     id = PrimaryKeyField(null=False)
     task = ForeignKeyField(Task, backref='notifications', null=True)
-    user = ForeignKeyField(User, backref='notifications', null=True)
+    user_id = IntegerField(null=True)
     title = CharField()
     relative_start_time = IntegerField()
     status = IntegerField(default=NotificationStatus.CREATED.value)
@@ -102,7 +89,7 @@ class UsersReadTasks(BaseModel):
     UsersReadTasks model. If there is an entry with user and task it means that user can read this task
     """
 
-    user = ForeignKeyField(User)
+    user_id = IntegerField(null=True)
     task = ForeignKeyField(Task)
 
 
@@ -111,7 +98,7 @@ class UsersWriteTasks(BaseModel):
     UsersWriteTasks model. If there is an entry with user and task it means that user can read and change this task
     """
 
-    user = ForeignKeyField(User)
+    user_id = IntegerField(null=True)
     task = ForeignKeyField(Task)
 
 
@@ -123,5 +110,5 @@ class Adapter:
 
     def create_tables(self, database):
         database.connect()
-        database.create_tables([Task, UsersReadTasks,
-                                UsersWriteTasks, Category, Notification, TaskPlan])
+        database.create_tables(
+            [Task, UsersReadTasks, UsersWriteTasks, Category, Notification, TaskPlan])

@@ -36,7 +36,8 @@ class Adapter:
 class UserStorage(Adapter):
     def create(self, user):
         if self.get_by_username(user.username) is None:
-            return self.to_user_instance(User.create(id=user.id, username=user.username))
+            return self.to_user_instance(User.create(
+                id=user.id, username=user.username))
 
     def delete_by_id(self, user_id):
         User.delete().where(User.id == user_id).execute()
@@ -54,7 +55,8 @@ class UserStorage(Adapter):
             return None
 
     def all_users(self):
-        return list(map(self.to_user_instance, list(User.select(User.id, User.username))))
+        return list(map(self.to_user_instance, list(
+            User.select(User.id, User.username))))
 
     def to_user_instance(self, user):
         return UserInstance(id=user.id, username=user.username)

@@ -1,6 +1,6 @@
 from lib.storage.storage_models import Category, Adapter
 from lib.models.category import Category as CategoryInstance
-from peewee import *
+from peewee import DoesNotExist
 
 
 class CategoryStorage(Adapter):
@@ -37,4 +37,5 @@ class CategoryStorage(Adapter):
             return None
 
     def all_user_categories(self, user_id):
-        return list(map(self.to_category_instance, list(Category.select().where(Category.user_id == user_id))))
+        return list(map(self.to_category_instance, list(
+            Category.select().where(Category.user_id == user_id))))

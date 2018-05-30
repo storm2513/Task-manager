@@ -1,6 +1,6 @@
 import configparser
 from cli.user import UserInstance as User
-from lib.config import commands
+from lib import commands
 
 
 CONFIG_NAME = 'config.ini'
@@ -17,7 +17,7 @@ def get_username_from_config():
         config.read(CONFIG_NAME)
         username = config['user']['username']
         return username
-    except:
+    except BaseException:
         pass
 
 
@@ -50,7 +50,7 @@ def logging_enabled():
         config.read(CONFIG_NAME)
         level = config['logging']['enabled']
         return level.lower() in ("yes", "true", "t", "1")
-    except:
+    except BaseException:
         # logging is enabled by default
         write_logging_status_to_config(True)
         return True

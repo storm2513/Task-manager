@@ -1,18 +1,6 @@
 import re
-from lib.exceptions.exceptions import *
+from lib.exceptions.exceptions import InvalidTaskTimeError, InvalidTaskPlanIntervalError
 import dateparser
-
-
-def validate_email(email):
-    """
-    Validates email and raises exception if it doesn't match to the regex
-    pattern. More about this regex you can read at http://emailregex.com/
-    """
-
-    EMAIL_PATTERN = (r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
-
-    if re.match(EMAIL_PATTERN, email) is None:
-        raise InvalidEmailError(email)
 
 
 def validate_start_time_less_than_end_time(start_time, end_time):
@@ -32,14 +20,6 @@ def validate_task_plan_interval(interval):
 
     if interval < 300:  # 5 minutes
         raise InvalidTaskPlanIntervalError(interval)
-
-
-def validate_user(user):
-    """
-    Validates user's fields
-    """
-
-    validate_email(user.email)
 
 
 def validate_task(task):

@@ -1,5 +1,5 @@
 from cli.user import UserStorage
-from cli.config.config_parser import get_username_from_config, remove_user_from_config, write_user_to_config
+from cli.config_parser import get_username_from_config, remove_user_from_config, write_user_to_config
 
 
 def login_user(username):
