@@ -1055,7 +1055,7 @@ def task_plans_controller(database_name='task_manager'):
 def process_args():
     if current_user() is not None:
         notifications_controller().process_notifications()
-        task_plans_controller().process_plans()
+        task_plans_controller().process_plans(tasks_controller())
         show_pending_notifications()
 
     parser = init_parser()

@@ -1,123 +1,51 @@
+import datetime
 import unittest
-from peewee import *
-from storage.storage_models import User, Level, Task, UsersReadTasks, UsersWriteTasks, Category
-from storage.category_storage import CategoryStorage
-from storage.level_storage import LevelStorage
-from storage.task_storage import TaskStorage
-from storage.user_storage import UserStorage
-from models.task import Task as TaskInstance
-from models.level import Level as LevelInstance
-from models.user import User as UserInstance
-from models.category import Category as CategoryInstance
-from controllers.categories_controller import CategoriesController
-from controllers.levels_controller import LevelsController
-from controllers.tasks_controller import TasksController
-from controllers.users_controller import UsersController
-from tests.factories import *
-from enums.status import Status
+from lib.storage.storage_models import Task, TaskPlan, UsersReadTasks, UsersWriteTasks, Category, Adapter, Notification
+from lib.storage.category_storage import CategoryStorage
+from lib.storage.notification_storage import NotificationStorage
+from lib.storage.task_storage import TaskStorage
+from lib.storage.task_plan_storage import TaskPlanStorage
+from lib.models.notification import Status as NotificationStatus
+from lib.models.task import Status
+from lib.controllers.categories_controller import CategoriesController
+from lib.controllers.notifications_controller import NotificationsController
+from lib.controllers.tasks_controller import TasksController
+from lib.controllers.task_plans_controller import TaskPlansController
+from tests.factories import CategoryFactory, TaskFactory, TaskPlanFactory, NotificationFactory
 
 # use an in-memory SQLite for tests.
-test_db = SqliteDatabase(':memory:')
+database = ':memory:'
 
-MODELS = [User, Level, Task, UsersReadTasks, UsersWriteTasks, Category]
-
-categories_controller = CategoriesController(CategoryStorage())
-levels_controller = LevelsController(LevelStorage())
-users_controller = UsersController(UserStorage())
-tasks_controller = TasksController(TaskStorage())
+user_id = 10
+categories_controller = CategoriesController(
+    user_id, CategoryStorage(database))
+tasks_controller = TasksController(user_id, TaskStorage(database))
+task_plans_controller = TaskPlansController(user_id, TaskPlanStorage(database))
+notifications_controller = NotificationsController(
+    user_id, NotificationStorage(database))
 category = CategoryFactory()
-user = UserFactory()
 task = TaskFactory()
+task_plan = TaskPlanFactory()
+notification = NotificationFactory()
 
 
 class ControllersTest(unittest.TestCase):
     def setUp(self):
-        # Bind model classes to test db
-        for model in MODELS:
-            model.bind(test_db, bind_refs=False, bind_backrefs=False)
-
-        test_db.connect()
-        test_db.create_tables(MODELS)
+        Adapter(database).create_tables()
 
     def tearDown(self):
-        test_db.drop_tables(MODELS)
-        # Close connection to db.
-        test_db.close()
-
-    # LevelsController tests
-
-    def test_creates_level(self):
-        before_levels_count = Level.select().count()
-        levels_controller.create()
-        after_levels_count = Level.select().count()
-        self.assertEqual(before_levels_count + 1, after_levels_count)
-
-    def test_increases_experience(self):
-        level = levels_controller.create()
-        old_experience = level.experience
-        levels_controller.increase_experience(level)
-        new_level = Level.get(Level.id == level.id)
-        self.assertGreater(new_level.experience, old_experience)
-
-    def test_deletes_level(self):
-        level = levels_controller.create()
-        levels_controller.delete(level.id)
-        self.assertEqual(Level.select().where(Level.id == level.id).count(), 0)
-
-    def test_gets_level_by_user_id(self):
-        user_with_id = users_controller.create(user)
-        level = LevelStorage().get_by_id(user_with_id.level_id)
-        level_from_test_method = levels_controller.get_by_user_id(
-            user_with_id.id)
-        self.assertEqual(level.id, level_from_test_method.id)
-        self.assertEqual(level.experience, level_from_test_method.experience)
-
-    # UsersController tests
-
-    def test_creates_user(self):
-        before_users_count = User.select().count()
-        users_controller.create(user)
-        after_users_count = User.select().count()
-        self.assertEqual(before_users_count + 1, after_users_count)
-
-    def test_gets_user_by_id(self):
-        user_with_id = users_controller.create(user)
-        user_from_test_method = users_controller.get_by_id(user_with_id.id)
-        self.assertEqual(user_with_id.id, user_from_test_method.id)
-        self.assertEqual(user_with_id.name, user_from_test_method.name)
-        self.assertEqual(user_with_id.email, user_from_test_method.email)
-        self.assertEqual(user_with_id.password, user_from_test_method.password)
-
-    def test_gets_user_by_email(self):
-        user.email = "example@mail.com"
-        users_controller.create(user)
-        user_from_test_method = users_controller.get_by_email(user.email)
-        self.assertEqual(user.email, user_from_test_method.email)
-
-    def test_updates_user(self):
-        user_with_id = users_controller.create(user)
-        user_with_id.name = "Maksim"
-        users_controller.update(user_with_id)
-        user_from_test_method = users_controller.get_by_id(user_with_id.id)
-        self.assertEqual(user_with_id.name, user_from_test_method.name)
-
-    def test_deletes_user(self):
-        user_with_id = users_controller.create(user)
-        users_controller.delete(user_with_id.id)
-        self.assertEqual(users_controller.get_by_id(user_with_id.id), None)
+        Adapter(database).drop_tables()
 
     # CategoriesController tests
 
     def test_creates_category(self):
         before_categories_count = Category.select().count()
-        user_id = users_controller.create(user).id
-        categories_controller.create(category, user_id)
+        categories_controller.create(category)
         after_categories_count = Category.select().count()
         self.assertEqual(before_categories_count + 1, after_categories_count)
 
     def gets_category_by_id(self):
-        user_id = users_controller.create(user).id
-        category_with_id = categories_controller.create(category, user_id)
+        category_with_id = categories_controller.create(category)
         category_from_test_method = categories_controller.get_by_id(
             category_id)
         self.assertEqual(category_with_id.id, category_from_test_method.id)
@@ -127,8 +55,7 @@ class ControllersTest(unittest.TestCase):
             category_from_test_method.user_id)
 
     def test_updates_category(self):
-        user_id = users_controller.create(user).id
-        category_with_id = categories_controller.create(category, user_id)
+        category_with_id = categories_controller.create(category)
         category_with_id.name = "Movies to watch"
         categories_controller.update(category_with_id)
         category_from_test_method = categories_controller.get_by_id(
@@ -136,8 +63,7 @@ class ControllersTest(unittest.TestCase):
         self.assertEqual(category_with_id.name, category_from_test_method.name)
 
     def test_deletes_category(self):
-        user_id = users_controller.create(user).id
-        category_with_id = categories_controller.create(category, user_id)
+        category_with_id = categories_controller.create(category)
         categories_controller.delete(category_with_id.id)
         self.assertEqual(
             categories_controller.get_by_id(
@@ -180,11 +106,11 @@ class ControllersTest(unittest.TestCase):
         task_id = tasks_controller.create(task).id
         tasks_controller.set_as_in_progress(task_id)
         task_from_test_method = tasks_controller.get_by_id(task_id)
-        self.assertEqual(task_from_test_method.status, Status.IN_PROGRESS.value)
+        self.assertEqual(
+            task_from_test_method.status,
+            Status.IN_PROGRESS.value)
 
     def test_sets_task_as_done(self):
-        user_with_id = users_controller.create(user)
-        task.user_id = user_with_id.id
         task.status = Status.TODO.value
         task_id = tasks_controller.create(task).id
         tasks_controller.set_as_done(task_id)
@@ -199,11 +125,9 @@ class ControllersTest(unittest.TestCase):
         self.assertEqual(task_from_test_method.status, Status.ARCHIVED.value)
 
     def test_returns_user_tasks(self):
-        user_id = users_controller.create(user).id
-        task.user_id = user_id
         first_task = tasks_controller.create(task)
         second_task = tasks_controller.create(task)
-        tasks = tasks_controller.user_tasks(user_id)
+        tasks = tasks_controller.user_tasks()
         self.assertEqual(len(tasks), 2)
 
     def test_creates_inner_task(self):
@@ -220,7 +144,7 @@ class ControllersTest(unittest.TestCase):
         self.assertEqual(len(inner_tasks), 2)
 
     def test_assignes_task_on_user(self):
-        user_id = users_controller.create(user).id
+        user_id = 5
         task_id = tasks_controller.create(task).id
         tasks_controller.assign_task_on_user(task_id, user_id)
         self.assertEqual(
@@ -228,7 +152,7 @@ class ControllersTest(unittest.TestCase):
                 Task.assigned_user_id == user_id).count(), 1)
 
     def test_adds_user_for_read(self):
-        user_id = users_controller.create(user).id
+        user_id = 5
         task_id = tasks_controller.create(task).id
         tasks_controller.add_user_for_read(user_id=user_id, task_id=task_id)
         self.assertEqual(
@@ -237,7 +161,7 @@ class ControllersTest(unittest.TestCase):
             1)
 
     def test_adds_user_for_write(self):
-        user_id = users_controller.create(user).id
+        user_id = 5
         task_id = tasks_controller.create(task).id
         tasks_controller.add_user_for_write(user_id=user_id, task_id=task_id)
         self.assertEqual(
@@ -246,7 +170,7 @@ class ControllersTest(unittest.TestCase):
             1)
 
     def test_removes_user_for_read(self):
-        user_id = users_controller.create(user).id
+        user_id = 5
         task_id = tasks_controller.create(task).id
         tasks_controller.add_user_for_read(user_id=user_id, task_id=task_id)
         tasks_controller.remove_user_for_read(user_id=user_id, task_id=task_id)
@@ -256,7 +180,7 @@ class ControllersTest(unittest.TestCase):
             0)
 
     def test_removes_user_for_write(self):
-        user_id = users_controller.create(user).id
+        user_id = 5
         task_id = tasks_controller.create(task).id
         tasks_controller.add_user_for_write(user_id=user_id, task_id=task_id)
         tasks_controller.remove_user_for_write(
@@ -265,3 +189,164 @@ class ControllersTest(unittest.TestCase):
             UsersWriteTasks.select().where(
                 UsersWriteTasks.task_id == task_id and UsersWriteTasks.user_id == user_id).count(),
             0)
+
+    # TaskPlansController tests
+
+    def test_creates_task_plan(self):
+        before_plans_count = TaskPlan.select().count()
+        task_plans_controller.create(task_plan)
+        after_plans_count = TaskPlan.select().count()
+        self.assertEqual(before_plans_count + 1, after_plans_count)
+
+    def test_deletes_task_plan_by_id(self):
+        task_plan_id = task_plans_controller.create(task_plan).id
+        task_plans_controller.delete(task_plan_id)
+        self.assertEqual(TaskPlan.select().where(
+            TaskPlan.id == task_plan_id).count(), 0)
+
+    def test_updates_task_plan(self):
+        new_interval = 500
+        new_datetime = datetime.datetime.now()
+        task_plan_with_id = task_plans_controller.create(task_plan)
+        task_plan_with_id.interval = new_interval
+        task_plan_with_id.last_created_at = new_datetime
+        task_plans_controller.update(task_plan_with_id)
+        task_plan_from_db = TaskPlan.get(TaskPlan.id == task_plan_with_id.id)
+        self.assertEqual(task_plan_from_db.interval, new_interval)
+        self.assertEqual(task_plan_from_db.last_created_at, new_datetime)
+
+    def test_returns_all_user_plans(self):
+        user_id = 10
+        task_plan.user_id = 10
+        plans_count = 3
+        for i in range(plans_count):
+            task_plans_controller.create(task_plan)
+        plans = task_plans_controller.all()
+        self.assertEqual(len(plans), plans_count)
+
+    def test_processes_task_plans(self):
+        user_id = 10
+        repeated_task = TaskFactory()
+        repeated_task.status = Status.TEMPLATE.value
+        repeated_task.user_id = user_id
+        task_id = tasks_controller.create(repeated_task).id
+        before_tasks_count = len(tasks_controller.user_tasks())
+        interval = 300
+        big_interval = interval * 10
+        last_created_at = datetime.datetime.now() - datetime.timedelta(seconds=interval + 5)
+        """
+        repeated_task_plan after processing should create new task
+        repeated_task_plan_big_interval should not create new task because of bit interval
+        """
+        repeated_task_plan = TaskPlan(
+            user_id=user_id,
+            task_id=task_id,
+            last_created_at=last_created_at,
+            interval=interval)
+        repeated_task_plan_big_interval = TaskPlan(
+            user_id=user_id,
+            task_id=task_id,
+            last_created_at=last_created_at,
+            interval=big_interval)
+        task_plans_controller.create(repeated_task_plan)
+        task_plans_controller.create(repeated_task_plan_big_interval)
+        task_plans_controller.process_plans(tasks_controller)
+        self.assertEqual(len(tasks_controller.user_tasks()),
+                         before_tasks_count + 1)
+
+    # NotificationsController tests
+
+    def test_creates_notification(self):
+        before_notifications_count = Notification.select().count()
+        notifications_controller.create(notification)
+        after_notifications_count = Notification.select().count()
+        self.assertEqual(
+            before_notifications_count + 1,
+            after_notifications_count)
+
+    def test_deletes_notification_by_id(self):
+        notification_id = notifications_controller.create(notification).id
+        notifications_controller.delete(notification_id)
+        self.assertEqual(Notification.select().where(
+            Notification.id == notification_id).count(), 0)
+
+    def test_updates_notification(self):
+        new_title = "Updated title"
+        notification_with_id = notifications_controller.create(notification)
+        notification_with_id.title = new_title
+        notifications_controller.update(notification_with_id)
+        notification_from_db = Notification.get(
+            Notification.id == notification_with_id.id)
+        self.assertEqual(notification_from_db.title, new_title)
+
+    def test_returns_all_user_notifications(self):
+        user_id = 10
+        notification.user_id = 10
+        notifications_count = 3
+        for i in range(notifications_count):
+            notifications_controller.create(notification)
+        notifications = notifications_controller.all()
+        self.assertEqual(len(notifications), notifications_count)
+
+    def test_returns_pending_notifications(self):
+        user_id = 10
+        notification.user_id = 10
+        notification.status = NotificationStatus.PENDING.value
+        notifications_count = 3
+        for i in range(notifications_count):
+            notifications_controller.create(notification)
+        # create notification with other status
+        notification.status = NotificationStatus.CREATED.value
+        notifications_controller.create(notification)
+        notifications = notifications_controller.pending()
+        self.assertEqual(len(notifications), notifications_count)
+
+    def test_returns_created_notifications(self):
+        user_id = 10
+        notification.user_id = 10
+        notification.status = NotificationStatus.CREATED.value
+        notifications_count = 3
+        for i in range(notifications_count):
+            notifications_controller.create(notification)
+        # create notification with other status
+        notification.status = NotificationStatus.PENDING.value
+        notifications_controller.create(notification)
+        notifications = notifications_controller.created()
+        self.assertEqual(len(notifications), notifications_count)
+
+    def test_returns_pending_notifications(self):
+        user_id = 10
+        notification.user_id = 10
+        notification.status = NotificationStatus.SHOWN.value
+        notifications_count = 3
+        for i in range(notifications_count):
+            notifications_controller.create(notification)
+        # create notification with other status
+        notification.status = NotificationStatus.CREATED.value
+        notifications_controller.create(notification)
+        notifications = notifications_controller.shown()
+        self.assertEqual(len(notifications), notifications_count)
+
+    def test_process_notification(self):
+        task.start_time = datetime.datetime.now()
+        task_id = tasks_controller.create(task).id
+        relative_start_time = 300
+        notification.status = NotificationStatus.CREATED.value
+        notification.relative_start_time = 300
+        notification.task_id = task_id
+        notification_id = notifications_controller.create(notification).id
+        notifications_controller.process_notifications()
+        processed_notification = notifications_controller.get_by_id(
+            notification_id)
+        self.assertEqual(
+            processed_notification.status,
+            NotificationStatus.PENDING.value)
+
+    def test_sets_notification_status_as_shown(self):
+        notification_with_id = notifications_controller.create(notification)
+        notifications_controller.set_as_shown(notification_with_id.id)
+        notification_from_db = Notification.get(
+            Notification.id == notification_with_id.id)
+        self.assertEqual(
+            notification_from_db.status,
+            NotificationStatus.SHOWN.value)

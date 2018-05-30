@@ -1,12 +1,10 @@
 import unittest
 import datetime
 
-from models.task import Task
-from models.level import Level
-from models.user import User
-from models.category import Category
-from models.task_plan import TaskPlan
-from models.notification import Notification
+from lib.models.task import Task
+from lib.models.category import Category
+from lib.models.task_plan import TaskPlan
+from lib.models.notification import Notification
 
 
 class ModelsTest(unittest.TestCase):
@@ -27,42 +25,6 @@ class ModelsTest(unittest.TestCase):
         self.assertIsInstance(task, Task)
         self.assertEqual(task.title, self.task_title)
         self.assertEqual(task.note, self.task_note)
-
-    def create_level(self, id=1, experience=1):
-        return Level(id=id, experience=experience)
-
-    def test_level_creation(self):
-        level = self.create_level()
-        self.assertIsInstance(level, Level)
-
-    def test_current_level_method(self):
-        level_with_1_xp = self.create_level(id=1, experience=1)
-        self.assertEqual(level_with_1_xp.current_level(), 1)
-        level_with_10_xp = self.create_level(id=1, experience=10)
-        self.assertEqual(level_with_10_xp.current_level(), 4)
-
-    def test_next_level_experience_method(self):
-        level_with_1_xp = self.create_level(id=1, experience=1)
-        self.assertEqual(level_with_1_xp.next_level_experience(), 3)
-        level_with_10_xp = self.create_level(id=1, experience=10)
-        self.assertEqual(level_with_10_xp.next_level_experience(), 15)
-
-    def create_user(
-            self,
-            email="email@example.com",
-            name="Somename",
-            password="somepassword"):
-        self.user_email = email
-        self.user_name = name
-        self.user_password = password
-        return User(email=email, name=name, password=password)
-
-    def test_user_creation(self):
-        user = self.create_user()
-        self.assertIsInstance(user, User)
-        self.assertEqual(user.email, self.user_email)
-        self.assertEqual(user.name, self.user_name)
-        self.assertEqual(user.password, self.user_password)
 
     def create_category(self, name="Some category"):
         self.category_name = name

@@ -26,9 +26,9 @@ class TaskPlansController(BaseController):
     def all(self):
         return self.storage.all_user_plans(self.user_id)
 
-    def process_plans(self):
+    def process_plans(self, tasks_controller):
         """
         Creates tasks according to task plans.
         """
 
-        self.storage.process_plans()
+        self.storage.process_plans(tasks_controller.storage)

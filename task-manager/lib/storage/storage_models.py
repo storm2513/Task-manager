@@ -104,11 +104,27 @@ class UsersWriteTasks(BaseModel):
 
 class Adapter:
     def __init__(self, database_name='task_manager'):
-        database = SqliteDatabase(database_name)
-        database_proxy.initialize(database)
-        self.create_tables(database)
+        self.database_name = database_name
+        self.database = SqliteDatabase(database_name)
+        self.connected = False
+        database_proxy.initialize(self.database)
+        self.create_tables()
 
-    def create_tables(self, database):
-        database.connect()
-        database.create_tables(
+    def create_tables(self):
+        if not self.connected:
+            self.database.connect()
+            self.connected = True
+        Category.create_table(True)
+        Notification.create_table(True)
+        Task.create_table(True)
+        TaskPlan.create_table(True)
+        UsersReadTasks.create_table(True)
+        UsersWriteTasks.create_table(True)
+
+
+    def drop_tables(self):
+        self.database.drop_tables(
             [Task, UsersReadTasks, UsersWriteTasks, Category, Notification, TaskPlan])
+        self.database.close()
+        self.connected = False
+

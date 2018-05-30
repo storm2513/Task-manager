@@ -1,119 +1,33 @@
 import unittest
-from peewee import *
-from storage.storage_models import User, Level, Task, UsersReadTasks, UsersWriteTasks, Category, TaskPlan
-from storage.category_storage import CategoryStorage
-from storage.level_storage import LevelStorage
-from storage.task_storage import TaskStorage
-from storage.user_storage import UserStorage
-from storage.task_plan_storage import TaskPlanStorage
-from models.task import Task as TaskInstance
-from models.level import Level as LevelInstance
-from models.user import User as UserInstance
-from models.category import Category as CategoryInstance
-from models.task_plan import TaskPlan as TaskPlanInstance
-from tests.factories import *
+import datetime
+from lib.storage.storage_models import Task, UsersReadTasks, UsersWriteTasks, Category, TaskPlan, Notification, Adapter
+from lib.storage.category_storage import CategoryStorage
+from lib.storage.notification_storage import NotificationStorage
+from lib.storage.task_storage import TaskStorage
+from lib.storage.task_plan_storage import TaskPlanStorage
+from lib.models.task import Status
+from lib.models.notification import Status as NotificationStatus
+from tests.factories import CategoryFactory, TaskFactory, TaskPlanFactory, NotificationFactory
 
 # use an in-memory SQLite for tests.
-test_db = SqliteDatabase(':memory:')
+database = ':memory:'
 
-MODELS = [User, Level, Task, UsersReadTasks, UsersWriteTasks, Category]
-
-level_storage = LevelStorage()
-user_storage = UserStorage()
-category_storage = CategoryStorage()
-task_storage = TaskStorage()
-task_plan_storage = TaskPlanStorage()
-user = UserFactory()
+category_storage = CategoryStorage(database)
+task_storage = TaskStorage(database)
+task_plan_storage = TaskPlanStorage(database)
+notification_storage = NotificationStorage(database)
 category = CategoryFactory(user_id=10)
 task = TaskFactory()
 task_plan = TaskPlanFactory()
+notification = NotificationFactory()
 
 
 class StorageTest(unittest.TestCase):
     def setUp(self):
-        # Bind model classes to test db
-        for model in MODELS:
-            model.bind(test_db, bind_refs=False, bind_backrefs=False)
-
-        test_db.connect()
-        test_db.create_tables(MODELS)
+        Adapter(database).create_tables()
 
     def tearDown(self):
-        test_db.drop_tables(MODELS)
-        # Close connection to db.
-        test_db.close()
-
-    # LevelStorage tests
-
-    def test_creates_level(self):
-        before_levels_count = Level.select().count()
-        level_storage.create()
-        after_levels_count = Level.select().count()
-        self.assertEqual(before_levels_count + 1, after_levels_count)
-
-    def test_creates_level_and_gets_it_by_id(self):
-        level = level_storage.create()
-        level_from_db = level_storage.get_by_id(level.id)
-        self.assertEqual(level.id, level_from_db.id)
-        self.assertEqual(level.experience, level_from_db.experience)
-
-    def test_creates_level_and_gets_it_by_user_id(self):
-        level = level_storage.create()
-        user.level_id = level.id
-        user_id = user_storage.create(user).id
-        level_from_db = level_storage.get_by_user_id(user_id)
-        self.assertEqual(level.id, level_from_db.id)
-        self.assertEqual(level.experience, level_from_db.experience)
-
-    def test_deletes_level_by_id(self):
-        level_id = level_storage.create().id
-        level_storage.delete_by_id(level_id)
-        self.assertEqual(Level.select().where(Level.id == level_id).count(), 0)
-
-    def test_updates_level(self):
-        level = level_storage.create()
-        level.experience = 10
-        level_storage.update(level)
-        experience = Level.get(Level.id == level.id).experience
-        self.assertEqual(experience, 10)
-
-    # UserStorage tests
-
-    def test_creates_user(self):
-        before_users_count = User.select().count()
-        user_storage.create(user)
-        after_users_count = User.select().count()
-        self.assertEqual(before_users_count + 1, after_users_count)
-
-    def test_creates_user_and_gets_id_by_id(self):
-        user_with_id = user_storage.create(user)
-        user_from_db = user_storage.get_by_id(user_with_id.id)
-        self.assertEqual(user_with_id.id, user_from_db.id)
-        self.assertEqual(user_with_id.email, user_from_db.email)
-        self.assertEqual(user_with_id.name, user_from_db.name)
-        self.assertEqual(user_with_id.password, user_from_db.password)
-
-    def test_creates_user_and_gets_id_by_email(self):
-        user_with_id = user_storage.create(user)
-        user_from_db = user_storage.get_by_email(user_with_id.email)
-        self.assertEqual(user_with_id.id, user_from_db.id)
-        self.assertEqual(user_with_id.email, user_from_db.email)
-        self.assertEqual(user_with_id.name, user_from_db.name)
-        self.assertEqual(user_with_id.password, user_from_db.password)
-
-    def test_deletes_user_by_id(self):
-        user_id = user_storage.create(user).id
-        user_storage.delete_by_id(user_id)
-        self.assertEqual(User.select().where(User.id == user_id).count(), 0)
-
-    def test_updates_user(self):
-        user_with_id = user_storage.create(user)
-        user_with_id.name = "Maksim"
-        user_with_id.password = "12345678"
-        user_storage.update(user_with_id)
-        user_from_db = User.get(User.id == user_with_id.id)
-        self.assertEqual(user_from_db.name, "Maksim")
-        self.assertEqual(user_from_db.password, "12345678")
+        Adapter(database).drop_tables()
 
     # CategoryStorage tests
 
@@ -175,7 +89,7 @@ class StorageTest(unittest.TestCase):
     def test_returns_user_tasks(self):
         first_task = TaskFactory()
         second_task = TaskFactory()
-        user_id = user_storage.create(user).id
+        user_id = 10
         first_task.user_id = user_id
         second_task.user_id = user_id
         task_storage.create(first_task)
@@ -192,7 +106,7 @@ class StorageTest(unittest.TestCase):
         self.assertEqual(len(inner_tasks), 1)
 
     def test_adds_user_for_read(self):
-        user_id = user_storage.create(user).id
+        user_id = 10
         task_id = task_storage.create(task).id
         task_storage.add_user_for_read(user_id=user_id, task_id=task_id)
         self.assertEqual(
@@ -201,7 +115,7 @@ class StorageTest(unittest.TestCase):
             1)
 
     def test_adds_user_for_write(self):
-        user_id = user_storage.create(user).id
+        user_id = 10
         task_id = task_storage.create(task).id
         task_storage.add_user_for_write(user_id=user_id, task_id=task_id)
         self.assertEqual(
@@ -210,7 +124,7 @@ class StorageTest(unittest.TestCase):
             1)
 
     def test_removes_user_for_read(self):
-        user_id = user_storage.create(user).id
+        user_id = 10
         task_id = task_storage.create(task).id
         task_storage.add_user_for_read(user_id=user_id, task_id=task_id)
         task_storage.remove_user_for_read(user_id=user_id, task_id=task_id)
@@ -220,7 +134,7 @@ class StorageTest(unittest.TestCase):
             0)
 
     def test_removes_user_for_write(self):
-        user_id = user_storage.create(user).id
+        user_id = 10
         task_id = task_storage.create(task).id
         task_storage.add_user_for_write(user_id=user_id, task_id=task_id)
         task_storage.remove_user_for_write(user_id=user_id, task_id=task_id)
@@ -240,4 +154,143 @@ class StorageTest(unittest.TestCase):
     def test_deletes_task_plan_by_id(self):
         task_plan_id = task_plan_storage.create(task_plan).id
         task_plan_storage.delete_by_id(task_plan_id)
-        self.assertEqual(TaskPlan.select().where(TaskPlan.id == task_plan_id).count(), 0)
+        self.assertEqual(TaskPlan.select().where(
+            TaskPlan.id == task_plan_id).count(), 0)
+
+    def test_updates_task_plan(self):
+        new_interval = 500
+        new_datetime = datetime.datetime.now()
+        task_plan_with_id = task_plan_storage.create(task_plan)
+        task_plan_with_id.interval = new_interval
+        task_plan_with_id.last_created_at = new_datetime
+        task_plan_storage.update(task_plan_with_id)
+        task_plan_from_db = TaskPlan.get(TaskPlan.id == task_plan_with_id.id)
+        self.assertEqual(task_plan_from_db.interval, new_interval)
+        self.assertEqual(task_plan_from_db.last_created_at, new_datetime)
+
+    def test_returns_all_user_plans(self):
+        user_id = 10
+        task_plan.user_id = 10
+        plans_count = 3
+        for i in range(plans_count):
+            task_plan_storage.create(task_plan)
+        plans = task_plan_storage.all_user_plans(user_id)
+        self.assertEqual(len(plans), plans_count)
+
+    def test_processes_task_plans(self):
+        user_id = 10
+        repeated_task = TaskFactory()
+        repeated_task.status = Status.TEMPLATE.value
+        repeated_task.user_id = user_id
+        task_id = task_storage.create(repeated_task).id
+        before_tasks_count = len(task_storage.user_tasks(user_id))
+        interval = 300
+        big_interval = interval * 10
+        last_created_at = datetime.datetime.now() - datetime.timedelta(seconds=interval + 5)
+        """
+        repeated_task_plan after processing should create new task
+        repeated_task_plan_big_interval should not create new task because of bit interval
+        """
+        repeated_task_plan = TaskPlan(
+            user_id=user_id,
+            task_id=task_id,
+            last_created_at=last_created_at,
+            interval=interval)
+        repeated_task_plan_big_interval = TaskPlan(
+            user_id=user_id,
+            task_id=task_id,
+            last_created_at=last_created_at,
+            interval=big_interval)
+        task_plan_storage.create(repeated_task_plan)
+        task_plan_storage.create(repeated_task_plan_big_interval)
+        task_plan_storage.process_plans(task_storage)
+        self.assertEqual(len(task_storage.user_tasks(user_id)),
+                         before_tasks_count + 1)
+
+    # NotificationStorage tests
+
+    def test_creates_notification(self):
+        before_notifications_count = Notification.select().count()
+        notification_storage.create(notification)
+        after_notifications_count = Notification.select().count()
+        self.assertEqual(
+            before_notifications_count + 1,
+            after_notifications_count)
+
+    def test_deletes_notification_by_id(self):
+        notification_id = notification_storage.create(notification).id
+        notification_storage.delete_by_id(notification_id)
+        self.assertEqual(Notification.select().where(
+            Notification.id == notification_id).count(), 0)
+
+    def test_updates_notification(self):
+        new_title = "Updated title"
+        notification_with_id = notification_storage.create(notification)
+        notification_with_id.title = new_title
+        notification_storage.update(notification_with_id)
+        notification_from_db = Notification.get(
+            Notification.id == notification_with_id.id)
+        self.assertEqual(notification_from_db.title, new_title)
+
+    def test_returns_all_user_notifications(self):
+        user_id = 10
+        notification.user_id = 10
+        notifications_count = 3
+        for i in range(notifications_count):
+            notification_storage.create(notification)
+        notifications = notification_storage.all_user_notifications(user_id)
+        self.assertEqual(len(notifications), notifications_count)
+
+    def test_returns_pending_notifications(self):
+        user_id = 10
+        notification.user_id = 10
+        notification.status = NotificationStatus.PENDING.value
+        notifications_count = 3
+        for i in range(notifications_count):
+            notification_storage.create(notification)
+        # create notification with other status
+        notification.status = NotificationStatus.CREATED.value
+        notification_storage.create(notification)
+        notifications = notification_storage.pending(user_id)
+        self.assertEqual(len(notifications), notifications_count)
+
+    def test_returns_created_notifications(self):
+        user_id = 10
+        notification.user_id = 10
+        notification.status = NotificationStatus.CREATED.value
+        notifications_count = 3
+        for i in range(notifications_count):
+            notification_storage.create(notification)
+        # create notification with other status
+        notification.status = NotificationStatus.PENDING.value
+        notification_storage.create(notification)
+        notifications = notification_storage.created(user_id)
+        self.assertEqual(len(notifications), notifications_count)
+
+    def test_returns_pending_notifications(self):
+        user_id = 10
+        notification.user_id = 10
+        notification.status = NotificationStatus.SHOWN.value
+        notifications_count = 3
+        for i in range(notifications_count):
+            notification_storage.create(notification)
+        # create notification with other status
+        notification.status = NotificationStatus.CREATED.value
+        notification_storage.create(notification)
+        notifications = notification_storage.shown(user_id)
+        self.assertEqual(len(notifications), notifications_count)
+
+    def test_process_notification(self):
+        task.start_time = datetime.datetime.now()
+        task_id = task_storage.create(task).id
+        relative_start_time = 300
+        notification.status = NotificationStatus.CREATED.value
+        notification.relative_start_time = 300
+        notification.task_id = task_id
+        notification_id = notification_storage.create(notification).id
+        notification_storage.process_notifications()
+        processed_notification = notification_storage.get_by_id(
+            notification_id)
+        self.assertEqual(
+            processed_notification.status,
+            NotificationStatus.PENDING.value)

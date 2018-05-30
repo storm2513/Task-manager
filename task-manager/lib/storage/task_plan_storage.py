@@ -48,7 +48,7 @@ class TaskPlanStorage(Adapter):
         return list(map(self.to_plan_instance, list(
             TaskPlan.select().where(TaskPlan.user_id == user_id))))
 
-    def process_plans(self):
+    def process_plans(self, task_storage):
         """
         Creates tasks according to task plans.
         """
@@ -57,7 +57,6 @@ class TaskPlanStorage(Adapter):
             if plan.last_created_at + \
                     datetime.timedelta(seconds=plan.interval) < datetime.datetime.now():
                 try:
-                    task_storage = TaskStorage()
                     task = task_storage.get_by_id(
                         plan.task_id)  # template task
                     task.id = None
