@@ -1,5 +1,5 @@
 from peewee import Model, SqliteDatabase, PrimaryKeyField, CharField, Proxy, DoesNotExist
-import config.config as config
+import cli.config as config
 
 database_proxy = Proxy()
 

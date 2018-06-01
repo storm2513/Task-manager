@@ -1,7 +1,7 @@
 import argparse
 from cli.session import login_user, current_user, logout_user
 from cli.user import UserStorage, UserInstance as User
-import config.config as config
+import cli.config as config
 from lib import commands
 from lib.models.category import Category
 from lib.models.task import Task, Status, Priority

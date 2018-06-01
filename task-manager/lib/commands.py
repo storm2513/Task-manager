@@ -7,18 +7,16 @@ import lib.logger as log
 This module provides all methods to work with library
 """
 
-_logger_name = 'Task manager'
-
 
 def add_task(tasks_controller, task):
     validate_task(task)
-    log.get_logger(_logger_name).info('Added task')
+    log.get_logger().info('Added task')
     return tasks_controller.create(task)
 
 
 def add_task_plan(task_plans_controller, plan):
     validate_task_plan(plan)
-    log.get_logger(_logger_name).info('Added task plan')
+    log.get_logger().info('Added task plan')
     task_plans_controller.create(plan)
 
 
@@ -34,9 +32,9 @@ def update_task(tasks_controller, task):
     validate_task(task)
     if user_can_write_task(tasks_controller, task.id):
         tasks_controller.update(task)
-        log.get_logger(_logger_name).info('Updated task')
+        log.get_logger().info('Updated task')
     else:
-        log.get_logger(_logger_name).error(
+        log.get_logger().error(
             'User has no rights for updating task')
         raise UserHasNoRightError
 
@@ -44,7 +42,7 @@ def update_task(tasks_controller, task):
 def update_task_plan(task_plans_controller, plan):
     validate_task_plan(plan)
     task_plans_controller.update(plan)
-    log.get_logger(_logger_name).info('Updated task plan')
+    log.get_logger().info('Updated task plan')
 
 
 def get_task_by_id(tasks_controller, task_id):
@@ -57,10 +55,10 @@ def get_task_by_id(tasks_controller, task_id):
 def delete_task(tasks_controller, task_id):
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.delete(task_id)
-        log.get_logger(_logger_name).info(
+        log.get_logger().info(
             'Deleted task with ID {}'.format(task_id))
     else:
-        log.get_logger(_logger_name).error(
+        log.get_logger().error(
             'User has no right for deleting task')
         raise UserHasNoRightError
 
@@ -72,15 +70,15 @@ def create_inner_task(tasks_controller, parent_task_id, task):
 
     parent_task = get_task_by_id(tasks_controller, parent_task_id)
     if parent_task is None:
-        log.get_logger(_logger_name).error('Task does not exist')
+        log.get_logger().error('Task does not exist')
         raise TaskDoesNotExistError
     validate_task(task)
     if user_can_write_task(tasks_controller, parent_task_id):
         tasks_controller.create_inner_task(parent_task_id, task)
-        log.get_logger(_logger_name).info(
+        log.get_logger().info(
             'Created inner task for task with ID: {}'.format(task.id))
     else:
-        log.get_logger(_logger_name).error(
+        log.get_logger().error(
             'User has no right for creating inner task')
         raise UserHasNoRightError
 
@@ -93,7 +91,7 @@ def get_inner_tasks(tasks_controller, task_id):
     if user_can_read_task(tasks_controller, task_id):
         return tasks_controller.inner(task_id)
     else:
-        log.get_logger(_logger_name).error(
+        log.get_logger().error(
             'User has no right for getting inner task')
         raise UserHasNoRightError
 
@@ -115,11 +113,11 @@ def assign_task_on_user(tasks_controller, task_id, user_id):
 
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.assign_task_on_user(task_id, user_id)
-        log.get_logger(_logger_name).info(
+        log.get_logger().info(
             'Assigned task with ID: {} on user with ID: {}'.format(
                 task_id, user_id))
     else:
-        log.get_logger(_logger_name).error(
+        log.get_logger().error(
             'User has no right for assigning this task')
         raise UserHasNoRightError
 
@@ -131,11 +129,11 @@ def add_user_for_read(tasks_controller, user_id, task_id):
 
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.add_user_for_read(user_id, task_id)
-        log.get_logger(_logger_name).info(
+        log.get_logger().info(
             'Gave user with ID: {} read access to task with ID: {}'.format(
                 user_id, task_id))
     else:
-        log.get_logger(_logger_name).error(
+        log.get_logger().error(
             'User has no right for giving access for this task')
         raise UserHasNoRightError
 
@@ -147,11 +145,11 @@ def add_user_for_write(tasks_controller, user_id, task_id):
 
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.add_user_for_write(user_id, task_id)
-        log.get_logger(_logger_name).info(
+        log.get_logger().info(
             'Gave user with ID: {} read and write access to task with ID: {}'.format(
                 user_id, task_id))
     else:
-        log.get_logger(_logger_name).error(
+        log.get_logger().error(
             'User has no right for giving access for this task')
         raise UserHasNoRightError
 
@@ -163,11 +161,11 @@ def remove_user_for_read(tasks_controller, user_id, task_id):
 
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.remove_user_for_read(user_id, task_id)
-        log.get_logger(_logger_name).info(
+        log.get_logger().info(
             'Removed from user with ID: {} read access to task with ID: {}'.format(
                 user_id, task_id))
     else:
-        log.get_logger(_logger_name).error(
+        log.get_logger().error(
             'User has no right for removing access for this task')
         raise UserHasNoRightError
 
@@ -179,11 +177,11 @@ def remove_user_for_write(tasks_controller, user_id, task_id):
 
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.remove_user_for_write(user_id, task_id)
-        log.get_logger(_logger_name).info(
+        log.get_logger().info(
             'Removed from user with ID: {} read and write access to task with ID: {}'.format(
                 user_id, task_id))
     else:
-        log.get_logger(_logger_name).error(
+        log.get_logger().error(
             'User has no right for removing access for this task')
         raise UserHasNoRightError
 
@@ -215,10 +213,10 @@ def set_task_as_to_do(tasks_controller, task_id):
 
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.set_as_to_do(task_id)
-        log.get_logger(_logger_name).info(
+        log.get_logger().info(
             "Set task's status with ID {} as TODO".format(task_id))
     else:
-        log.get_logger(_logger_name).error(
+        log.get_logger().error(
             'User has no right for changing status for this task')
         raise UserHasNoRightError
 
@@ -230,10 +228,10 @@ def set_task_as_in_progress(tasks_controller, task_id):
 
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.set_as_in_progress(task_id)
-        log.get_logger(_logger_name).info(
+        log.get_logger().info(
             "Set task's status with ID {} as IN_PROGRESS".format(task_id))
     else:
-        log.get_logger(_logger_name).error(
+        log.get_logger().error(
             'User has no right for changing status for this task')
         raise UserHasNoRightError
 
@@ -245,10 +243,10 @@ def set_task_as_done(tasks_controller, task_id):
 
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.set_as_done(task_id)
-        log.get_logger(_logger_name).info(
+        log.get_logger().info(
             "Set task's status with ID {} as DONE".format(task_id))
     else:
-        log.get_logger(_logger_name).error(
+        log.get_logger().error(
             'User has no right for changing status for this task')
         raise UserHasNoRightError
 
@@ -260,17 +258,17 @@ def set_task_as_archived(tasks_controller, task_id):
 
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.set_as_archived(task_id)
-        log.get_logger(_logger_name).info(
+        log.get_logger().info(
             "Set task's status with ID {} as ARCHIVED".format(task_id))
     else:
-        log.get_logger(_logger_name).error(
+        log.get_logger().error(
             'User has no right for changing status for this task')
         raise UserHasNoRightError
 
 
 def add_category(categories_controller, category):
     categories_controller.create(category)
-    log.get_logger(_logger_name).info(
+    log.get_logger().info(
         'Category {} added'.format(category.name))
 
 
@@ -283,7 +281,7 @@ def update_category(categories_controller, category):
             category.id).user_id == categories_controller.user_id:
         categories_controller.update(category)
     else:
-        log.get_logger(_logger_name).error('User has no rights')
+        log.get_logger().error('User has no rights')
         raise UserHasNoRightError
 
 
@@ -295,7 +293,7 @@ def delete_category(categories_controller, category_id):
     category = categories_controller.get_by_id(category_id)
     if category.user_id == categories_controller.user_id:
         categories_controller.delete(category_id)
-        log.get_logger(_logger_name).info('Deleted category')
+        log.get_logger().info('Deleted category')
 
 
 def user_can_read_task(tasks_controller, task_id):
@@ -318,10 +316,10 @@ def user_can_write_task(tasks_controller, task_id):
 def add_notification(tasks_controller, notifications_controller, notification):
     task = get_task_by_id(tasks_controller, notification.task_id)
     if task is None:
-        log.get_logger(_logger_name).error('Task does not exist')
+        log.get_logger().error('Task does not exist')
         raise TaskDoesNotExistError
     notifications_controller.create(notification)
-    log.get_logger(_logger_name).info('Created notification')
+    log.get_logger().info('Created notification')
 
 
 def get_notification_by_id(notifications_controller, notification_id):
@@ -330,7 +328,7 @@ def get_notification_by_id(notifications_controller, notification_id):
 
 def delete_notification(notifications_controller, notification_id):
     notifications_controller.delete(notification_id)
-    log.get_logger(_logger_name).info('Deleted notification')
+    log.get_logger().info('Deleted notification')
 
 
 def user_notifications(notifications_controller):
@@ -343,10 +341,10 @@ def update_notification(
         notification):
     task = get_task_by_id(tasks_controller, notification.task_id)
     if task is None:
-        log.get_logger(_logger_name).error('Task does not exist')
+        log.get_logger().error('Task does not exist')
         raise TaskDoesNotExistError
     notifications_controller.update(notification)
-    log.get_logger(_logger_name).info('Updated notification')
+    log.get_logger().info('Updated notification')
 
 
 def pending_notifications(notifications_controller):
@@ -367,7 +365,7 @@ def set_notification_as_shown(notifications_controller, notification_id):
     """
 
     notifications_controller.set_as_shown(notification_id)
-    log.get_logger(_logger_name).info(
+    log.get_logger().info(
         "Set notification's status with ID {} as SHOWN".format(notification_id))
 
 
