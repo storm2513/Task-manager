@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import sys
 import dateparser
 import humanize
 from cli.session import login_user, current_user, logout_user
@@ -552,14 +553,14 @@ def add_user(args):
         login_user(user.username)
         print('User {} registered'.format(args.username))
     else:
-        print('Error. User {} already exists'.format(args.username))
+        print('Error. User {} already exists'.format(args.username), file=sys.stderr)
 
 
 def login(args):
     if login_user(args.username) is not None:
         print('User {} logged in'.format(args.username))
     else:
-        print('User {} does not exist'.format(args.username))
+        print('User {} does not exist'.format(args.username), file=sys.stderr)
 
 
 def logout():
@@ -601,6 +602,7 @@ def update_category(args):
 
 def delete_category(args):
     commands.delete_category(categories_controller(), args.id)
+    print("Category was deleted")
 
 
 def show_category(args):
@@ -618,7 +620,7 @@ def show_all_categories():
 def validate_time_in_task(start_time, end_time):
     if start_time is not None and end_time is not None:
         if start_time > end_time:
-            print("Error: start time greater than end time")
+            print("Error: start time greater than end time", file=sys.stderr)
             quit()
 
 
@@ -641,13 +643,13 @@ def add_task(args):
     if args.repeat is not None:
         parsed_time = dateparser.parse(args.repeat)
         if parsed_time is None:
-            print("Repeat time is incorrect")
+            print("Error. Repeat time is incorrect", file=sys.stderr)
             quit()
         else:
             interval = (datetime.datetime.now() - parsed_time).total_seconds()
             last_created_at = datetime.datetime.now() - datetime.timedelta(seconds=interval)
             if interval < 300:  # 5 minutes
-                print("task's interval is incorrect")
+                print("Error. Task's interval is incorrect", file=sys.stderr)
             else:
                 if args.start_repeat_at is not None:
                     start_date = dateparser.parse(args.start_repeat_at)
@@ -688,8 +690,9 @@ def edit_task(args):
         if args.priority is not None:
             task.priority = Priority[args.priority.upper()].value
         commands.update_task(tasks_controller(), task)
+        print("Task was updated")
     else:
-        print("Error. There is no task with such ID")
+        print("Error. There is no task with such ID", file=sys.stderr)
 
 
 def show_task(args):
@@ -702,7 +705,7 @@ def delete_task(args):
         commands.delete_task(tasks_controller(), args.id)
         print('Task with id {} deleted'.format(args.id))
     except UserHasNoRightError:
-        print("User has no rights for this action")
+        print("User has no rights for this action", file=sys.stderr)
 
 
 def set_task_as_to_do(args):
@@ -738,6 +741,7 @@ def create_inner_task(args):
     if args.priority is not None:
         task.priority = Priority[args.priority.upper()].value
     commands.create_inner_task(tasks_controller(), args.parent_task_id, task)
+    print("Inner task was created")
 
 
 def show_inner_tasks(args):
@@ -887,11 +891,12 @@ def add_notification(args):
                 relative_start_time=relative_start_time)
             commands.add_notification(
                 tasks_controller(), notifications_controller(), notification)
+            print("Added notification")
         else:
             print(
-                "Task should have start time and notification's relative start time should be correct")
+                "Error. Task should have start time and notification's relative start time should be correct", file=sys.stderr)
     else:
-        print("Task doesn't exist")
+        print("Error. Task doesn't exist", file=sys.stderr)
 
 
 def edit_notification(args):
@@ -908,12 +913,14 @@ def edit_notification(args):
                     parsed_time).total_seconds()
         commands.update_notification(
             tasks_controller(), notifications_controller(), notification)
+        print("Updated notification")
     else:
-        print("Error. There is not notification with such ID")
+        print("Error. There is not notification with such ID", file=sys.stderr)
 
 
 def delete_notification(args):
     commands.delete_notification(notifications_controller(), args.id)
+    print("Notification was deleted")
 
 
 def show_notification(args):
@@ -975,14 +982,14 @@ def edit_task_plan(args):
         if args.repeat is not None:
             parsed_time = dateparser.parse(args.repeat)
             if parsed_time is None:
-                print("Repeat time is incorrect")
+                print("Error. Repeat time is incorrect", file=sys.stderr)
             else:
                 interval = (
                     datetime.datetime.now() -
                     parsed_time).total_seconds()
                 last_created_at = datetime.datetime.now() - datetime.timedelta(seconds=interval)
                 if interval < 300:  # 5 minutes
-                    print("task's interval is incorrect")
+                    print("Error. Task's interval is incorrect", file=sys.stderr)
                 else:
                     plan.interval = interval
         if args.start_repeat_at is not None:
@@ -993,8 +1000,9 @@ def edit_task_plan(args):
                 last_created_at = datetime.datetime.now() - datetime.timedelta(seconds=time_delta)
                 plan.last_created_at = last_created_at
         commands.update_task_plan(task_plans_controller(), plan)
+        print("Updated task plan")
     else:
-        print("Error. There is no task plan with such ID")
+        print("Error. There is no task plan with such ID", file=sys.stderr)
 
 
 def show_all_task_plans():
