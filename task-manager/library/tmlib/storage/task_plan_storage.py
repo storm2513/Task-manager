@@ -1,7 +1,7 @@
-from lib.storage.storage_models import Task, TaskPlan, Adapter
-from lib.storage.task_storage import TaskStorage
-from lib.models.task_plan import TaskPlan as TaskPlanInstance
-from lib.models.task import Status
+from tmlib.storage.storage_models import Task, TaskPlan, Adapter
+from tmlib.storage.task_storage import TaskStorage
+from tmlib.models.task_plan import TaskPlan as TaskPlanInstance
+from tmlib.models.task import Status
 import datetime
 from peewee import DoesNotExist
 

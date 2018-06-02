@@ -7,7 +7,7 @@ def setup_lib_logging(
         log_all_levels=True,
         log_file_path='./log.log',
         log_format='%(asctime)s, %(name)s, [%(levelname)s]: %(message)s'):
-    def check_and_create_logger_files(path):
+    def check_and_create_logger_file(path):
         if not os.path.exists(os.path.dirname(path)):
             os.makedirs(os.path.dirname(path))
         try:
@@ -15,7 +15,7 @@ def setup_lib_logging(
         except FileNotFoundError:
             open(path, 'w').close()
 
-    check_and_create_logger_files(log_file_path)
+    check_and_create_logger_file(log_file_path)
     formatter = logging.Formatter(log_format)
 
     file_logging_handler = logging.FileHandler(log_file_path)

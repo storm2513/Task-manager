@@ -2,16 +2,16 @@ import argparse
 from cli.session import login_user, current_user, logout_user
 from cli.user import UserStorage, UserInstance as User
 import cli.config as config
-from lib import commands
-from lib.models.category import Category
-from lib.models.task import Task, Status, Priority
-from lib.models.task_plan import TaskPlan
-from lib.models.notification import Notification, Status as NotificationStatus
-from lib.controllers.categories_controller import create_categories_controller
-from lib.controllers.notifications_controller import create_notifications_controller
-from lib.controllers.task_plans_controller import create_task_plans_controller
-from lib.controllers.tasks_controller import create_tasks_controller
-from lib.exceptions.exceptions import UserHasNoRightError
+from tmlib import commands
+from tmlib.models.category import Category
+from tmlib.models.task import Task, Status, Priority
+from tmlib.models.task_plan import TaskPlan
+from tmlib.models.notification import Notification, Status as NotificationStatus
+from tmlib.controllers.categories_controller import create_categories_controller
+from tmlib.controllers.notifications_controller import create_notifications_controller
+from tmlib.controllers.task_plans_controller import create_task_plans_controller
+from tmlib.controllers.tasks_controller import create_tasks_controller
+from tmlib.exceptions.exceptions import UserHasNoRightError
 import datetime
 import dateparser
 import humanize

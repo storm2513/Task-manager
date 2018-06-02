@@ -1,5 +1,5 @@
-from lib.storage.storage_models import Notification, Task, Adapter
-from lib.models.notification import Notification as NotificationInstance, Status as NotificationStatus
+from tmlib.storage.storage_models import Notification, Task, Adapter
+from tmlib.models.notification import Notification as NotificationInstance, Status as NotificationStatus
 import datetime
 from peewee import DoesNotExist
 

@@ -1,6 +1,6 @@
-from lib.storage.task_storage import TaskStorage
-from lib.models.task import Status
-from lib.controllers.base_controller import BaseController
+from tmlib.storage.task_storage import TaskStorage
+from tmlib.models.task import Status
+from tmlib.controllers.base_controller import BaseController
 
 
 def create_tasks_controller(user_id, database_name):

@@ -1,5 +1,5 @@
-from lib.storage.category_storage import CategoryStorage
-from lib.controllers.base_controller import BaseController
+from tmlib.storage.category_storage import CategoryStorage
+from tmlib.controllers.base_controller import BaseController
 
 
 def create_categories_controller(user_id, database_name):

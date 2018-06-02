@@ -1,7 +1,7 @@
 import os
 from cli.arg_parser import process_args
 import cli.config as config
-from lib.logger import setup_logging
+from tmlib.logger import setup_lib_logging
 
 
 def run():

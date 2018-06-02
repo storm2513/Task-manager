@@ -1,5 +1,5 @@
-from lib.controllers.base_controller import BaseController
-from lib.storage.task_plan_storage import TaskPlanStorage
+from tmlib.controllers.base_controller import BaseController
+from tmlib.storage.task_plan_storage import TaskPlanStorage
 
 
 def create_task_plans_controller(user_id, database_name):

@@ -1,6 +1,6 @@
-from lib.storage.notification_storage import NotificationStorage
-from lib.models.notification import Status as NotificationStatus
-from lib.controllers.base_controller import BaseController
+from tmlib.storage.notification_storage import NotificationStorage
+from tmlib.models.notification import Status as NotificationStatus
+from tmlib.controllers.base_controller import BaseController
 
 
 def create_notifications_controller(user_id, database_name):

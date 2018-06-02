@@ -1,7 +1,6 @@
 import configparser
 from cli.user import UserInstance as User
 import cli.config as config
-from lib import commands
 
 
 config_parser = configparser.ConfigParser()

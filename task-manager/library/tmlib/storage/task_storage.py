@@ -1,5 +1,5 @@
-from lib.storage.storage_models import Task, UsersReadTasks, UsersWriteTasks, TaskPlan, Adapter
-from lib.models.task import Task as TaskInstance
+from tmlib.storage.storage_models import Task, UsersReadTasks, UsersWriteTasks, TaskPlan, Adapter
+from tmlib.models.task import Task as TaskInstance
 from peewee import DoesNotExist
 import datetime
 

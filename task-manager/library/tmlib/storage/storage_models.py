@@ -9,8 +9,8 @@ from peewee import (
     BooleanField,
     SqliteDatabase)
 import datetime
-from lib.models.task import Status, Priority
-from lib.models.notification import Status as NotificationStatus
+from tmlib.models.task import Status, Priority
+from tmlib.models.notification import Status as NotificationStatus
 
 database_proxy = Proxy()
 

@@ -1,12 +1,12 @@
 import unittest
 import datetime
-from lib.storage.storage_models import Task, UsersReadTasks, UsersWriteTasks, Category, TaskPlan, Notification, Adapter
-from lib.storage.category_storage import CategoryStorage
-from lib.storage.notification_storage import NotificationStorage
-from lib.storage.task_storage import TaskStorage
-from lib.storage.task_plan_storage import TaskPlanStorage
-from lib.models.task import Status
-from lib.models.notification import Status as NotificationStatus
+from tmlib.storage.storage_models import Task, UsersReadTasks, UsersWriteTasks, Category, TaskPlan, Notification, Adapter
+from tmlib.storage.category_storage import CategoryStorage
+from tmlib.storage.notification_storage import NotificationStorage
+from tmlib.storage.task_storage import TaskStorage
+from tmlib.storage.task_plan_storage import TaskPlanStorage
+from tmlib.models.task import Status
+from tmlib.models.notification import Status as NotificationStatus
 from tests.factories import CategoryFactory, TaskFactory, TaskPlanFactory, NotificationFactory
 
 # use an in-memory SQLite for tests.

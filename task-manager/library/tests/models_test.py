@@ -1,10 +1,10 @@
 import unittest
 import datetime
 
-from lib.models.task import Task
-from lib.models.category import Category
-from lib.models.task_plan import TaskPlan
-from lib.models.notification import Notification
+from tmlib.models.task import Task
+from tmlib.models.category import Category
+from tmlib.models.task_plan import TaskPlan
+from tmlib.models.notification import Notification
 
 
 class ModelsTest(unittest.TestCase):

@@ -1,10 +1,10 @@
 import factory
 import factory.fuzzy
 import datetime
-from lib.models.task import Task as TaskInstance
-from lib.models.category import Category as CategoryInstance
-from lib.models.task_plan import TaskPlan as TaskPlanInstance
-from lib.models.notification import Notification as NotificationInstance
+from tmlib.models.task import Task as TaskInstance
+from tmlib.models.category import Category as CategoryInstance
+from tmlib.models.task_plan import TaskPlan as TaskPlanInstance
+from tmlib.models.notification import Notification as NotificationInstance
 
 
 class CategoryFactory(factory.Factory):

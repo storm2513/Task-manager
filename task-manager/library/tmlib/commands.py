@@ -1,7 +1,7 @@
-from lib.models.task import Task, Status, Priority
-from lib.models.validator import validate_task, validate_task_plan
-from lib.exceptions.exceptions import UserHasNoRightError, TaskDoesNotExistError
-import lib.logger as log
+from tmlib.models.task import Task, Status, Priority
+from tmlib.models.validator import validate_task, validate_task_plan
+from tmlib.exceptions.exceptions import UserHasNoRightError, TaskDoesNotExistError
+import tmlib.logger as log
 
 """
 This module provides all methods to work with library
