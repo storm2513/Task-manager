@@ -1,9 +1,9 @@
+import datetime
+from peewee import DoesNotExist
 from tmlib.storage.storage_models import Task, TaskPlan, Adapter
 from tmlib.storage.task_storage import TaskStorage
 from tmlib.models.task_plan import TaskPlan as TaskPlanInstance
 from tmlib.models.task import Status
-import datetime
-from peewee import DoesNotExist
 
 
 class TaskPlanStorage(Adapter):

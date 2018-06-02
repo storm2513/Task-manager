@@ -1,3 +1,4 @@
+import datetime
 from peewee import (
     Proxy,
     Model,
@@ -8,7 +9,6 @@ from peewee import (
     DateTimeField,
     BooleanField,
     SqliteDatabase)
-import datetime
 from tmlib.models.task import Status, Priority
 from tmlib.models.notification import Status as NotificationStatus
 
@@ -103,6 +103,10 @@ class UsersWriteTasks(BaseModel):
 
 
 class Adapter:
+    """
+    Base class for establishing connection with database, creating and dropping tables
+    """
+
     def __init__(self, database_name='task-manager.db'):
         self.database_name = database_name
         self.database = SqliteDatabase(database_name)

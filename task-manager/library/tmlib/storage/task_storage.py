@@ -1,7 +1,7 @@
+import datetime
+from peewee import DoesNotExist
 from tmlib.storage.storage_models import Task, UsersReadTasks, UsersWriteTasks, TaskPlan, Adapter
 from tmlib.models.task import Task as TaskInstance
-from peewee import DoesNotExist
-import datetime
 
 
 class TaskStorage(Adapter):

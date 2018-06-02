@@ -1,6 +1,6 @@
+from peewee import DoesNotExist
 from tmlib.storage.storage_models import Category, Adapter
 from tmlib.models.category import Category as CategoryInstance
-from peewee import DoesNotExist
 
 
 class CategoryStorage(Adapter):

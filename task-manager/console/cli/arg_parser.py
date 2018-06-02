@@ -1,4 +1,7 @@
 import argparse
+import datetime
+import dateparser
+import humanize
 from cli.session import login_user, current_user, logout_user
 from cli.user import UserStorage, UserInstance as User
 import cli.config as config
@@ -12,9 +15,6 @@ from tmlib.controllers.notifications_controller import create_notifications_cont
 from tmlib.controllers.task_plans_controller import create_task_plans_controller
 from tmlib.controllers.tasks_controller import create_tasks_controller
 from tmlib.exceptions.exceptions import UserHasNoRightError
-import datetime
-import dateparser
-import humanize
 
 
 def init_parser():
