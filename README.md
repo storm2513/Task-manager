@@ -6,7 +6,6 @@ $ cd library
 $ python3 setup.py install
 ```
 
-
 ### Running tests: ###
 ```bash
 $ python3 setup.py test
@@ -17,7 +16,6 @@ $ python3 setup.py test
 $ cd console
 $ python3 setup.py install
 ```
-
 
 ## How to use? ##
 
@@ -46,7 +44,6 @@ $ task-manager plan
 $ task-manager notification
 ```
 
-# For documentation add '-h' #
-
+### For documentation add '-h' ###
 
 Made by Maksim Shylov.
