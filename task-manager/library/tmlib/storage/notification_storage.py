@@ -5,9 +5,7 @@ from tmlib.models.notification import Notification as NotificationInstance, Stat
 
 
 class NotificationStorage(Adapter):
-    """
-    Class for managing notifications in database
-    """
+    """Class for managing notifications in database"""
 
     def create(self, notification):
         return self.to_notification_instance(
@@ -46,27 +44,21 @@ class NotificationStorage(Adapter):
             return None
 
     def pending(self, user_id):
-        """
-        Returns notifications with PENDING status for user with ID == user_id
-        """
+        """Returns notifications with PENDING status for user with ID == user_id"""
 
         return list(map(self.to_notification_instance,
                         list(Notification.select().where(Notification.user_id == user_id,
                                                          Notification.status == NotificationStatus.PENDING.value))))
 
     def created(self, user_id):
-        """
-        Returns notifications with CREATED status for user with ID == user_id
-        """
+        """Returns notifications with CREATED status for user with ID == user_id"""
 
         return list(map(self.to_notification_instance,
                         list(Notification.select().where(Notification.user_id == user_id,
                                                          Notification.status == NotificationStatus.CREATED.value))))
 
     def shown(self, user_id):
-        """
-        Returns notifications with SHOWN status for user with ID == user_id
-        """
+        """Returns notifications with SHOWN status for user with ID == user_id"""
 
         return list(map(self.to_notification_instance,
                         list(Notification.select().where(Notification.user_id == user_id,
@@ -77,9 +69,7 @@ class NotificationStorage(Adapter):
             Notification.select().where(Notification.user_id == user_id))))
 
     def process_notifications(self):
-        """
-        Changes notification status from CREATED to PENDING if it's time to show notification
-        """
+        """Changes notification status from CREATED to PENDING if it's time to show notification"""
 
         for notification in Notification.select().where(
                 Notification.status == NotificationStatus.CREATED.value).join(Task).where(

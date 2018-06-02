@@ -7,9 +7,7 @@ def create_categories_controller(user_id, database_name):
 
 
 class CategoriesController(BaseController):
-    """
-    Class for managing categories
-    """
+    """Class for managing categories"""
 
     def create(self, category):
         category.user_id = self.user_id

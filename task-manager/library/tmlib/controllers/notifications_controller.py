@@ -8,9 +8,7 @@ def create_notifications_controller(user_id, database_name):
 
 
 class NotificationsController(BaseController):
-    """
-    Class for managing notifications
-    """
+    """Class for managing notifications"""
 
     def create(self, notification):
         notification.user_id = self.user_id
@@ -29,38 +27,28 @@ class NotificationsController(BaseController):
         return self.storage.all_user_notifications(self.user_id)
 
     def set_as_shown(self, notification_id):
-        """
-        Sets notification's status with ID == notification_id as SHOWN
-        """
+        """Sets notification's status with ID == notification_id as SHOWN"""
 
         notification = self.get_by_id(notification_id)
         notification.status = NotificationStatus.SHOWN.value
         self.update(notification)
 
     def pending(self):
-        """
-        Returns notifications with status PENDING
-        """
+        """Returns notifications with status PENDING"""
 
         return self.storage.pending(self.user_id)
 
     def created(self):
-        """
-        Returns notifications with status CREATED
-        """
+        """Returns notifications with status CREATED"""
 
         return self.storage.created(self.user_id)
 
     def shown(self):
-        """
-        Returns notifications with status SHOWN
-        """
+        """Returns notifications with status SHOWN"""
 
         return self.storage.shown(self.user_id)
 
     def process_notifications(self):
-        """
-        Changes notification status from CREATED to PENDING if it's time to show notification
-        """
+        """Changes notification status from CREATED to PENDING if it's time to show notification"""
 
         self.storage.process_notifications()

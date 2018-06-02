@@ -7,9 +7,7 @@ from tmlib.models.task import Status
 
 
 class TaskPlanStorage(Adapter):
-    """
-    Class for managing task plans in database
-    """
+    """Class for managing task plans in database"""
 
     def create(self, plan):
         return self.to_plan_instance(
@@ -49,9 +47,7 @@ class TaskPlanStorage(Adapter):
             TaskPlan.select().where(TaskPlan.user_id == user_id))))
 
     def process_plans(self, task_storage):
-        """
-        Creates tasks according to task plans.
-        """
+        """Creates tasks according to task plans."""
 
         for plan in TaskPlan.select():
             if plan.last_created_at + \

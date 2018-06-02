@@ -3,9 +3,7 @@ from tmlib.models.validator import validate_task, validate_task_plan
 from tmlib.exceptions.exceptions import UserHasNoRightError, TaskDoesNotExistError
 import tmlib.logger as log
 
-"""
-This module provides all methods to work with library
-"""
+"""This module provides all methods to work with library"""
 
 
 def add_task(tasks_controller, task):
@@ -64,9 +62,7 @@ def delete_task(tasks_controller, task_id):
 
 
 def create_inner_task(tasks_controller, parent_task_id, task):
-    """
-    Checks if parent task exists, then creates inner task
-    """
+    """Checks if parent task exists, then creates inner task"""
 
     parent_task = get_task_by_id(tasks_controller, parent_task_id)
     if parent_task is None:
@@ -84,9 +80,7 @@ def create_inner_task(tasks_controller, parent_task_id, task):
 
 
 def get_inner_tasks(tasks_controller, task_id):
-    """
-    Returns inner tasks for task with ID == task_id
-    """
+    """Returns inner tasks for task with ID == task_id"""
 
     if user_can_read_task(tasks_controller, task_id):
         return tasks_controller.inner(task_id)
@@ -97,9 +91,7 @@ def get_inner_tasks(tasks_controller, task_id):
 
 
 def get_parent_task(tasks_controller, task_id):
-    """
-    Returns parent task for task with ID == task_id
-    """
+    """Returns parent task for task with ID == task_id"""
 
     task = get_task_by_id(tasks_controller, task_id)
     if task is not None and task.parent_task_id is not None:
@@ -107,9 +99,7 @@ def get_parent_task(tasks_controller, task_id):
 
 
 def assign_task_on_user(tasks_controller, task_id, user_id):
-    """
-    Assigns task with ID == task_id on user with ID == user_id
-    """
+    """Assigns task with ID == task_id on user with ID == user_id"""
 
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.assign_task_on_user(task_id, user_id)
@@ -123,9 +113,7 @@ def assign_task_on_user(tasks_controller, task_id, user_id):
 
 
 def add_user_for_read(tasks_controller, user_id, task_id):
-    """
-    Allows user with ID == user_id to read task with ID == task_id
-    """
+    """Allows user with ID == user_id to read task with ID == task_id"""
 
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.add_user_for_read(user_id, task_id)
@@ -139,9 +127,7 @@ def add_user_for_read(tasks_controller, user_id, task_id):
 
 
 def add_user_for_write(tasks_controller, user_id, task_id):
-    """
-    Allows user with ID == user_id to read and change task with ID == task_id
-    """
+    """Allows user with ID == user_id to read and change task with ID == task_id"""
 
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.add_user_for_write(user_id, task_id)
@@ -155,9 +141,7 @@ def add_user_for_write(tasks_controller, user_id, task_id):
 
 
 def remove_user_for_read(tasks_controller, user_id, task_id):
-    """
-    Removes permission to read task with ID == task_id from user with ID == user_id
-    """
+    """Removes permission to read task with ID == task_id from user with ID == user_id"""
 
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.remove_user_for_read(user_id, task_id)
@@ -171,9 +155,7 @@ def remove_user_for_read(tasks_controller, user_id, task_id):
 
 
 def remove_user_for_write(tasks_controller, user_id, task_id):
-    """
-    Removes permission to read and change task with ID == task_id from user with ID == user_id
-    """
+    """Removes permission to read and change task with ID == task_id from user with ID == user_id"""
 
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.remove_user_for_write(user_id, task_id)
@@ -207,9 +189,7 @@ def tasks_with_status(tasks_controller, status):
 
 
 def set_task_as_to_do(tasks_controller, task_id):
-    """
-    Sets task's status as TODO by ID
-    """
+    """Sets task's status as TODO by ID"""
 
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.set_as_to_do(task_id)
@@ -222,9 +202,7 @@ def set_task_as_to_do(tasks_controller, task_id):
 
 
 def set_task_as_in_progress(tasks_controller, task_id):
-    """
-    Sets task's status as IN_PROGRESS by ID
-    """
+    """Sets task's status as IN_PROGRESS by ID"""
 
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.set_as_in_progress(task_id)
@@ -237,9 +215,7 @@ def set_task_as_in_progress(tasks_controller, task_id):
 
 
 def set_task_as_done(tasks_controller, task_id):
-    """
-    Sets task's status as DONE by ID
-    """
+    """Sets task's status as DONE by ID"""
 
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.set_as_done(task_id)
@@ -252,9 +228,7 @@ def set_task_as_done(tasks_controller, task_id):
 
 
 def set_task_as_archived(tasks_controller, task_id):
-    """
-    Sets task's status as ARCHIVED by ID
-    """
+    """Sets task's status as ARCHIVED by ID"""
 
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.set_as_archived(task_id)
@@ -360,9 +334,7 @@ def user_shown_notifications(notifications_controller):
 
 
 def set_notification_as_shown(notifications_controller, notification_id):
-    """
-    Sets notification's status with ID == notification_id as SHOWN
-    """
+    """Sets notification's status with ID == notification_id as SHOWN"""
 
     notifications_controller.set_as_shown(notification_id)
     log.get_logger().info(

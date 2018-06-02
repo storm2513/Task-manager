@@ -15,9 +15,7 @@ class Status(enum.Enum):
 
 
 class Notification:
-    """
-    Notification class that should remind user about task
-    """
+    """Notification class that should remind user about task"""
 
     def __init__(
             self,

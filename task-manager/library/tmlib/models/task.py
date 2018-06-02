@@ -2,9 +2,7 @@ import enum
 
 
 class Priority(enum.Enum):
-    """
-    Enum that stores values of task's priorities
-    """
+    """Enum that stores values of task's priorities"""
 
     MIN = 0
     LOW = 1
@@ -14,9 +12,7 @@ class Priority(enum.Enum):
 
 
 class Status(enum.Enum):
-    """
-    Enum that stores values of task's statuses
-    """
+    """Enum that stores values of task's statuses"""
 
     TODO = 0
     IN_PROGRESS = 1
@@ -26,9 +22,7 @@ class Status(enum.Enum):
 
 
 class Task:
-    """
-    Class for storing user's task
-    """
+    """Class for storing user's task"""
 
     def __init__(
             self,

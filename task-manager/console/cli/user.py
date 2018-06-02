@@ -5,9 +5,7 @@ database_proxy = Proxy()
 
 
 class UserInstance:
-    """
-    Class for storing user
-    """
+    """Class for storing user"""
 
     def __init__(self, username, id=None):
         self.id = id
@@ -15,9 +13,7 @@ class UserInstance:
 
 
 class User(Model):
-    """
-    User model
-    """
+    """User model"""
 
     id = PrimaryKeyField(null=False)
     username = CharField()
@@ -27,6 +23,8 @@ class User(Model):
 
 
 class Adapter:
+    """Base class for establishing connection with database, creating and dropping tables"""
+
     def __init__(self, database_name=config.DATABASE):
         database = SqliteDatabase(database_name)
         database_proxy.initialize(database)
@@ -34,6 +32,8 @@ class Adapter:
 
 
 class UserStorage(Adapter):
+    """Class for managing users in database"""
+
     def create(self, user):
         if self.get_by_username(user.username) is None:
             return self.to_user_instance(User.create(

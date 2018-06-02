@@ -6,9 +6,7 @@ import cli.config as config
 config_parser = configparser.ConfigParser()
 
 
-"""
-This module provides methods to work with config file
-"""
+"""This module provides methods to work with config file"""
 
 
 def get_username_from_config():

@@ -4,9 +4,7 @@ from tmlib.models.category import Category as CategoryInstance
 
 
 class CategoryStorage(Adapter):
-    """
-    Class for managing categories in database
-    """
+    """Class for managing categories in database"""
 
     def create(self, category):
         return self.to_category_instance(

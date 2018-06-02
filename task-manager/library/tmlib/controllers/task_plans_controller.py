@@ -7,9 +7,7 @@ def create_task_plans_controller(user_id, database_name):
 
 
 class TaskPlansController(BaseController):
-    """
-    Class for managing task plans
-    """
+    """Class for managing task plans"""
 
     def create(self, plan):
         return self.storage.create(plan)
@@ -27,8 +25,6 @@ class TaskPlansController(BaseController):
         return self.storage.all_user_plans(self.user_id)
 
     def process_plans(self, tasks_controller):
-        """
-        Creates tasks according to task plans.
-        """
+        """Creates tasks according to task plans"""
 
         self.storage.process_plans(tasks_controller.storage)

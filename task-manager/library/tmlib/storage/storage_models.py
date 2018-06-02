@@ -16,18 +16,14 @@ database_proxy = Proxy()
 
 
 class BaseModel(Model):
-    """
-    Base class for classes that work with peewee library
-    """
+    """Base class for classes that work with peewee library"""
 
     class Meta:
         database = database_proxy
 
 
 class Category(BaseModel):
-    """
-    Category model
-    """
+    """Category model"""
 
     id = PrimaryKeyField(null=False)
     name = CharField()
@@ -35,9 +31,7 @@ class Category(BaseModel):
 
 
 class Task(BaseModel):
-    """
-    Task model
-    """
+    """Task model"""
 
     id = PrimaryKeyField(null=False)
     user_id = IntegerField(null=True)
@@ -60,9 +54,7 @@ class Task(BaseModel):
 
 
 class TaskPlan(BaseModel):
-    """
-    TaskPlan model
-    """
+    """TaskPlan model"""
 
     id = PrimaryKeyField(null=False)
     user_id = IntegerField(null=True)
@@ -72,9 +64,7 @@ class TaskPlan(BaseModel):
 
 
 class Notification(BaseModel):
-    """
-    Notification model
-    """
+    """Notification model"""
 
     id = PrimaryKeyField(null=False)
     task = ForeignKeyField(Task, backref='notifications', null=True)
@@ -85,29 +75,23 @@ class Notification(BaseModel):
 
 
 class UsersReadTasks(BaseModel):
-    """
-    UsersReadTasks model. If there is an entry with user and task it means that user can read this task
-    """
+    """UsersReadTasks model. If there is an entry with user and task it means that user can read this task"""
 
     user_id = IntegerField(null=True)
     task = ForeignKeyField(Task)
 
 
 class UsersWriteTasks(BaseModel):
-    """
-    UsersWriteTasks model. If there is an entry with user and task it means that user can read and change this task
-    """
+    """UsersWriteTasks model. If there is an entry with user and task it means that user can read and change this task"""
 
     user_id = IntegerField(null=True)
     task = ForeignKeyField(Task)
 
 
 class Adapter:
-    """
-    Base class for establishing connection with database, creating and dropping tables
-    """
+    """Base class for establishing connection with database, creating and dropping tables"""
 
-    def __init__(self, database_name='task-manager.db'):
+    def __init__(self, database_name='./task-manager.db'):
         self.database_name = database_name
         self.database = SqliteDatabase(database_name)
         self.connected = False

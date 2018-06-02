@@ -5,9 +5,7 @@ from tmlib.models.task import Task as TaskInstance
 
 
 class TaskStorage(Adapter):
-    """
-    Class for managing tasks in database
-    """
+    """Class for managing tasks in database"""
 
     def create(self, task):
         return self.to_task_instance(
@@ -80,33 +78,25 @@ class TaskStorage(Adapter):
             Task.select().where(Task.user_id == user_id, Task.status == status))))
 
     def can_read(self, user_id):
-        """
-        Returns tasks that user can read
-        """
+        """Returns tasks that user can read"""
 
         return list(map(self.to_task_instance, list(Task.select().join(UsersReadTasks).where(
             UsersReadTasks.task_id == Task.id, UsersReadTasks.user_id == user_id))))
 
     def can_write(self, user_id):
-        """
-        Returns tasks that user can read and change
-        """
+        """Returns tasks that user can read and change"""
 
         return list(map(self.to_task_instance, list(Task.select().join(UsersWriteTasks).where(
             UsersWriteTasks.task_id == Task.id, UsersWriteTasks.user_id == user_id))))
 
     def inner(self, task_id):
-        """
-        Returns inner tasks for task with ID == task_id
-        """
+        """Returns inner tasks for task with ID == task_id"""
 
         return list(map(self.to_task_instance, list(
             Task.select().where(Task.parent_task_id == task_id))))
 
     def add_user_for_read(self, user_id, task_id):
-        """
-        Allows user with ID == user_id to read task with ID == task_id
-        """
+        """Allows user with ID == user_id to read task with ID == task_id"""
 
         if UsersReadTasks.select().where(
                 UsersReadTasks.task_id == task_id,
@@ -114,9 +104,7 @@ class TaskStorage(Adapter):
             UsersReadTasks.create(user_id=user_id, task_id=task_id)
 
     def add_user_for_write(self, user_id, task_id):
-        """
-        Allows user with ID == user_id to read and change task with ID == task_id
-        """
+        """Allows user with ID == user_id to read and change task with ID == task_id"""
 
         if UsersWriteTasks.select().where(
                 UsersWriteTasks.task_id == task_id,
@@ -124,18 +112,14 @@ class TaskStorage(Adapter):
             UsersWriteTasks.create(user_id=user_id, task_id=task_id)
 
     def remove_user_for_read(self, user_id, task_id):
-        """
-        Removes permission to read task with ID == task_id from user with ID == user_id
-        """
+        """Removes permission to read task with ID == task_id from user with ID == user_id"""
 
         UsersReadTasks.delete().where(
             UsersReadTasks.user_id == user_id,
             UsersReadTasks.task_id == task_id).execute()
 
     def remove_user_for_write(self, user_id, task_id):
-        """
-        Removes permission to read and change task with ID == task_id from user with ID == user_id
-        """
+        """Removes permission to read and change task with ID == task_id from user with ID == user_id"""
 
         UsersWriteTasks.delete().where(
             UsersWriteTasks.user_id == user_id,
