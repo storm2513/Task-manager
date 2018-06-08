@@ -1,6 +1,14 @@
 # Task Manager. Library and Console version. #
 ## How to install? ##
+
+### Make sure you have installed setuptools: ###
+
+```bash
+$ pip3 install -U pip setuptools 
+```
+
 ### Installing Library: ###
+
 ```bash
 $ cd library
 $ python3 setup.py install
