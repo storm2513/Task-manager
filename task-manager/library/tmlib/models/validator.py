@@ -18,12 +18,8 @@ def validate_task_plan_interval(interval):
 
 
 def validate_task(task):
-    """Validates task's fields"""
-
     validate_start_time_less_than_end_time(task.start_time, task.end_time)
 
 
 def validate_task_plan(plan):
-    """Validates task plan's fields"""
-
     validate_task_plan_interval(plan.interval)

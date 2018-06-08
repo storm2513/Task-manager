@@ -1,13 +1,13 @@
 import os
-from cli.arg_parser import process_args
+from cli.arg_parser import handle_commands
 import cli.config as config
 from tmlib.logger import setup_lib_logging
 
 
-def run():
+def main():
     _create_app_data_folder()
     _setup_lib_logging()
-    process_args()
+    handle_commands()
 
 
 def _create_app_data_folder():
@@ -26,4 +26,4 @@ def _setup_lib_logging():
 
 
 if(__name__ == "__main__"):
-    run()
+    main()

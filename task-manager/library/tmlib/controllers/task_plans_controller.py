@@ -7,8 +7,6 @@ def create_task_plans_controller(user_id, database_name):
 
 
 class TaskPlansController(BaseController):
-    """Class for managing task plans"""
-
     def create(self, plan):
         return self.storage.create(plan)
 

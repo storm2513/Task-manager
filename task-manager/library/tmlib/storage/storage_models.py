@@ -12,7 +12,7 @@ from peewee import (
 from tmlib.models.task import Status, Priority
 from tmlib.models.notification import Status as NotificationStatus
 
-database_proxy = Proxy()
+database_proxy = Proxy() # Peewee doesn't allow to add database without global database object
 
 
 class BaseModel(Model):
@@ -23,16 +23,12 @@ class BaseModel(Model):
 
 
 class Category(BaseModel):
-    """Category model"""
-
     id = PrimaryKeyField(null=False)
     name = CharField()
     user_id = IntegerField(null=True)
 
 
 class Task(BaseModel):
-    """Task model"""
-
     id = PrimaryKeyField(null=False)
     user_id = IntegerField(null=True)
     title = CharField()
@@ -54,8 +50,6 @@ class Task(BaseModel):
 
 
 class TaskPlan(BaseModel):
-    """TaskPlan model"""
-
     id = PrimaryKeyField(null=False)
     user_id = IntegerField(null=True)
     task = ForeignKeyField(Task, null=True)
@@ -64,8 +58,6 @@ class TaskPlan(BaseModel):
 
 
 class Notification(BaseModel):
-    """Notification model"""
-
     id = PrimaryKeyField(null=False)
     task = ForeignKeyField(Task, backref='notifications', null=True)
     user_id = IntegerField(null=True)
@@ -88,7 +80,7 @@ class UsersWriteTasks(BaseModel):
     task = ForeignKeyField(Task)
 
 
-class Adapter:
+class DatabaseConnector:
     """Base class for establishing connection with database, creating and dropping tables"""
 
     def __init__(self, database_name='./task-manager.db'):

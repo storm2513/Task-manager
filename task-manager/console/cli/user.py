@@ -1,7 +1,7 @@
 from peewee import Model, SqliteDatabase, PrimaryKeyField, CharField, Proxy, DoesNotExist
 import cli.config as config
 
-database_proxy = Proxy()
+database_proxy = Proxy() # Peewee doesn't allow to add database without global database object
 
 
 class UserInstance:
@@ -22,16 +22,16 @@ class User(Model):
         database = database_proxy
 
 
-class Adapter:
+class DatabaseConnector:
     """Base class for establishing connection with database, creating and dropping tables"""
 
     def __init__(self, database_name=config.DATABASE):
         database = SqliteDatabase(database_name)
         database_proxy.initialize(database)
-        User.create_table()
+        User.create_table(True)
 
 
-class UserStorage(Adapter):
+class UserStorage(DatabaseConnector):
     """Class for managing users in database"""
 
     def create(self, user):

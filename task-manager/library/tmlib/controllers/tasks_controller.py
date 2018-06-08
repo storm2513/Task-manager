@@ -8,8 +8,6 @@ def create_tasks_controller(user_id, database_name):
 
 
 class TasksController(BaseController):
-    """Class for managing tasks"""
-
     def create(self, task):
         return self.storage.create(task)
 
@@ -19,32 +17,9 @@ class TasksController(BaseController):
     def delete(self, task_id):
         self.storage.delete_by_id(task_id)
 
-    def set_as_to_do(self, task_id):
-        """Sets task's status as TODO by ID"""
-
+    def set_status(self, task_id, status):
         task = self.get_by_id(task_id)
-        task.status = Status.TODO.value
-        self.update(task)
-
-    def set_as_in_progress(self, task_id):
-        """Sets task's status as IN_PROGRESS by ID"""
-
-        task = self.get_by_id(task_id)
-        task.status = Status.IN_PROGRESS.value
-        self.update(task)
-
-    def set_as_done(self, task_id):
-        """Sets task's status as DONE by ID"""
-
-        task = self.get_by_id(task_id)
-        task.status = Status.DONE.value
-        self.update(task)
-
-    def set_as_archived(self, task_id):
-        """Sets task's status as ARCHIVED by ID"""
-
-        task = self.get_by_id(task_id)
-        task.status = Status.ARCHIVED.value
+        task.status = status
         self.update(task)
 
     def user_tasks(self):

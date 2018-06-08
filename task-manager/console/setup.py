@@ -8,4 +8,4 @@ setup(
     packages=find_packages(),
     entry_points='''
     [console_scripts]
-    task-manager=cli.main:run''')
+    task-manager=cli.main:main''')

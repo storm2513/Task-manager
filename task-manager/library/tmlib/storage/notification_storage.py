@@ -1,12 +1,10 @@
 import datetime
 from peewee import DoesNotExist
-from tmlib.storage.storage_models import Notification, Task, Adapter
+from tmlib.storage.storage_models import Notification, Task, DatabaseConnector
 from tmlib.models.notification import Notification as NotificationInstance, Status as NotificationStatus
 
 
-class NotificationStorage(Adapter):
-    """Class for managing notifications in database"""
-
+class NotificationStorage(DatabaseConnector):
     def create(self, notification):
         return self.to_notification_instance(
             Notification.create(
@@ -75,7 +73,7 @@ class NotificationStorage(Adapter):
                 Notification.status == NotificationStatus.CREATED.value).join(Task).where(
                 Task.id == Notification.task_id):
             task = Task.get(Task.id == notification.task_id)
-            if task.start_time - \
-                    datetime.timedelta(seconds=notification.relative_start_time) < datetime.datetime.now():
+            if (task.start_time -
+                    datetime.timedelta(seconds=notification.relative_start_time)) < datetime.datetime.now():
                 notification.status = NotificationStatus.PENDING.value
                 notification.save()

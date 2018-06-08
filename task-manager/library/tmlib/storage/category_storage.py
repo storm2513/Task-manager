@@ -1,11 +1,9 @@
 from peewee import DoesNotExist
-from tmlib.storage.storage_models import Category, Adapter
+from tmlib.storage.storage_models import Category, DatabaseConnector
 from tmlib.models.category import Category as CategoryInstance
 
 
-class CategoryStorage(Adapter):
-    """Class for managing categories in database"""
-
+class CategoryStorage(DatabaseConnector):
     def create(self, category):
         return self.to_category_instance(
             Category.create(

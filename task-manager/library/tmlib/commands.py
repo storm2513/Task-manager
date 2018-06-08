@@ -1,9 +1,10 @@
-from tmlib.models.task import Task, Status, Priority
+"""This module provides all methods to work with library"""
+
+
+from tmlib.models.task import Task, Status
 from tmlib.models.validator import validate_task, validate_task_plan
 from tmlib.exceptions.exceptions import UserHasNoRightError, TaskDoesNotExistError
 import tmlib.logger as log
-
-"""This module provides all methods to work with library"""
 
 
 def add_task(tasks_controller, task):
@@ -192,7 +193,7 @@ def set_task_as_to_do(tasks_controller, task_id):
     """Sets task's status as TODO by ID"""
 
     if user_can_write_task(tasks_controller, task_id):
-        tasks_controller.set_as_to_do(task_id)
+        tasks_controller.set_status(task_id, Status.TODO.value)
         log.get_logger().info(
             "Set task's status with ID {} as TODO".format(task_id))
     else:
@@ -205,7 +206,7 @@ def set_task_as_in_progress(tasks_controller, task_id):
     """Sets task's status as IN_PROGRESS by ID"""
 
     if user_can_write_task(tasks_controller, task_id):
-        tasks_controller.set_as_in_progress(task_id)
+        tasks_controller.set_status(task_id, Status.IN_PROGRESS.value)
         log.get_logger().info(
             "Set task's status with ID {} as IN_PROGRESS".format(task_id))
     else:
@@ -218,7 +219,7 @@ def set_task_as_done(tasks_controller, task_id):
     """Sets task's status as DONE by ID"""
 
     if user_can_write_task(tasks_controller, task_id):
-        tasks_controller.set_as_done(task_id)
+        tasks_controller.set_status(task_id, Status.DONE.value)
         log.get_logger().info(
             "Set task's status with ID {} as DONE".format(task_id))
     else:
@@ -231,7 +232,7 @@ def set_task_as_archived(tasks_controller, task_id):
     """Sets task's status as ARCHIVED by ID"""
 
     if user_can_write_task(tasks_controller, task_id):
-        tasks_controller.set_as_archived(task_id)
+        tasks_controller.set_status(task_id, Status.ARCHIVED.value)
         log.get_logger().info(
             "Set task's status with ID {} as ARCHIVED".format(task_id))
     else:
@@ -273,18 +274,18 @@ def delete_category(categories_controller, category_id):
 def user_can_read_task(tasks_controller, task_id):
     task = tasks_controller.get_by_id(task_id)
     if task is not None:
-        return task.user_id == tasks_controller.user_id or \
-            task.assigned_user_id == tasks_controller.user_id or \
-            tasks_controller.user_can_read(task_id) or \
-            tasks_controller.user_can_write(task_id)
+        return (task.user_id == tasks_controller.user_id or
+            task.assigned_user_id == tasks_controller.user_id or
+            tasks_controller.user_can_read(task_id) or
+            tasks_controller.user_can_write(task_id))
 
 
 def user_can_write_task(tasks_controller, task_id):
     task = tasks_controller.get_by_id(task_id)
     if task is not None:
-        return task.user_id == tasks_controller.user_id or \
-            task.assigned_user_id == tasks_controller.user_id or \
-            tasks_controller.user_can_write(task_id)
+        return (task.user_id == tasks_controller.user_id or
+            task.assigned_user_id == tasks_controller.user_id or
+            tasks_controller.user_can_write(task_id))
 
 
 def add_notification(tasks_controller, notifications_controller, notification):

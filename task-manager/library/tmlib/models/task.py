@@ -22,8 +22,6 @@ class Status(enum.Enum):
 
 
 class Task:
-    """Class for storing user's task"""
-
     def __init__(
             self,
             user_id,

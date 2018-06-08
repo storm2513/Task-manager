@@ -1,14 +1,12 @@
 import datetime
 from peewee import DoesNotExist
-from tmlib.storage.storage_models import Task, TaskPlan, Adapter
+from tmlib.storage.storage_models import Task, TaskPlan, DatabaseConnector
 from tmlib.storage.task_storage import TaskStorage
 from tmlib.models.task_plan import TaskPlan as TaskPlanInstance
 from tmlib.models.task import Status
 
 
-class TaskPlanStorage(Adapter):
-    """Class for managing task plans in database"""
-
+class TaskPlanStorage(DatabaseConnector):
     def create(self, plan):
         return self.to_plan_instance(
             TaskPlan.create(
@@ -50,8 +48,8 @@ class TaskPlanStorage(Adapter):
         """Creates tasks according to task plans."""
 
         for plan in TaskPlan.select():
-            if plan.last_created_at + \
-                    datetime.timedelta(seconds=plan.interval) < datetime.datetime.now():
+            if (plan.last_created_at + datetime.timedelta(seconds=plan.interval)
+                    ) < datetime.datetime.now():
                 try:
                     task = task_storage.get_by_id(
                         plan.task_id)  # template task
@@ -64,10 +62,14 @@ class TaskPlanStorage(Adapter):
                     If this method called on tuesday in last_created_at should be monday
                     in order to save the rule that it creates task every monday on 10:00.
                     """
-                    last_created_at = plan.last_created_at + \
-                        datetime.timedelta(seconds=plan.interval)
-                    while last_created_at + \
-                            datetime.timedelta(seconds=plan.interval) < datetime.datetime.now():
+                    last_created_at = (
+                        plan.last_created_at +
+                        datetime.timedelta(
+                            seconds=plan.interval))
+                    while (
+                        last_created_at +
+                        datetime.timedelta(
+                            seconds=plan.interval)) < datetime.datetime.now():
                         last_created_at += datetime.timedelta(
                             seconds=plan.interval)
                     plan.last_created_at = last_created_at

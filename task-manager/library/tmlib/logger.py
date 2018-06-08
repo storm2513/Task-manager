@@ -1,7 +1,9 @@
+"""This module provides functions to work with logging"""
+
+
 import logging
 import os
 
-"""This module provides functions to work with logging"""
 
 def setup_lib_logging(
         enabled=True,

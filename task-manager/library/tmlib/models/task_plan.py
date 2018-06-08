@@ -1,5 +1,5 @@
 class TaskPlan:
-    """Class that creates task from template according to interval"""
+    """Class that is used to create task from template according to interval"""
 
     def __init__(
             self,

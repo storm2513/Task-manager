@@ -3,18 +3,18 @@ import datetime
 import sys
 import dateparser
 import humanize
-from cli.session import login_user, current_user, logout_user
 from cli.user import UserStorage, UserInstance as User
+from cli.user_session import UserSession
 import cli.config as config
 from tmlib import commands
+import tmlib.controllers.categories_controller
+import tmlib.controllers.notifications_controller
+import tmlib.controllers.tasks_controller
+import tmlib.controllers.task_plans_controller
 from tmlib.models.category import Category
 from tmlib.models.task import Task, Status, Priority
 from tmlib.models.task_plan import TaskPlan
 from tmlib.models.notification import Notification, Status as NotificationStatus
-from tmlib.controllers.categories_controller import create_categories_controller
-from tmlib.controllers.notifications_controller import create_notifications_controller
-from tmlib.controllers.task_plans_controller import create_task_plans_controller
-from tmlib.controllers.tasks_controller import create_tasks_controller
 from tmlib.exceptions.exceptions import UserHasNoRightError
 
 
@@ -416,160 +416,159 @@ def create_show_notification_parser(parser):
     parser.add_parser('all', help="Shows all user's notifications")
 
 
-def check_user_authorized():
-    if current_user() is None:
+def check_user_authorized(user_session):
+    if user_session.get_current_user() is None:
         print("You should login before this action")
         quit()
 
 
-def parse_object(args):
+def process_object(args, user_session):
     if args.object == 'user':
-        parse_user_action(args)
+        process_user_action(args, user_session)
     elif args.object == 'category':
-        check_user_authorized()
-        parse_category_action(args)
+        check_user_authorized(user_session)
+        process_category_action(args, user_session.get_current_user())
     elif args.object == 'task':
-        check_user_authorized()
-        parse_task_action(args)
+        check_user_authorized(user_session)
+        process_task_action(args, user_session.get_current_user())
     elif args.object == 'notification':
-        check_user_authorized()
-        parse_notification_action(args)
+        check_user_authorized(user_session)
+        process_notification_action(args, user_session.get_current_user())
     elif args.object == 'plan':
-        check_user_authorized()
-        parse_task_plan_action(args)
+        check_user_authorized(user_session)
+        process_task_plan_action(args, user_session.get_current_user())
 
 
-def parse_user_action(args):
+def process_user_action(args, user_session):
     if args.action == 'add':
-        add_user(args)
+        add_user(args, user_session)
     elif args.action == 'login':
-        login(args)
+        login(args, user_session)
     elif args.action == 'logout':
-        logout()
+        logout(user_session)
     elif args.action == 'current':
-        check_user_authorized()
-        current()
+        check_user_authorized(user_session)
+        show_user(user_session.get_current_user())
     elif args.action == 'all':
         show_all_users()
 
 
-def parse_category_action(args):
+def process_category_action(args, user):
     if args.action == 'add':
-        add_category(args)
+        add_category(args, user)
     elif args.action == 'show':
-        show_category(args)
+        show_category(args, user)
     elif args.action == 'delete':
-        delete_category(args)
+        delete_category(args, user)
     elif args.action == 'edit':
-        update_category(args)
+        update_category(args, user)
     elif args.action == 'all':
-        show_all_categories()
+        show_all_categories(user)
 
 
-def parse_task_action(args):
+def process_task_action(args, user):
     if args.action == 'add':
-        add_task(args)
+        add_task(args, user)
     elif args.action == 'edit':
-        edit_task(args)
+        edit_task(args, user)
     elif args.action == 'show':
         if args.show_action == 'id':
-            show_task(args)
+            show_task(args, user)
         elif args.show_action == 'all':
-            show_all_tasks()
+            show_all_tasks(user)
         elif args.show_action == 'inner':
-            show_inner_tasks(args)
+            show_inner_tasks(args, user)
         elif args.show_action == 'parent':
-            show_parent_task(args)
+            show_parent_task(args, user)
         elif args.show_action == 'assigned':
-            show_assigned_tasks()
+            show_assigned_tasks(user)
         elif args.show_action == 'todo':
-            show_to_do_tasks()
+            show_to_do_tasks(user)
         elif args.show_action == 'in_progress':
-            show_in_progress_tasks()
+            show_in_progress_tasks(user)
         elif args.show_action == 'done':
-            show_done_tasks()
+            show_done_tasks(user)
         elif args.show_action == 'archived':
-            show_archived_tasks()
+            show_archived_tasks(user)
         elif args.show_action == 'can_read':
-            show_can_read_tasks()
+            show_can_read_tasks(user)
         elif args.show_action == 'can_write':
-            show_can_write_tasks()
+            show_can_write_tasks(user)
     elif args.action == 'set_status':
         if args.set_status_action == 'todo':
-            set_task_as_to_do(args)
+            set_task_as_to_do(args, user)
         elif args.set_status_action == 'in_progress':
-            set_task_as_in_progress(args)
+            set_task_as_in_progress(args, user)
         elif args.set_status_action == 'done':
-            set_task_as_done(args)
+            set_task_as_done(args, user)
         elif args.set_status_action == 'archived':
-            set_task_as_archived(args)
+            set_task_as_archived(args, user)
     elif args.action == 'delete':
-        delete_task(args)
+        delete_task(args, user)
     elif args.action == 'add_inner':
-        create_inner_task(args)
+        create_inner_task(args, user)
     elif args.action == 'assign':
-        assign_task_on_user(args)
+        assign_task_on_user(args, user)
     elif args.action == 'rights':
         if args.rights_action == 'add':
             if args.rights_add_action == 'read':
-                add_user_for_read(args)
+                add_user_for_read(args, user)
             elif args.rights_add_action == 'write':
-                add_user_for_write(args)
+                add_user_for_write(args, user)
         elif args.rights_action == 'remove':
             if args.rights_remove_action == 'read':
-                remove_user_for_read(args)
+                remove_user_for_read(args, user)
             elif args.rights_remove_action == 'write':
-                remove_user_for_write(args)
+                remove_user_for_write(args, user)
 
 
-def parse_notification_action(args):
+def process_notification_action(args, user):
     if args.action == 'add':
-        add_notification(args)
+        add_notification(args, user)
     elif args.action == 'show':
         if args.show_action == 'id':
-            show_notification(args)
+            show_notification(args, user)
         elif args.show_action == 'all':
-            show_all_notifications()
+            show_all_notifications(user)
         elif args.show_action == 'created':
-            show_created_notifications()
+            show_created_notifications(user)
         elif args.show_action == 'shown':
-            show_shown_notifications()
+            show_shown_notifications(user)
     elif args.action == 'edit':
-        edit_notification(args)
+        edit_notification(args, user)
     elif args.action == 'delete':
-        delete_notification(args)
+        delete_notification(args, user)
 
 
-def parse_task_plan_action(args):
+def process_task_plan_action(args, user):
     if args.action == 'edit':
-        edit_task_plan(args)
+        edit_task_plan(args, user)
     elif args.action == 'all':
-        show_all_task_plans()
+        show_all_task_plans(user)
 
 
-def add_user(args):
+def add_user(args, user_session):
     user = User(username=args.username)
     if UserStorage().create(user):
-        login_user(user.username)
+        user_session.login_user(user.username)
         print('User {} registered'.format(args.username))
     else:
         print('Error. User {} already exists'.format(args.username), file=sys.stderr)
 
 
-def login(args):
-    if login_user(args.username) is not None:
+def login(args, user_session):
+    if user_session.login_user(args.username) is not None:
         print('User {} logged in'.format(args.username))
     else:
         print('User {} does not exist'.format(args.username), file=sys.stderr)
 
 
-def logout():
-    logout_user()
+def logout(user_session):
+    user_session.logout_user()
     print('User logged out')
 
 
-def current():
-    user = current_user()
+def show_user(user):
     print(
         "ID: {}, username: {}".format(user.id, user.username))
 
@@ -584,35 +583,37 @@ def show_all_users():
                 user.username))
 
 
-def add_category(args):
+def add_category(args, user):
     category = Category(name=args.name)
-    commands.add_category(categories_controller(), category)
+    commands.add_category(create_categories_controller(user), category)
     print('Category "{}" added'.format(args.name))
 
 
-def update_category(args):
-    category = commands.get_category_by_id(categories_controller(), args.id)
+def update_category(args, user):
+    category = commands.get_category_by_id(
+        create_categories_controller(user), args.id)
     if category is None:
         print("There is no category with such ID")
         quit()
     category.name = args.name
-    commands.update_category(categories_controller(), category)
-    print('Category with ID: {} was updated'.format(category.id))
+    commands.update_category(create_categories_controller(user), category)
+    print('Category {} with ID {} was updated'.format(category.name, category.id))
 
 
-def delete_category(args):
-    commands.delete_category(categories_controller(), args.id)
+def delete_category(args, user):
+    commands.delete_category(create_categories_controller(user), args.id)
     print("Category was deleted")
 
 
-def show_category(args):
-    category = commands.get_category_by_id(categories_controller(), args.id)
+def show_category(args, user):
+    category = commands.get_category_by_id(
+        create_categories_controller(user), args.id)
     print("ID: {}, name: {}".format(category.id, category.name))
 
 
-def show_all_categories():
+def show_all_categories(user):
     print("Categories:")
-    categories = commands.all_categories(categories_controller())
+    categories = commands.all_categories(create_categories_controller(user))
     for category in categories:
         print("ID: {}, name: {}".format(category.id, category.name))
 
@@ -624,8 +625,8 @@ def validate_time_in_task(start_time, end_time):
             quit()
 
 
-def add_task(args):
-    user_id = current_user().id
+def add_task(args, user):
+    user_id = user.id
     task = Task(title=args.title, user_id=user_id)
     if args.note is not None:
         task.note = args.note
@@ -654,25 +655,25 @@ def add_task(args):
                 if args.start_repeat_at is not None:
                     start_date = dateparser.parse(args.start_repeat_at)
                     if start_date is not None:
-                        time_delta = interval - \
-                            (start_date - datetime.datetime.now()).total_seconds()
+                        time_delta = (interval -
+                            (start_date - datetime.datetime.now()).total_seconds())
                         last_created_at = datetime.datetime.now() - datetime.timedelta(seconds=time_delta)
             task.status = Status.TEMPLATE.value
-            task_id = commands.add_task(tasks_controller(), task).id
+            task_id = commands.add_task(create_tasks_controller(user), task).id
             plan = TaskPlan(
                 task_id=task_id,
-                user_id=current_user().id,
+                user_id=user.id,
                 interval=interval,
                 last_created_at=last_created_at)
-            commands.add_task_plan(task_plans_controller(), plan)
+            commands.add_task_plan(create_task_plans_controller(user), plan)
             print('Planned task added')
     else:
-        commands.add_task(tasks_controller(), task)
+        commands.add_task(create_tasks_controller(user), task)
         print('Task added')
 
 
-def edit_task(args):
-    task = commands.get_task_by_id(tasks_controller(), args.id)
+def edit_task(args, user):
+    task = commands.get_task_by_id(create_tasks_controller(user), args.id)
     if task is not None:
         if args.title is not None:
             task.title = args.title
@@ -689,43 +690,43 @@ def edit_task(args):
             task.category_id = args.category_id
         if args.priority is not None:
             task.priority = Priority[args.priority.upper()].value
-        commands.update_task(tasks_controller(), task)
+        commands.update_task(create_tasks_controller(user), task)
         print("Task was updated")
     else:
         print("Error. There is no task with such ID", file=sys.stderr)
 
 
-def show_task(args):
-    task = commands.get_task_by_id(tasks_controller(), args.id)
-    print_task(task)
+def show_task(args, user):
+    task = commands.get_task_by_id(create_tasks_controller(user), args.id)
+    print_task(task, user)
 
 
-def delete_task(args):
+def delete_task(args, user):
     try:
-        commands.delete_task(tasks_controller(), args.id)
+        commands.delete_task(create_tasks_controller(user), args.id)
         print('Task with id {} deleted'.format(args.id))
     except UserHasNoRightError:
         print("User has no rights for this action", file=sys.stderr)
 
 
-def set_task_as_to_do(args):
-    commands.set_task_as_to_do(tasks_controller(), args.id)
+def set_task_as_to_do(args, user):
+    commands.set_task_as_to_do(create_tasks_controller(user), args.id)
 
 
-def set_task_as_in_progress(args):
-    commands.set_task_as_in_progress(tasks_controller(), args.id)
+def set_task_as_in_progress(args, user):
+    commands.set_task_as_in_progress(create_tasks_controller(user), args.id)
 
 
-def set_task_as_done(args):
-    commands.set_task_as_done(tasks_controller(), args.id)
+def set_task_as_done(args, user):
+    commands.set_task_as_done(create_tasks_controller(user), args.id)
 
 
-def set_task_as_archived(args):
-    commands.set_task_as_archived(tasks_controller(), args.id)
+def set_task_as_archived(args, user):
+    commands.set_task_as_archived(create_tasks_controller(user), args.id)
 
 
-def create_inner_task(args):
-    user_id = current_user().id
+def create_inner_task(args, user):
+    user_id = user.id
     task = Task(title=args.title, user_id=user_id)
     if args.note is not None:
         task.note = args.note
@@ -740,115 +741,119 @@ def create_inner_task(args):
         task.category_id = args.category_id
     if args.priority is not None:
         task.priority = Priority[args.priority.upper()].value
-    commands.create_inner_task(tasks_controller(), args.parent_task_id, task)
+    commands.create_inner_task(
+        create_tasks_controller(user),
+        args.parent_task_id,
+        task)
     print("Inner task was created")
 
 
-def show_inner_tasks(args):
+def show_inner_tasks(args, user):
     print('Inner tasks:')
-    tasks = commands.get_inner_tasks(tasks_controller(), args.pid)
-    print_task_list(tasks)
+    tasks = commands.get_inner_tasks(create_tasks_controller(user), args.pid)
+    print_task_list(tasks, user)
 
 
-def show_parent_task(args):
+def show_parent_task(args, user):
     print('Parent task:')
-    task = commands.get_parent_task(tasks_controller(), args.id)
-    print_task(task)
+    task = commands.get_parent_task(create_tasks_controller(user), args.id)
+    print_task(task, user)
 
 
-def assign_task_on_user(args):
+def assign_task_on_user(args, user):
     commands.assign_task_on_user(
-        tasks_controller=tasks_controller(),
+        tasks_controller=create_tasks_controller(user),
         task_id=args.task_id,
-        assigned_user_id=args.user_id)
+        user_id=args.user_id)
 
 
-def add_user_for_read(args):
+def add_user_for_read(args, user):
     commands.add_user_for_read(
-        tasks_controller=tasks_controller(),
+        tasks_controller=create_tasks_controller(user),
         user_id=args.user_id,
         task_id=args.task_id)
 
 
-def add_user_for_write(args):
+def add_user_for_write(args, user):
     commands.add_user_for_write(
-        tasks_controller=tasks_controller(),
+        tasks_controller=create_tasks_controller(user),
         user_id=args.user_id,
         task_id=args.task_id)
 
 
-def remove_user_for_read(args):
+def remove_user_for_read(args, user):
     commands.remove_user_for_read(
-        tasks_controller=tasks_controller(),
+        tasks_controller=create_tasks_controller(user),
         user_id=args.user_id,
         task_id=args.task_id)
 
 
-def remove_user_for_write(args):
+def remove_user_for_write(args, user):
     commands.remove_user_for_write(
-        tasks_controller=tasks_controller(),
+        tasks_controller=create_tasks_controller(user),
         user_id=args.user_id,
         task_id=args.task_id)
 
 
-def show_all_tasks():
+def show_all_tasks(user):
     print('Tasks:')
-    tasks = commands.user_tasks(tasks_controller())
-    print_task_list(tasks)
+    tasks = commands.user_tasks(create_tasks_controller(user))
+    print_task_list(tasks, user)
 
 
-def show_assigned_tasks():
+def show_assigned_tasks(user):
     print('Assigned tasks:')
-    tasks = commands.assigned_tasks(tasks_controller())
-    print_task_list(tasks)
+    tasks = commands.assigned_tasks(create_tasks_controller(user))
+    print_task_list(tasks, user)
 
 
-def show_can_read_tasks():
+def show_can_read_tasks(user):
     print('Can read tasks:')
-    tasks = commands.can_read_tasks(tasks_controller())
-    print_task_list(tasks)
+    tasks = commands.can_read_tasks(create_tasks_controller(user))
+    print_task_list(tasks, user)
 
 
-def show_can_write_tasks():
+def show_can_write_tasks(user):
     print('Can write tasks:')
-    tasks = commands.can_write_tasks(tasks_controller())
-    print_task_list(tasks)
+    tasks = commands.can_write_tasks(create_tasks_controller(user))
+    print_task_list(tasks, user)
 
 
-def show_to_do_tasks():
+def show_to_do_tasks(user):
     print('TODO:')
-    tasks = commands.tasks_with_status(tasks_controller(), Status.TODO.value)
-    print_task_list(tasks)
+    tasks = commands.tasks_with_status(
+        create_tasks_controller(user), Status.TODO.value)
+    print_task_list(tasks, user)
 
 
-def show_in_progress_tasks():
+def show_in_progress_tasks(user):
     print('IN_PROGRESS:')
     tasks = commands.tasks_with_status(
-        tasks_controller(), Status.IN_PROGRESS.value)
-    print_task_list(tasks)
+        create_tasks_controller(user), Status.IN_PROGRESS.value)
+    print_task_list(tasks, user)
 
 
-def show_done_tasks():
+def show_done_tasks(user):
     print('DONE:')
-    tasks = commands.tasks_with_status(tasks_controller(), Status.DONE.value)
-    print_task_list(tasks)
+    tasks = commands.tasks_with_status(
+        create_tasks_controller(user), Status.DONE.value)
+    print_task_list(tasks, user)
 
 
-def show_archived_tasks():
+def show_archived_tasks(user):
     print('ARCHIVED:')
     tasks = commands.tasks_with_status(
-        tasks_controller(), Status.ARCHIVED.value)
-    print_task_list(tasks)
+        create_tasks_controller(user), Status.ARCHIVED.value)
+    print_task_list(tasks, user)
 
 
-def print_task(task):
+def print_task(task, user):
     if task is not None:
         result = "ID: {}".format(task.id)
         if task.parent_task_id is not None:
             result += ", parent task's id: {}".format(task.parent_task_id)
         if task.assigned_user_id is not None:
-            result += ", assigned to user: {}".format(
-                commands.get_user_email_by_id(task.assigned_user_id))
+            result += ", assigned user's id: {}".format(task.assigned_user_id)
         result += ", title: {}".format(task.title)
         if task.note is not "":
             result += ", note: {}".format(task.note)
@@ -860,7 +865,7 @@ def print_task(task):
             result += ", category: None"
         else:
             result += ", category: {}".format(
-                commands.get_category_by_id(categories_controller(),
+                commands.get_category_by_id(create_categories_controller(user),
                                             task.category_id).name)
         result += ", is event: {}, priority: {}, status: {}".format(
             task.is_event, Priority(
@@ -871,14 +876,14 @@ def print_task(task):
         print(result)
 
 
-def print_task_list(task_list):
+def print_task_list(task_list, user):
     if task_list is not None:
         for task in task_list:
-            print_task(task)
+            print_task(task, user)
 
 
-def add_notification(args):
-    task = commands.get_task_by_id(tasks_controller(), args.task_id)
+def add_notification(args, user):
+    task = commands.get_task_by_id(create_tasks_controller(user), args.task_id)
     parsed_time = dateparser.parse(args.relative_start_time)
     if task is not None:
         if task.start_time is not None and parsed_time is not None:
@@ -890,7 +895,9 @@ def add_notification(args):
                 title=args.title,
                 relative_start_time=relative_start_time)
             commands.add_notification(
-                tasks_controller(), notifications_controller(), notification)
+                create_tasks_controller(user),
+                create_notifications_controller(user),
+                notification)
             print("Added notification")
         else:
             print(
@@ -899,9 +906,9 @@ def add_notification(args):
         print("Error. Task doesn't exist", file=sys.stderr)
 
 
-def edit_notification(args):
+def edit_notification(args, user):
     notification = commands.get_notification_by_id(
-        notifications_controller(), args.id)
+        create_notifications_controller(user), args.id)
     if notification is not None:
         if args.title is not None:
             notification.title = args.title
@@ -912,37 +919,40 @@ def edit_notification(args):
                     datetime.datetime.now() -
                     parsed_time).total_seconds()
         commands.update_notification(
-            tasks_controller(), notifications_controller(), notification)
+            create_tasks_controller(user),
+            create_notifications_controller(user),
+            notification)
         print("Updated notification")
     else:
         print("Error. There is not notification with such ID", file=sys.stderr)
 
 
-def delete_notification(args):
-    commands.delete_notification(notifications_controller(), args.id)
+def delete_notification(args, user):
+    commands.delete_notification(create_notifications_controller(user), args.id)
     print("Notification was deleted")
 
 
-def show_notification(args):
+def show_notification(args, user):
     notification = commands.get_notification_by_id(
-        notifications_controller(), args.id)
+        create_notifications_controller(user), args.id)
     print_notification(notification)
 
 
-def show_all_notifications():
-    notifications = commands.user_notifications(notifications_controller())
+def show_all_notifications(user):
+    notifications = commands.user_notifications(
+        create_notifications_controller(user))
     print_notification_list(notifications)
 
 
-def show_created_notifications():
+def show_created_notifications(user):
     notifications = commands.user_created_notifications(
-        notifications_controller())
+        create_notifications_controller(user))
     print_notification_list(notifications)
 
 
-def show_shown_notifications():
+def show_shown_notifications(user):
     notifications = commands.user_shown_notifications(
-        notifications_controller())
+        create_notifications_controller(user))
     print_notification_list(notifications)
 
 
@@ -965,19 +975,20 @@ def print_notification_list(notifications):
             print_notification(notification)
 
 
-def show_pending_notifications():
-    check_user_authorized()
-    notifications = commands.pending_notifications(notifications_controller())
+def show_pending_notifications(user):
+    notifications = commands.pending_notifications(
+        create_notifications_controller(user))
     if notifications:
         print('Notifications')
         for notification in notifications:
             commands.set_notification_as_shown(
-                notifications_controller(), notification.id)
+                create_notifications_controller(user), notification.id)
             print_notification(notification)
 
 
-def edit_task_plan(args):
-    plan = commands.get_task_plan_by_id(task_plans_controller(), args.id)
+def edit_task_plan(args, user):
+    plan = commands.get_task_plan_by_id(
+        create_task_plans_controller(user), args.id)
     if plan is not None:
         if args.repeat is not None:
             parsed_time = dateparser.parse(args.repeat)
@@ -995,18 +1006,18 @@ def edit_task_plan(args):
         if args.start_repeat_at is not None:
             start_date = dateparser.parse(args.start_repeat_at)
             if start_date is not None:
-                time_delta = interval - \
-                    (start_date - datetime.datetime.now()).total_seconds()
+                time_delta = (interval - 
+                    (start_date - datetime.datetime.now()).total_seconds())
                 last_created_at = datetime.datetime.now() - datetime.timedelta(seconds=time_delta)
                 plan.last_created_at = last_created_at
-        commands.update_task_plan(task_plans_controller(), plan)
+        commands.update_task_plan(create_task_plans_controller(user), plan)
         print("Updated task plan")
     else:
         print("Error. There is no task plan with such ID", file=sys.stderr)
 
 
-def show_all_task_plans():
-    plans = commands.get_task_plans(task_plans_controller())
+def show_all_task_plans(user):
+    plans = commands.get_task_plans(create_task_plans_controller(user))
     print_task_plan_list(plans)
 
 
@@ -1027,28 +1038,34 @@ def print_task_plan_list(plans):
             print_task_plan(plan)
 
 
-def tasks_controller(database_name=config.DATABASE):
-    return create_tasks_controller(current_user().id, database_name)
+def create_tasks_controller(user, database_name=config.DATABASE):
+    return tmlib.controllers.tasks_controller.create_tasks_controller(
+        user.id, database_name)
 
 
-def categories_controller(database_name=config.DATABASE):
-    return create_categories_controller(current_user().id, database_name)
+def create_categories_controller(user, database_name=config.DATABASE):
+    return tmlib.controllers.categories_controller.create_categories_controller(
+        user.id, database_name)
 
 
-def notifications_controller(database_name=config.DATABASE):
-    return create_notifications_controller(current_user().id, database_name)
+def create_notifications_controller(user, database_name=config.DATABASE):
+    return tmlib.controllers.notifications_controller.create_notifications_controller(
+        user.id, database_name)
 
 
-def task_plans_controller(database_name=config.DATABASE):
-    return create_task_plans_controller(current_user().id, database_name)
+def create_task_plans_controller(user, database_name=config.DATABASE):
+    return tmlib.controllers.task_plans_controller.create_task_plans_controller(
+        user.id, database_name)
 
 
-def process_args():
-    if current_user() is not None:
-        notifications_controller().process_notifications()
-        task_plans_controller().process_plans(tasks_controller())
-        show_pending_notifications()
+def handle_commands():
+    user_session = UserSession(config_file=config.CONFIG_FILE, database_name=config.DATABASE)
+    current_user = user_session.get_current_user()
+    if current_user is not None:
+        create_notifications_controller(current_user).process_notifications()
+        create_task_plans_controller(current_user).process_plans(create_tasks_controller(current_user))
+        show_pending_notifications(current_user)
 
     parser = init_parser()
     args = parser.parse_args()
-    parse_object(args)
+    process_object(args, user_session)

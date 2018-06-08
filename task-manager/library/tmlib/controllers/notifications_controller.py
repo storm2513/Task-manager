@@ -8,8 +8,6 @@ def create_notifications_controller(user_id, database_name):
 
 
 class NotificationsController(BaseController):
-    """Class for managing notifications"""
-
     def create(self, notification):
         notification.user_id = self.user_id
         return self.storage.create(notification)

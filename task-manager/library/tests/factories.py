@@ -1,6 +1,6 @@
+import datetime
 import factory
 import factory.fuzzy
-import datetime
 from tmlib.models.task import Task as TaskInstance
 from tmlib.models.category import Category as CategoryInstance
 from tmlib.models.task_plan import TaskPlan as TaskPlanInstance
