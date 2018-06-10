@@ -18,8 +18,15 @@ from tmlib.models.notification import Notification, Status as NotificationStatus
 from tmlib.exceptions.exceptions import UserHasNoRightError
 
 
+class DefaultHelpParser(argparse.ArgumentParser):
+    def error(self, message):
+        print('error: %s\n' % message, file=sys.stderr)
+        self.print_help()
+        sys.exit(2)
+
+
 def init_parser():
-    parser = argparse.ArgumentParser(
+    parser = DefaultHelpParser(
         description='Simple console task manager',
         usage='''task_manager <object> [<args>]''')
     subparser = parser.add_subparsers(
