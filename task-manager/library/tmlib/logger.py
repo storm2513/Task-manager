@@ -19,14 +19,15 @@ def setup_lib_logging(
             open(path, 'w').close()
 
     check_and_create_logger_file(log_file_path)
-    formatter = logging.Formatter(log_format)
 
+    formatter = logging.Formatter(log_format)
     file_logging_handler = logging.FileHandler(log_file_path)
     if log_all_levels:
         file_logging_handler.setLevel(logging.DEBUG)
     else:
         file_logging_handler.setLevel(logging.WARNING)
     file_logging_handler.setFormatter(formatter)
+
     logger = get_logger()
     logger.setLevel(logging.DEBUG)
     if (logger.hasHandlers()):

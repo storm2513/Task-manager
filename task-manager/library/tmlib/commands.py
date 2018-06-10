@@ -189,52 +189,11 @@ def tasks_with_status(tasks_controller, status):
     return tasks_controller.with_status(status)
 
 
-def set_task_as_to_do(tasks_controller, task_id):
-    """Sets task's status as TODO by ID"""
-
+def set_task_status(tasks_controller, task_id, status):
     if user_can_write_task(tasks_controller, task_id):
-        tasks_controller.set_status(task_id, Status.TODO.value)
+        tasks_controller.set_status(task_id, status)
         log.get_logger().info(
-            "Set task's status with ID {} as TODO".format(task_id))
-    else:
-        log.get_logger().error(
-            'User has no right for changing status for this task')
-        raise UserHasNoRightError
-
-
-def set_task_as_in_progress(tasks_controller, task_id):
-    """Sets task's status as IN_PROGRESS by ID"""
-
-    if user_can_write_task(tasks_controller, task_id):
-        tasks_controller.set_status(task_id, Status.IN_PROGRESS.value)
-        log.get_logger().info(
-            "Set task's status with ID {} as IN_PROGRESS".format(task_id))
-    else:
-        log.get_logger().error(
-            'User has no right for changing status for this task')
-        raise UserHasNoRightError
-
-
-def set_task_as_done(tasks_controller, task_id):
-    """Sets task's status as DONE by ID"""
-
-    if user_can_write_task(tasks_controller, task_id):
-        tasks_controller.set_status(task_id, Status.DONE.value)
-        log.get_logger().info(
-            "Set task's status with ID {} as DONE".format(task_id))
-    else:
-        log.get_logger().error(
-            'User has no right for changing status for this task')
-        raise UserHasNoRightError
-
-
-def set_task_as_archived(tasks_controller, task_id):
-    """Sets task's status as ARCHIVED by ID"""
-
-    if user_can_write_task(tasks_controller, task_id):
-        tasks_controller.set_status(task_id, Status.ARCHIVED.value)
-        log.get_logger().info(
-            "Set task's status with ID {} as ARCHIVED".format(task_id))
+            "Set task's status with ID {} as {}".format(task_id, Status(status).name))
     else:
         log.get_logger().error(
             'User has no right for changing status for this task')

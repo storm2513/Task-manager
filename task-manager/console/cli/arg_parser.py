@@ -604,7 +604,10 @@ def update_category(args, user):
         quit()
     category.name = args.name
     commands.update_category(create_categories_controller(user), category)
-    print('Category {} with ID {} was updated'.format(category.name, category.id))
+    print(
+        'Category {} with ID {} was updated'.format(
+            category.name,
+            category.id))
 
 
 def delete_category(args, user):
@@ -663,7 +666,7 @@ def add_task(args, user):
                     start_date = dateparser.parse(args.start_repeat_at)
                     if start_date is not None:
                         time_delta = (interval -
-                            (start_date - datetime.datetime.now()).total_seconds())
+                                      (start_date - datetime.datetime.now()).total_seconds())
                         last_created_at = datetime.datetime.now() - datetime.timedelta(seconds=time_delta)
             task.status = Status.TEMPLATE.value
             task_id = commands.add_task(create_tasks_controller(user), task).id
@@ -717,19 +720,31 @@ def delete_task(args, user):
 
 
 def set_task_as_to_do(args, user):
-    commands.set_task_as_to_do(create_tasks_controller(user), args.id)
+    commands.set_task_status(
+        create_tasks_controller(user),
+        args.id,
+        Status.TODO.value)
 
 
 def set_task_as_in_progress(args, user):
-    commands.set_task_as_in_progress(create_tasks_controller(user), args.id)
+    commands.set_task_status(
+        create_tasks_controller(user),
+        args.id,
+        Status.IN_PROGRESS.value)
 
 
 def set_task_as_done(args, user):
-    commands.set_task_as_done(create_tasks_controller(user), args.id)
+    commands.set_task_status(
+        create_tasks_controller(user),
+        args.id,
+        Status.DONE.value)
 
 
 def set_task_as_archived(args, user):
-    commands.set_task_as_archived(create_tasks_controller(user), args.id)
+    commands.set_task_status(
+        create_tasks_controller(user),
+        args.id,
+        Status.ARCHIVED.value)
 
 
 def create_inner_task(args, user):
@@ -935,7 +950,8 @@ def edit_notification(args, user):
 
 
 def delete_notification(args, user):
-    commands.delete_notification(create_notifications_controller(user), args.id)
+    commands.delete_notification(
+        create_notifications_controller(user), args.id)
     print("Notification was deleted")
 
 
@@ -1013,8 +1029,8 @@ def edit_task_plan(args, user):
         if args.start_repeat_at is not None:
             start_date = dateparser.parse(args.start_repeat_at)
             if start_date is not None:
-                time_delta = (interval - 
-                    (start_date - datetime.datetime.now()).total_seconds())
+                time_delta = (interval -
+                              (start_date - datetime.datetime.now()).total_seconds())
                 last_created_at = datetime.datetime.now() - datetime.timedelta(seconds=time_delta)
                 plan.last_created_at = last_created_at
         commands.update_task_plan(create_task_plans_controller(user), plan)
@@ -1066,11 +1082,14 @@ def create_task_plans_controller(user, database_name=config.DATABASE):
 
 
 def handle_commands():
-    user_session = UserSession(config_file=config.CONFIG_FILE, database_name=config.DATABASE)
+    user_session = UserSession(
+        config_file=config.CONFIG_FILE,
+        database_name=config.DATABASE)
     current_user = user_session.get_current_user()
     if current_user is not None:
         create_notifications_controller(current_user).process_notifications()
-        create_task_plans_controller(current_user).process_plans(create_tasks_controller(current_user))
+        create_task_plans_controller(current_user).process_plans(
+            create_tasks_controller(current_user))
         show_pending_notifications(current_user)
 
     parser = init_parser()
