@@ -5,3 +5,4 @@ task-manager/logs/
 build/
 dist/
 *.egg-info
+db.sqlite3
