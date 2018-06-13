@@ -9,6 +9,7 @@ def create_tasks_controller(user_id, database_name):
 
 class TasksController(BaseController):
     def create(self, task):
+        task.user_id = self.user_id
         return self.storage.create(task)
 
     def update(self, task):
