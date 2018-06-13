@@ -636,8 +636,7 @@ def validate_time_in_task(start_time, end_time):
 
 
 def add_task(args, user):
-    user_id = user.id
-    task = Task(title=args.title, user_id=user_id)
+    task = Task(title=args.title)
     if args.note is not None:
         task.note = args.note
     if args.start_time is not None:
@@ -748,8 +747,7 @@ def set_task_as_archived(args, user):
 
 
 def create_inner_task(args, user):
-    user_id = user.id
-    task = Task(title=args.title, user_id=user_id)
+    task = Task(title=args.title)
     if args.note is not None:
         task.note = args.note
     if args.start_time is not None:

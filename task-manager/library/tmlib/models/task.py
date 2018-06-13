@@ -24,9 +24,9 @@ class Status(enum.Enum):
 class Task:
     def __init__(
             self,
-            user_id,
             title,
             note="",
+            user_id=None,
             id=None,
             start_time=None,
             end_time=None,
