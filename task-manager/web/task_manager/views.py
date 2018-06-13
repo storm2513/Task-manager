@@ -53,7 +53,7 @@ def categories(request):
 @login_required
 def create_category(request):
     if request.method == 'POST':
-        form = CreateCategoryForm(request.POST)
+        form = CategoryForm(request.POST)
         if form.is_valid():
             name = form.cleaned_data['name']
             category = Category(name)
