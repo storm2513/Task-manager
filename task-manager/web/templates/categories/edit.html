@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit category{% endblock %}
+
+{% block content %}
+<h2>Edit category</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Update" />
+</form>
+<input class='btn btn-primary' type=button value="Back" onClick="javascript:history.go(-1);">
+{% endblock %}

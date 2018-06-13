@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Categories{% endblock %}
+
+{% block content %}
+<h2>Categories</h2>
+<div class='table-responsive'>
+  <table class="table table-hover" style="width: inherit;">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th colspan="1"></th>
+      </tr>
+    </thead>
+    <tbody>
+    	{% for category in categories %}
+  		<tr>
+  		  <th scope="row">{{category.id}}</th>
+  		  <td>{{category.name}}</td>
+        <td>
+          <a href="{% url 'task_manager:edit_category' category.id %}" class='btn btn-warning'>Edit</a>
+          <form style='display: inline-block;' action="{% url 'task_manager:delete_category' category.id %}" method='post'>
+            {% csrf_token %}
+            <button type='submit' class='btn btn-danger' onclick="return confirm('Are you sure you want to delete this category?')">Delete</button>
+          </form>
+        </td>
+  		</tr>
+  	{% endfor %}
+    </tbody>
+  </table>
+</div>
+<a href="{% url 'task_manager:new_category' %}" class='btn btn-primary'>Add category</a>
+{% endblock %}

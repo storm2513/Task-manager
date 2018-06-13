@@ -5,6 +5,11 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link {% if nav_bar == 'categories' %}active{% endif %}" href='{% url 'task_manager:categories' %}'>Categories <span class="sr-only">(current)</span></a>
+        </li>
+      </ul>
       <ul class="navbar-nav mr-auto"></ul>
       {% if user.is_authenticated %}
         <ul class="navbar-nav ">
