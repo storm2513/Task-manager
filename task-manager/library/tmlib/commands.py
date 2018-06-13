@@ -206,7 +206,7 @@ def add_category(categories_controller, category):
         'Category {} added'.format(category.name))
 
 
-def all_categories(categories_controller):
+def user_categories(categories_controller):
     return categories_controller.all()
 
 

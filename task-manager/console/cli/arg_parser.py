@@ -623,7 +623,7 @@ def show_category(args, user):
 
 def show_all_categories(user):
     print("Categories:")
-    categories = commands.all_categories(create_categories_controller(user))
+    categories = commands.user_categories(create_categories_controller(user))
     for category in categories:
         print("ID: {}, name: {}".format(category.id, category.name))
 
