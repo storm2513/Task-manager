@@ -17,8 +17,17 @@ categories_patterns = [
     url(r'^delete/(?P<id>[0-9]+)/$', views.delete_category, name='delete_category'),
 ]
 
+tasks_patterns = [
+    url(r'^$', views.tasks, name='tasks'),
+    url(r'^new/$', views.create_task, name='new_task'),
+    url(r'^(?P<id>[0-9]+)/$', views.show_task, name='show_task'),
+    url(r'^edit/(?P<id>[0-9]+)/$', views.edit_task, name='edit_task'),
+    url(r'^delete/(?P<id>[0-9]+)/$', views.delete_task, name='delete_task'),
+]
+
 urlpatterns = [
     url(r'^$', views.home, name='home'),
     url(r'^users/', include(users_patterns)),
-    url(r'^categories/', include(categories_patterns))
+    url(r'^categories/', include(categories_patterns)),
+    url(r'^tasks/', include(tasks_patterns)),
 ]

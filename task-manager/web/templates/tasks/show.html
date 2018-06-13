@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Task info{% endblock %}
+{% load task_tags %}
+{% block content %}
+<h2>Task info</h2>
+<h3><span class="badge badge-secondary">ID</span> {{task.id}}</h3>
+<h3><span class="badge badge-secondary">Title</span> {{task.title}}</h3>
+<h3><span class="badge badge-secondary">Note</span> {{task.note}}</h3>
+<h3><span class="badge badge-secondary">Category</span> {{category.name}}</h3>
+<h3><span class="badge badge-secondary">Priority</span> {{priority}}</h3>
+<h3><span class="badge badge-secondary">Status</span> {{status}}</h3>
+<h3><span class="badge badge-secondary">Created at</span> {{task.created_at}}</h3>
+<h3><span class="badge badge-secondary">Updated at</span> {{task.updated_at}}</h3>
+<h3><span class="badge badge-secondary">Event</span> {{task.is_event}}</h3>
+<h3><span class="badge badge-secondary">Start time</span> {{task.start_time}}</h3>
+<h3><span class="badge badge-secondary">End time</span> {{task.end_time}}</h3>
+<h3><span class="badge badge-secondary">Parent task</span>
+{% if parent_task_title is not None %}
+<a href="{% url 'task_manager:show_task' task.parent_task_id%}">{{ parent_task_title }}</a>
+{% else %}
+{{ parent_task_title }}
+{% endif %}
+</h3>
+<h3><span class="badge badge-secondary">Assigned user</span> {{assigned_user}}</h3>
+
+
+<input class='btn btn-primary' type=button value="Back" onClick="javascript:history.go(-1);">
+{% endblock %}

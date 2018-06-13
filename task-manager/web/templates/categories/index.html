@@ -15,7 +15,7 @@
     <tbody>
     	{% for category in categories %}
   		<tr>
-  		  <th scope="row">{{category.id}}</th>
+  		  <td scope="row">{{category.id}}</td>
   		  <td>{{category.name}}</td>
         <td>
           <a href="{% url 'task_manager:edit_category' category.id %}" class='btn btn-warning'>Edit</a>
