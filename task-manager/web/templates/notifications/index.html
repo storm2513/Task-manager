@@ -24,7 +24,7 @@
         <td>{% get_timedelta notification.relative_start_time %}</td>
         <td>{% get_status notification.status %}</td>
         <td>
-          <a href="{% url 'task_manager:edit_task' notification.task_id %}">
+          <a href="{% url 'task_manager:show_task' notification.task_id %}">
             {% get_task_title_by_id notification.user_id notification.task_id %}
           </a>
         </td>
