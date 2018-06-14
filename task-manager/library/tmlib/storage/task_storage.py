@@ -132,6 +132,14 @@ class TaskStorage(DatabaseConnector):
         UsersWriteTasks.delete().where(
             UsersWriteTasks.task_id == task_id).execute()
 
+    def get_users_can_read_task(self, task_id):
+        return list(UsersReadTasks.select(
+            UsersReadTasks.user_id).where(UsersReadTasks.task_id == task_id))
+
+    def get_users_can_write_task(self, task_id):
+        return list(UsersWriteTasks.select(
+            UsersWriteTasks.user_id).where(UsersWriteTasks.task_id == task_id))
+
     def user_can_read(self, user_id, task_id):
         """
         Returns True if user with ID == user_id can read task with ID == task_id.

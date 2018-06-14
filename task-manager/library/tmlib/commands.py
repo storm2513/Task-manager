@@ -191,6 +191,14 @@ def remove_all_users_for_write(tasks_controller, task_id):
         raise UserHasNoRightError
 
 
+def get_users_can_read_task(tasks_controller, task_id):
+    return tasks_controller.get_users_can_read_task(task_id)
+
+
+def get_users_can_write_task(tasks_controller, task_id):
+    return tasks_controller.get_users_can_write_task(task_id)
+
+
 def user_tasks(tasks_controller):
     return tasks_controller.user_tasks()
 
