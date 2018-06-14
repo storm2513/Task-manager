@@ -35,6 +35,15 @@ def signup(request):
                   {'form': form, 'username': request.user.username})
 
 
+def users(request):
+    users = User.objects.all()
+    return render(request,
+                  'users/index.html',
+                  {'users': users,
+                   'username': request.user.username,
+                   'nav_bar': 'users'})
+
+
 def _create_categories_controller(user_id):
     return create_categories_controller(
         user_id, settings.TASK_MANAGER_DATABASE_PATH)
@@ -80,6 +89,8 @@ def create_category(request):
 def edit_category(request, id):
     categories_controller = _create_categories_controller(request.user.id)
     category = tmlib.commands.get_category_by_id(categories_controller, id)
+    if category is None:
+        return redirect('task_manager:categories')
     if request.method == 'POST':
         form = CategoryForm(request.POST)
         if form.is_valid():
@@ -162,6 +173,8 @@ def create_task(request):
 def show_task(request, id):
     tasks_controller = _create_tasks_controller(request.user.id)
     task = tmlib.commands.get_task_by_id(tasks_controller, id)
+    if task is None:
+        return redirect('task_manager:tasks')
     category = tmlib.commands.get_category_by_id(
         _create_categories_controller(
             request.user.id), task.category_id)
@@ -177,6 +190,7 @@ def show_task(request, id):
             assigned_user = User.objects.get(id=task.assigned_user_id).username
         except User.DoesNotExist:
             pass
+    inner_tasks = tmlib.commands.get_inner_tasks(tasks_controller, task.id)
 
     return render(request,
                   'tasks/show.html',
@@ -187,13 +201,16 @@ def show_task(request, id):
                    'priority': Priority(task.priority).name,
                    'status': Status(task.status).name,
                    'parent_task_title': parent_task_title,
-                   'assigned_user': assigned_user})
+                   'assigned_user': assigned_user,
+                   'inner_tasks': inner_tasks})
 
 
 @login_required
 def edit_task(request, id):
     tasks_controller = _create_tasks_controller(request.user.id)
     task = tmlib.commands.get_task_by_id(tasks_controller, id)
+    if task is None:
+        return redirect('task_manager:tasks')
     if request.method == 'POST':
         form = TaskForm(request.user.id, request.POST)
         if form.is_valid():
