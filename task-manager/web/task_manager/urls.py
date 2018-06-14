@@ -24,6 +24,7 @@ tasks_patterns = [
     url(r'^(?P<id>[0-9]+)/$', views.show_task, name='show_task'),
     url(r'^edit/(?P<id>[0-9]+)/$', views.edit_task, name='edit_task'),
     url(r'^delete/(?P<id>[0-9]+)/$', views.delete_task, name='delete_task'),
+    url(r'^filter/assigned/$', views.assigned_tasks, name='assigned_tasks'),
 ]
 
 urlpatterns = [

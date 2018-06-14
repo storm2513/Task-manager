@@ -9,8 +9,12 @@
         <li class="nav-item">
           <a class="nav-link {% if nav_bar == 'categories' %}active{% endif %}" href='{% url 'task_manager:categories' %}'>Categories <span class="sr-only">(current)</span></a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link {% if nav_bar == 'tasks' %}active{% endif %}" href='{% url 'task_manager:tasks' %}'>Tasks <span class="sr-only">(current)</span></a>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle {% if nav_bar == 'tasks' %}active{% endif %}" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Tasks </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href='{% url 'task_manager:tasks' %}'>My</a>
+            <a class="dropdown-item" href='{% url 'task_manager:assigned_tasks' %}'>Assigned</a>
+          </div>
         </li>
         <li class="nav-item">
           <a class="nav-link {% if nav_bar == 'users' %}active{% endif %}" href='{% url 'task_manager:users' %}'>Users <span class="sr-only">(current)</span></a>

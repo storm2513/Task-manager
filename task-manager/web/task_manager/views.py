@@ -118,16 +118,26 @@ def delete_category(request, id):
 def tasks(request):
     tasks_controller = _create_tasks_controller(request.user.id)
     tasks = tmlib.commands.user_tasks(tasks_controller)
-
-    def get_task_category(id): return tmlib.commands.get_category_by_id(
-        tasks_controller, id)
     return render(request,
                   'tasks/index.html',
                   {'tasks': tasks,
                    'username': request.user.username,
                    'nav_bar': 'tasks',
-                   'user_id': request.user.id})
+                   'user_id': request.user.id,
+                   'header': 'My tasks'})
 
+
+@login_required
+def assigned_tasks(request):
+    tasks_controller = _create_tasks_controller(request.user.id)
+    tasks = tmlib.commands.assigned_tasks(tasks_controller)
+    return render(request,
+                  'tasks/index.html',
+                  {'tasks': tasks,
+                   'username': request.user.username,
+                   'nav_bar': 'tasks',
+                   'user_id': request.user.id,
+                   'header': 'Assigned on me tasks'})
 
 @login_required
 def create_task(request):
