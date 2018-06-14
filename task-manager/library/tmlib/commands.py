@@ -184,7 +184,7 @@ def remove_all_users_for_write(tasks_controller, task_id):
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.remove_all_users_for_write(task_id)
         log.get_logger().info(
-            'Removed from user with ID: {} read and write access to task with ID: {}'.format(task_id))
+            'Removed read and write access to task with ID: {} for all users'.format(task_id))
     else:
         log.get_logger().error(
             'User has no right for removing access for this task')
