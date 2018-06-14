@@ -14,6 +14,8 @@
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
             <a class="dropdown-item" href='{% url 'task_manager:tasks' %}'>My</a>
             <a class="dropdown-item" href='{% url 'task_manager:assigned_tasks' %}'>Assigned</a>
+            <a class="dropdown-item" href='{% url 'task_manager:can_read_tasks' %}'>Can read</a>
+            <a class="dropdown-item" href='{% url 'task_manager:can_write_tasks' %}'>Can write</a>
           </div>
         </li>
         <li class="nav-item">

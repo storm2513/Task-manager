@@ -30,6 +30,7 @@
     {% endfor %}
   </h3>
 {% endif %}
+<h3><span class="badge badge-secondary">Creator</span> {{creator}}</h3>
 
 <input class='btn btn-primary' type=button value="Back" onClick="javascript:history.go(-1);">
 <a href="{% url 'task_manager:edit_task' task.id %}" class='btn btn-warning'>Edit</a>

@@ -59,3 +59,7 @@ class TaskForm(forms.Form):
     parent_task = forms.ChoiceField()
     assigned_user = forms.ModelChoiceField(
         queryset=User.objects.all(), required=False)
+    can_read = forms.ModelMultipleChoiceField(
+        queryset=User.objects.all(), required=False)
+    can_write = forms.ModelMultipleChoiceField(
+        queryset=User.objects.all(), required=False)

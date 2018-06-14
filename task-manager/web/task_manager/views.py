@@ -139,6 +139,34 @@ def assigned_tasks(request):
                    'user_id': request.user.id,
                    'header': 'Assigned on me tasks'})
 
+
+@login_required
+def can_read_tasks(request):
+    tasks_controller = _create_tasks_controller(request.user.id)
+    tasks = tmlib.commands.can_read_tasks(tasks_controller)
+    return render(request,
+                  'tasks/index.html',
+                  {'tasks': tasks,
+                   'username': request.user.username,
+                   'nav_bar': 'tasks',
+                   'user_id': request.user.id,
+                   'header': 'Other tasks that I can read',
+                   'view': 'can_read'})
+
+
+@login_required
+def can_write_tasks(request):
+    tasks_controller = _create_tasks_controller(request.user.id)
+    tasks = tmlib.commands.can_write_tasks(tasks_controller)
+    return render(request,
+                  'tasks/index.html',
+                  {'tasks': tasks,
+                   'username': request.user.username,
+                   'nav_bar': 'tasks',
+                   'user_id': request.user.id,
+                   'header': 'Other tasks that I can write'})
+
+
 @login_required
 def create_task(request):
     if request.method == 'POST':
@@ -168,7 +196,22 @@ def create_task(request):
                 parent_task_id=parent_task_id,
                 assigned_user_id=assigned_user_id)
             tasks_controller = _create_tasks_controller(request.user.id)
-            tmlib.commands.add_task(tasks_controller, task)
+            task.id = tmlib.commands.add_task(tasks_controller, task).id
+            can_read_users = form.cleaned_data['can_read']
+            can_write_users = form.cleaned_data['can_write']
+            tmlib.commands.remove_all_users_for_read(tasks_controller, task.id)
+            if can_read_users is not None:
+                user_ids = [user.id for user in can_read_users]
+                for user_id in user_ids:
+                    tmlib.commands.add_user_for_read(
+                        tasks_controller, user_id, task.id)
+            tmlib.commands.remove_all_users_for_write(
+                tasks_controller, task.id)
+            if can_write_users is not None:
+                user_ids = [user.id for user in can_write_users]
+                for user_id in user_ids:
+                    tmlib.commands.add_user_for_write(
+                        tasks_controller, user_id, task.id)
             return redirect('task_manager:tasks')
     else:
         form = TaskForm(request.user.id)
@@ -201,6 +244,7 @@ def show_task(request, id):
         except User.DoesNotExist:
             pass
     inner_tasks = tmlib.commands.get_inner_tasks(tasks_controller, task.id)
+    creator = User.objects.get(id=task.user_id)
 
     return render(request,
                   'tasks/show.html',
@@ -212,7 +256,8 @@ def show_task(request, id):
                    'status': Status(task.status).name,
                    'parent_task_title': parent_task_title,
                    'assigned_user': assigned_user,
-                   'inner_tasks': inner_tasks})
+                   'inner_tasks': inner_tasks,
+                   'creator': creator.username})
 
 
 @login_required
@@ -237,8 +282,29 @@ def edit_task(request, id):
             assigned_user = form.cleaned_data['assigned_user']
             task.assigned_user_id = assigned_user.id if assigned_user is not None else None
             tmlib.commands.update_task(tasks_controller, task)
+            can_read_users = form.cleaned_data['can_read']
+            can_write_users = form.cleaned_data['can_write']
+            tmlib.commands.remove_all_users_for_read(tasks_controller, task.id)
+            if can_read_users is not None:
+                user_ids = [user.id for user in can_read_users]
+                for user_id in user_ids:
+                    tmlib.commands.add_user_for_read(
+                        tasks_controller, user_id, task.id)
+            tmlib.commands.remove_all_users_for_write(
+                tasks_controller, task.id)
+            if can_write_users is not None:
+                user_ids = [user.id for user in can_write_users]
+                for user_id in user_ids:
+                    tmlib.commands.add_user_for_write(
+                        tasks_controller, user_id, task.id)
             return redirect('task_manager:tasks')
     else:
+        users_can_read_ids = tmlib.commands.get_users_can_read_task(
+            tasks_controller, id)
+        users_can_write_ids = tmlib.commands.get_users_can_write_task(
+            tasks_controller, id)
+        can_read = User.objects.filter(id__in=users_can_read_ids)
+        can_write = User.objects.filter(id__in=users_can_write_ids)
         form = TaskForm(
             request.user.id,
             initial={
@@ -251,7 +317,10 @@ def edit_task(request, id):
                 'start_time': task.start_time,
                 'end_time': task.end_time,
                 'parent_task': task.parent_task_id,
-                'assigned_user': task.assigned_user_id})
+                'assigned_user': task.assigned_user_id,
+                'can_read': can_read,
+                'can_write': can_write})
+
     return render(request,
                   'tasks/edit.html',
                   {'form': form.as_p,
