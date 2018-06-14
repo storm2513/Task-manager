@@ -133,12 +133,14 @@ class TaskStorage(DatabaseConnector):
             UsersWriteTasks.task_id == task_id).execute()
 
     def get_users_can_read_task(self, task_id):
-        return list(UsersReadTasks.select(
+        users_list = list(UsersReadTasks.select(
             UsersReadTasks.user_id).where(UsersReadTasks.task_id == task_id))
+        return [element.user_id for element in users_list]
 
     def get_users_can_write_task(self, task_id):
-        return list(UsersWriteTasks.select(
+        users_list = list(UsersWriteTasks.select(
             UsersWriteTasks.user_id).where(UsersWriteTasks.task_id == task_id))
+        return [element.user_id for element in users_list]
 
     def user_can_read(self, user_id, task_id):
         """
