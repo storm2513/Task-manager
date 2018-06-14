@@ -63,3 +63,8 @@ class TaskForm(forms.Form):
         queryset=User.objects.all(), required=False)
     can_write = forms.ModelMultipleChoiceField(
         queryset=User.objects.all(), required=False)
+
+
+class NotificationForm(forms.Form):
+    title = forms.CharField(max_length=200)
+    relative_start_time = forms.CharField(max_length=50)

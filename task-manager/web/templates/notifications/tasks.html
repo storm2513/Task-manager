@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+{% load task_tags %}
+<h2>Tasks that can have notifications</h2>
+<div class='table-responsive'>
+  <table class="table table-hover" style="width: inherit;">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Note</th>
+        <th>Category</th>
+        <th>Status</th>
+        <th>Priority</th>
+        <th>Start time</th>
+        <th colspan="1"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for task in tasks %}
+      <tr>
+        <td scope="row">{{task.id}}</td>
+        <td>{{task.title}}</td>
+        <td>{{task.note}}</td>
+        <td>{% get_category_name_by_id user_id task.category_id %}</td>
+        <td>{% get_status task.status %}</td>
+        <td>{% get_priority task.priority %}</td>
+        <td>{{task.start_time}}</td>
+        <td>
+          <a href="{% url 'task_manager:edit_task' task.id %}" class='btn btn-warning'>Edit task</a>
+          <a href="{% url 'task_manager:add_notification' task.id %}" class='btn btn-primary'>Add notification</a>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

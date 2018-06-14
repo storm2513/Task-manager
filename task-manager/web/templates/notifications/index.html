@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+{% load notification_tags %}
+<h2>{{header}}</h2>
+<div class='table-responsive'>
+  <table class="table table-hover" style="width: inherit;">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Relative start time</th>
+        <th>Status</th>
+        <th>Task</th>
+        <th colspan="1"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for notification in notifications %}
+      <tr>
+        <td scope="row">{{notification.id}}</td>
+        <td>{{notification.title}}</td>
+        <td>{% get_timedelta notification.relative_start_time %}</td>
+        <td>{% get_status notification.status %}</td>
+        <td>
+          <a href="{% url 'task_manager:edit_task' notification.task_id %}">
+            {% get_task_title_by_id notification.user_id notification.task_id %}
+          </a>
+        </td>
+        <td>
+          {% if view == 'pending' %}
+          <form style='display: inline-block;' action="{% url 'task_manager:set_notification_as_shown' notification.id %}" method='post'>
+            {% csrf_token %}
+            <button type='submit' class='btn btn-primary'>Set as shown</button>
+          </form>
+          {% endif %}
+          <a href="{% url 'task_manager:edit_notification' notification.id %}" class='btn btn-warning'>Edit</a>
+          <form style='display: inline-block;' action="{% url 'task_manager:delete_notification' notification.id %}" method='post'>
+            {% csrf_token %}
+            <button type='submit' class='btn btn-danger' onclick="return confirm('Are you sure you want to delete this notification?')">Delete</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,3 +1,4 @@
+import datetime
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -6,10 +7,13 @@ from django.shortcuts import render, redirect
 from django.conf import settings
 from tmlib.controllers.categories_controller import create_categories_controller
 from tmlib.controllers.tasks_controller import create_tasks_controller
+from tmlib.controllers.notifications_controller import create_notifications_controller
 from tmlib.models.category import Category
 from tmlib.models.task import Task, Status, Priority
+from tmlib.models.notification import Notification, Status as NotificationStatus
 import tmlib.commands
-from .forms import CategoryForm, TaskForm
+from pytimeparse import parse
+from .forms import CategoryForm, TaskForm, NotificationForm
 
 
 def home(request):
@@ -51,6 +55,11 @@ def _create_categories_controller(user_id):
 
 def _create_tasks_controller(user_id):
     return create_tasks_controller(
+        user_id, settings.TASK_MANAGER_DATABASE_PATH)
+
+
+def _create_notifications_controller(user_id):
+    return create_notifications_controller(
         user_id, settings.TASK_MANAGER_DATABASE_PATH)
 
 
@@ -264,7 +273,8 @@ def show_task(request, id):
 def edit_task(request, id):
     tasks_controller = _create_tasks_controller(request.user.id)
     task = tmlib.commands.get_task_by_id(tasks_controller, id)
-    if task is None:
+    if task is None or not tmlib.commands.user_can_write_task(
+            tasks_controller, id):
         return redirect('task_manager:tasks')
     if request.method == 'POST':
         form = TaskForm(request.user.id, request.POST)
@@ -330,7 +340,175 @@ def edit_task(request, id):
 
 @login_required
 def delete_task(request, id):
-    if request.method == 'POST':
-        tasks_controller = _create_tasks_controller(request.user.id)
+    tasks_controller = _create_tasks_controller(request.user.id)
+    if request.method == 'POST' and tmlib.commands.user_can_write_task(
+            tasks_controller, id):
         tmlib.commands.delete_task(tasks_controller, id)
     return redirect('task_manager:tasks')
+
+
+def process_notifications(function):
+    def wrap(request, *args, **kwargs):
+        _create_notifications_controller(
+            request.user.id).process_notifications()
+        return function(request, *args, **kwargs)
+    return wrap
+
+
+@login_required
+@process_notifications
+def notifications(request):
+    tasks_controller = _create_tasks_controller(request.user.id)
+    tasks = tmlib.commands.user_tasks(tasks_controller)
+    tasks_with_start_time = [
+        task for task in tasks if task.start_time is not None and task.start_time > datetime.datetime.now()]
+    return render(request,
+                  'notifications/tasks.html',
+                  {'tasks': tasks_with_start_time,
+                   'username': request.user.username,
+                   'nav_bar': 'notifications'})
+
+
+@login_required
+@process_notifications
+def create_notification(request, id):
+    if request.method == 'POST':
+        form = NotificationForm(request.POST)
+        str_relative_start_time = form.data['relative_start_time']
+        relative_start_time = parse(str_relative_start_time)
+        if relative_start_time is None:
+            form.add_error(None, "Relative start time is incorrect")
+        if form.is_valid():
+            title = form.cleaned_data['title']
+            notifications_controller = _create_notifications_controller(
+                request.user.id)
+            tasks_controller = _create_tasks_controller(request.user.id)
+            notification = Notification(
+                title=title,
+                relative_start_time=relative_start_time,
+                user_id=request.user.id,
+                task_id=id)
+            tmlib.commands.add_notification(
+                tasks_controller, notifications_controller, notification)
+            return redirect('task_manager:all_notifications')
+    else:
+        form = NotificationForm()
+    return render(request,
+                  'notifications/new.html',
+                  {'form': form,
+                   'username': request.user.username,
+                   'nav_bar': 'notifications'})
+
+
+@login_required
+@process_notifications
+def edit_notification(request, id):
+    notifications_controller = _create_notifications_controller(
+        request.user.id)
+    notification = tmlib.commands.get_notification_by_id(
+        notifications_controller, id)
+    if notification is None:
+        return redirect('task_manager:all_notifications')
+    if request.method == 'POST':
+        form = NotificationForm(request.POST)
+        str_relative_start_time = form.data['relative_start_time']
+        relative_start_time = parse(str_relative_start_time)
+        if relative_start_time is None:
+            form.add_error(None, "Relative start time is incorrect")
+        if form.is_valid():
+            notification.title = form.cleaned_data['title']
+            notification.relative_start_time = relative_start_time
+            tasks_controller = _create_tasks_controller(request.user.id)
+            tmlib.commands.update_notification(
+                tasks_controller, notifications_controller, notification)
+            return redirect('task_manager:all_notifications')
+    else:
+        form = NotificationForm(
+            initial={
+                'title': notification.title,
+                'relative_start_time': datetime.timedelta(
+                    seconds=notification.relative_start_time)})
+    return render(request,
+                  'notifications/edit.html',
+                  {'form': form,
+                   'username': request.user.username,
+                   'nav_bar': 'notifications'})
+
+
+@login_required
+@process_notifications
+def all_notifications(request):
+    notifications_controller = _create_notifications_controller(
+        request.user.id)
+    notifications = tmlib.commands.user_notifications(notifications_controller)
+    return render(request,
+                  'notifications/index.html',
+                  {'notifications': notifications,
+                   'username': request.user.username,
+                   'nav_bar': 'notifications',
+                   'header': 'All notifications'})
+
+
+@login_required
+@process_notifications
+def created_notifications(request):
+    notifications_controller = _create_notifications_controller(
+        request.user.id)
+    notifications = tmlib.commands.user_created_notifications(
+        notifications_controller)
+    return render(request,
+                  'notifications/index.html',
+                  {'notifications': notifications,
+                   'username': request.user.username,
+                   'nav_bar': 'notifications',
+                   'header': 'Created notifications'})
+
+
+@login_required
+@process_notifications
+def pending_notifications(request):
+    notifications_controller = _create_notifications_controller(
+        request.user.id)
+    notifications = tmlib.commands.pending_notifications(
+        notifications_controller)
+    return render(request,
+                  'notifications/index.html',
+                  {'notifications': notifications,
+                   'username': request.user.username,
+                   'nav_bar': 'notifications',
+                   'header': 'Pending notifications',
+                   'view': 'pending'})
+
+
+@login_required
+@process_notifications
+def shown_notifications(request):
+    notifications_controller = _create_notifications_controller(
+        request.user.id)
+    notifications = tmlib.commands.user_shown_notifications(
+        notifications_controller)
+    return render(request,
+                  'notifications/index.html',
+                  {'notifications': notifications,
+                   'username': request.user.username,
+                   'nav_bar': 'notifications',
+                   'header': 'Shown notifications'})
+
+
+@login_required
+@process_notifications
+def delete_notification(request, id):
+    if request.method == 'POST':
+        notifications_controller = _create_notifications_controller(
+            request.user.id)
+        tmlib.commands.delete_notification(notifications_controller, id)
+    return redirect('task_manager:all_notifications')
+
+
+@login_required
+def set_notification_as_shown(request, id):
+    if request.method == 'POST':
+        notifications_controller = _create_notifications_controller(
+            request.user.id)
+        tmlib.commands.set_notification_as_shown(notifications_controller, id)
+    return redirect('task_manager:all_notifications')

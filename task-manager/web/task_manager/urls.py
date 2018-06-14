@@ -24,9 +24,21 @@ tasks_patterns = [
     url(r'^(?P<id>[0-9]+)/$', views.show_task, name='show_task'),
     url(r'^edit/(?P<id>[0-9]+)/$', views.edit_task, name='edit_task'),
     url(r'^delete/(?P<id>[0-9]+)/$', views.delete_task, name='delete_task'),
-    url(r'^filter/assigned/$', views.assigned_tasks, name='assigned_tasks'),
-    url(r'^filter/can_read/$', views.can_read_tasks, name='can_read_tasks'),
-    url(r'^filter/can_write/$', views.can_write_tasks, name='can_write_tasks'),
+    url(r'^assigned/$', views.assigned_tasks, name='assigned_tasks'),
+    url(r'^can_read/$', views.can_read_tasks, name='can_read_tasks'),
+    url(r'^can_write/$', views.can_write_tasks, name='can_write_tasks'),
+]
+
+notifications_patterns = [
+    url(r'^$', views.notifications, name='notifications'),
+    url(r'^new/(?P<id>[0-9]+)/$', views.create_notification, name='add_notification'),
+    url(r'^all/$', views.all_notifications, name='all_notifications'),
+    url(r'^created/$', views.created_notifications, name='created_notifications'),
+    url(r'^pending/$', views.pending_notifications, name='pending_notifications'),
+    url(r'^shown/$', views.shown_notifications, name='shown_notifications'),
+    url(r'^edit/(?P<id>[0-9]+)/$', views.edit_notification, name='edit_notification'),
+    url(r'^delete/(?P<id>[0-9]+)/$', views.delete_notification, name='delete_notification'),
+    url(r'^set_as_shown/(?P<id>[0-9]+)/$', views.set_notification_as_shown, name='set_notification_as_shown'),
 ]
 
 urlpatterns = [
@@ -34,4 +46,5 @@ urlpatterns = [
     url(r'^users/', include(users_patterns)),
     url(r'^categories/', include(categories_patterns)),
     url(r'^tasks/', include(tasks_patterns)),
+    url(r'^notifications/', include(notifications_patterns)),
 ]
