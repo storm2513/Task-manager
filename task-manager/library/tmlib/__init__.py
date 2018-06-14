@@ -29,4 +29,12 @@ Getting all user's tasks:
     >>> from tmlib.controllers.tasks_controller import create_tasks_controller
     >>> tasks_controller = create_tasks_controller(USER_ID, '/your/database/path/database_name')
     >>> tasks_list = tmlib.commands.user_tasks(tasks_controller)
+
+You can create notifications only for task that has filled start_time field.
+When notification created it has default status "CREATED".
+When it is time to show notification, status changes to "PENDING".
+To change status, you should call process_notifications() method in NotificationsController.
+After you have seen pending notification, you can call set_as_shown() function from commands module to change notification's status on "SHOWN".
+
+If you want to create repeated task, firstly you should create template task. You can set this task's status as "TEMPLATE". Also you need to specify interval of repeated task in seconds. Then you have to create TaskPlan object and pass to it template task's ID and interval. To create repeated tasks according to TaskPlan, you should call process_plans() method in TaskPlansController. It will create tasks according to specified interval.
 """
