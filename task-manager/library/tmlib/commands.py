@@ -155,6 +155,17 @@ def remove_user_for_read(tasks_controller, user_id, task_id):
         raise UserHasNoRightError
 
 
+def remove_all_users_for_read(tasks_controller, task_id):
+    if user_can_write_task(tasks_controller, task_id):
+        tasks_controller.remove_all_users_for_read(task_id)
+        log.get_logger().info(
+            'Removed read access to task with ID: {} for all users'.format(task_id))
+    else:
+        log.get_logger().error(
+            'User has no right for removing access for this task')
+        raise UserHasNoRightError
+
+
 def remove_user_for_write(tasks_controller, user_id, task_id):
     """Removes permission to read and change task with ID == task_id from user with ID == user_id"""
 
@@ -163,6 +174,17 @@ def remove_user_for_write(tasks_controller, user_id, task_id):
         log.get_logger().info(
             'Removed from user with ID: {} read and write access to task with ID: {}'.format(
                 user_id, task_id))
+    else:
+        log.get_logger().error(
+            'User has no right for removing access for this task')
+        raise UserHasNoRightError
+
+
+def remove_all_users_for_write(tasks_controller, task_id):
+    if user_can_write_task(tasks_controller, task_id):
+        tasks_controller.remove_all_users_for_write(task_id)
+        log.get_logger().info(
+            'Removed from user with ID: {} read and write access to task with ID: {}'.format(task_id))
     else:
         log.get_logger().error(
             'User has no right for removing access for this task')
@@ -193,7 +215,8 @@ def set_task_status(tasks_controller, task_id, status):
     if user_can_write_task(tasks_controller, task_id):
         tasks_controller.set_status(task_id, status)
         log.get_logger().info(
-            "Set task's status with ID {} as {}".format(task_id, Status(status).name))
+            "Set task's status with ID {} as {}".format(
+                task_id, Status(status).name))
     else:
         log.get_logger().error(
             'User has no right for changing status for this task')
@@ -234,17 +257,17 @@ def user_can_read_task(tasks_controller, task_id):
     task = tasks_controller.get_by_id(task_id)
     if task is not None:
         return (task.user_id == tasks_controller.user_id or
-            task.assigned_user_id == tasks_controller.user_id or
-            tasks_controller.user_can_read(task_id) or
-            tasks_controller.user_can_write(task_id))
+                task.assigned_user_id == tasks_controller.user_id or
+                tasks_controller.user_can_read(task_id) or
+                tasks_controller.user_can_write(task_id))
 
 
 def user_can_write_task(tasks_controller, task_id):
     task = tasks_controller.get_by_id(task_id)
     if task is not None:
         return (task.user_id == tasks_controller.user_id or
-            task.assigned_user_id == tasks_controller.user_id or
-            tasks_controller.user_can_write(task_id))
+                task.assigned_user_id == tasks_controller.user_id or
+                tasks_controller.user_can_write(task_id))
 
 
 def add_notification(tasks_controller, notifications_controller, notification):

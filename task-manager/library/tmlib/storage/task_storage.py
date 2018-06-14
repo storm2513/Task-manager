@@ -117,11 +117,19 @@ class TaskStorage(DatabaseConnector):
             UsersReadTasks.user_id == user_id,
             UsersReadTasks.task_id == task_id).execute()
 
+    def remove_all_users_for_read(self, task_id):
+        UsersReadTasks.delete().where(
+            UsersReadTasks.task_id == task_id).execute()
+
     def remove_user_for_write(self, user_id, task_id):
         """Removes permission to read and change task with ID == task_id from user with ID == user_id"""
 
         UsersWriteTasks.delete().where(
             UsersWriteTasks.user_id == user_id,
+            UsersWriteTasks.task_id == task_id).execute()
+
+    def remove_all_users_for_write(self, task_id):
+        UsersWriteTasks.delete().where(
             UsersWriteTasks.task_id == task_id).execute()
 
     def user_can_read(self, user_id, task_id):
