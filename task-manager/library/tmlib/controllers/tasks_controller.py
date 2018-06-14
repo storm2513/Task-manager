@@ -79,11 +79,23 @@ class TasksController(BaseController):
         self.storage.remove_user_for_read(
             user_id=user_id, task_id=task_id)
 
+    def remove_all_users_for_read(self, task_id):
+        self.storage.remove_all_users_for_read(task_id=task_id)
+
     def remove_user_for_write(self, user_id, task_id):
         """Removes permission to read and change task with ID == task_id from user with ID == user_id"""
 
         self.storage.remove_user_for_write(
             user_id=user_id, task_id=task_id)
+
+    def remove_all_users_for_write(self, task_id):
+        self.storage.remove_all_users_for_write(task_id=task_id)
+
+    def get_users_can_read_task(self, task_id):
+        return self.storage.get_users_can_read_task(task_id)
+
+    def get_users_can_write_task(self, task_id):
+        return self.storage.get_users_can_write_task(task_id)
 
     def user_can_read(self, task_id):
         """
