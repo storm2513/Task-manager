@@ -299,7 +299,3 @@ def set_notification_as_shown(notifications_controller, notification_id):
     notifications_controller.set_as_shown(notification_id)
     log.get_logger().info(
         "Set notification's status with ID {} as SHOWN".format(notification_id))
-
-
-def enable_log(enabled):
-    write_log_status_to_config(enabled)
