@@ -9,6 +9,7 @@
       <tr>
         <th>ID</th>
         <th>Username</th>
+        <th>Level</th>
       </tr>
     </thead>
     <tbody>
@@ -16,6 +17,7 @@
       <tr>
         <td scope="row">{{user.id}}</td>
         <td>{{user.username}}</td>
+        <td>{{user.level.current_level}}</td>
       </tr>
     {% endfor %}
     </tbody>

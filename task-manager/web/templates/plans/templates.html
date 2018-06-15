@@ -23,7 +23,7 @@
         <td scope="row">{{task.id}}</td>
         <td>{{task.title}}</td>
         <td>{{task.note}}</td>
-        <td>{% get_category_name_by_id user_id task.category_id %}</td>
+        <td>{% get_category_name_by_id user.id task.category_id %}</td>
         <td>{% get_status task.status %}</td>
         <td>{% get_priority task.priority %}</td>
         <td>

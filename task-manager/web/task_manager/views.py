@@ -22,7 +22,7 @@ def home(request):
     username = 'stranger'
     if request.user.is_authenticated():
         username = request.user.username
-    return render(request, 'home.html', {'username': username})
+    return render(request, 'home.html', {'user': username})
 
 
 def signup(request):
@@ -38,7 +38,7 @@ def signup(request):
     else:
         form = UserCreationForm()
     return render(request, 'registration/signup.html',
-                  {'form': form, 'username': request.user.username})
+                  {'form': form, 'user': request.user})
 
 
 def users(request):
@@ -46,7 +46,7 @@ def users(request):
     return render(request,
                   'users/index.html',
                   {'users': users,
-                   'username': request.user.username,
+                   'user': request.user,
                    'nav_bar': 'users'})
 
 
@@ -86,7 +86,7 @@ def categories(request):
     return render(request,
                   'categories/index.html',
                   {'categories': categories,
-                   'username': request.user.username,
+                   'user': request.user,
                    'nav_bar': 'categories'})
 
 
@@ -106,7 +106,7 @@ def create_category(request):
     return render(request,
                   'categories/new.html',
                   {'form': form,
-                   'username': request.user.username,
+                   'user': request.user,
                    'nav_bar': 'categories'})
 
 
@@ -127,7 +127,7 @@ def edit_category(request, id):
     return render(request,
                   'categories/edit.html',
                   {'form': form,
-                   'username': request.user.username,
+                   'user': request.user,
                    'nav_bar': 'categories'})
 
 
@@ -148,9 +148,8 @@ def tasks(request):
     return render(request,
                   'tasks/index.html',
                   {'tasks': tasks,
-                   'username': request.user.username,
+                   'user': request.user,
                    'nav_bar': 'tasks',
-                   'user_id': request.user.id,
                    'header': 'My tasks'})
 
 
@@ -162,9 +161,8 @@ def assigned_tasks(request):
     return render(request,
                   'tasks/index.html',
                   {'tasks': tasks,
-                   'username': request.user.username,
+                   'user': request.user,
                    'nav_bar': 'tasks',
-                   'user_id': request.user.id,
                    'header': 'Assigned on me tasks'})
 
 
@@ -176,9 +174,8 @@ def can_read_tasks(request):
     return render(request,
                   'tasks/index.html',
                   {'tasks': tasks,
-                   'username': request.user.username,
+                   'user': request.user,
                    'nav_bar': 'tasks',
-                   'user_id': request.user.id,
                    'header': 'Other tasks that I can read',
                    'view': 'can_read'})
 
@@ -191,9 +188,8 @@ def can_write_tasks(request):
     return render(request,
                   'tasks/index.html',
                   {'tasks': tasks,
-                   'username': request.user.username,
+                   'user': request.user,
                    'nav_bar': 'tasks',
-                   'user_id': request.user.id,
                    'header': 'Other tasks that I can write'})
 
 
@@ -249,7 +245,7 @@ def create_task(request):
     return render(request,
                   'tasks/new.html',
                   {'form': form.as_p,
-                   'username': request.user.username,
+                   'user': request.user,
                    'nav_bar': 'tasks'})
 
 
@@ -279,7 +275,7 @@ def show_task(request, id):
 
     return render(request,
                   'tasks/show.html',
-                  {'username': request.user.username,
+                  {'user': request.user,
                    'nav_bar': 'tasks',
                    'task': task,
                    'category': category,
@@ -306,7 +302,10 @@ def edit_task(request, id):
             task.note = form.cleaned_data['note']
             task.category_id = form.cleaned_data['category']
             task.priority = form.cleaned_data['priority']
-            task.status = form.cleaned_data['status']
+            previous_status = task.status
+            task.status = int(form.cleaned_data['status'])
+            if previous_status == Status.IN_PROGRESS.value and task.status == Status.DONE.value:
+                request.user.level.increase()
             task.is_event = form.cleaned_data['event']
             task.start_time = form.cleaned_data['start_time']
             task.end_time = form.cleaned_data['end_time']
@@ -357,7 +356,7 @@ def edit_task(request, id):
     return render(request,
                   'tasks/edit.html',
                   {'form': form.as_p,
-                   'username': request.user.username,
+                   'user': request.user,
                    'nav_bar': 'tasks'})
 
 
@@ -390,7 +389,7 @@ def notifications(request):
     return render(request,
                   'notifications/tasks.html',
                   {'tasks': tasks_with_start_time,
-                   'username': request.user.username,
+                   'user': request.user,
                    'nav_bar': 'notifications'})
 
 
@@ -421,7 +420,7 @@ def create_notification(request, id):
     return render(request,
                   'notifications/new.html',
                   {'form': form.as_p,
-                   'username': request.user.username,
+                   'user': request.user,
                    'nav_bar': 'notifications'})
 
 
@@ -456,7 +455,7 @@ def edit_notification(request, id):
     return render(request,
                   'notifications/edit.html',
                   {'form': form.as_p,
-                   'username': request.user.username,
+                   'user': request.user,
                    'nav_bar': 'notifications'})
 
 
@@ -469,7 +468,7 @@ def all_notifications(request):
     return render(request,
                   'notifications/index.html',
                   {'notifications': notifications,
-                   'username': request.user.username,
+                   'user': request.user,
                    'nav_bar': 'notifications',
                    'header': 'All notifications'})
 
@@ -484,7 +483,7 @@ def created_notifications(request):
     return render(request,
                   'notifications/index.html',
                   {'notifications': notifications,
-                   'username': request.user.username,
+                   'user': request.user,
                    'nav_bar': 'notifications',
                    'header': 'Created notifications'})
 
@@ -499,7 +498,7 @@ def pending_notifications(request):
     return render(request,
                   'notifications/index.html',
                   {'notifications': notifications,
-                   'username': request.user.username,
+                   'user': request.user,
                    'nav_bar': 'notifications',
                    'header': 'Pending notifications',
                    'view': 'pending'})
@@ -515,7 +514,7 @@ def shown_notifications(request):
     return render(request,
                   'notifications/index.html',
                   {'notifications': notifications,
-                   'username': request.user.username,
+                   'user': request.user,
                    'nav_bar': 'notifications',
                    'header': 'Shown notifications'})
 
@@ -547,9 +546,8 @@ def templates(request):
     return render(request,
                   'plans/templates.html',
                   {'tasks': tasks,
-                   'username': request.user.username,
-                   'nav_bar': 'plans',
-                   'user_id': request.user.id})
+                   'user': request.user,
+                   'nav_bar': 'plans'})
 
 
 @login_required
@@ -602,7 +600,7 @@ def create_template_task(request):
     return render(request,
                   'tasks/new.html',
                   {'form': form.as_p,
-                   'username': request.user.username,
+                   'user': request.user,
                    'nav_bar': 'plans'})
 
 
@@ -614,9 +612,8 @@ def plans(request):
     return render(request,
                   'plans/index.html',
                   {'plans': plans,
-                   'username': request.user.username,
-                   'nav_bar': 'plans',
-                   'user_id': request.user.id})
+                   'user': request.user,
+                   'nav_bar': 'plans'})
 
 
 @login_required
@@ -649,7 +646,7 @@ def create_plan(request, id):
     return render(request,
                   'plans/new.html',
                   {'form': form.as_p,
-                   'username': request.user.username,
+                   'user': request.user,
                    'nav_bar': 'plans'})
 
 
@@ -688,7 +685,7 @@ def edit_plan(request, id):
     return render(request,
                   'plans/edit.html',
                   {'form': form.as_p,
-                   'username': request.user.username,
+                   'user': request.user,
                    'nav_bar': 'plans'})
 
 
