@@ -47,7 +47,8 @@ def users(request):
                   'users/index.html',
                   {'users': users,
                    'user': request.user,
-                   'nav_bar': 'users'})
+                   'nav_bar': 'users',
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 def _create_categories_controller(user_id):
@@ -70,6 +71,11 @@ def _create_notifications_controller(user_id):
         user_id, settings.TASK_MANAGER_DATABASE_PATH)
 
 
+def _get_pending_notifications(user_id):
+    notifications_controller = _create_notifications_controller(user_id)
+    return tmlib.commands.pending_notifications(notifications_controller)
+
+
 def process_plans(function):
     def wrap(request, *args, **kwargs):
         _create_task_plans_controller(
@@ -87,7 +93,8 @@ def categories(request):
                   'categories/index.html',
                   {'categories': categories,
                    'user': request.user,
-                   'nav_bar': 'categories'})
+                   'nav_bar': 'categories',
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 @login_required
@@ -107,7 +114,8 @@ def create_category(request):
                   'categories/new.html',
                   {'form': form,
                    'user': request.user,
-                   'nav_bar': 'categories'})
+                   'nav_bar': 'categories',
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 @login_required
@@ -128,7 +136,8 @@ def edit_category(request, id):
                   'categories/edit.html',
                   {'form': form,
                    'user': request.user,
-                   'nav_bar': 'categories'})
+                   'nav_bar': 'categories',
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 @login_required
@@ -150,7 +159,8 @@ def tasks(request):
                   {'tasks': tasks,
                    'user': request.user,
                    'nav_bar': 'tasks',
-                   'header': 'My tasks'})
+                   'header': 'My tasks',
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 @login_required
@@ -163,7 +173,8 @@ def assigned_tasks(request):
                   {'tasks': tasks,
                    'user': request.user,
                    'nav_bar': 'tasks',
-                   'header': 'Assigned on me tasks'})
+                   'header': 'Assigned on me tasks',
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 @login_required
@@ -177,7 +188,8 @@ def can_read_tasks(request):
                    'user': request.user,
                    'nav_bar': 'tasks',
                    'header': 'Other tasks that I can read',
-                   'view': 'can_read'})
+                   'view': 'can_read',
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 @login_required
@@ -190,7 +202,8 @@ def can_write_tasks(request):
                   {'tasks': tasks,
                    'user': request.user,
                    'nav_bar': 'tasks',
-                   'header': 'Other tasks that I can write'})
+                   'header': 'Other tasks that I can write',
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 @login_required
@@ -246,7 +259,8 @@ def create_task(request):
                   'tasks/new.html',
                   {'form': form.as_p,
                    'user': request.user,
-                   'nav_bar': 'tasks'})
+                   'nav_bar': 'tasks',
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 @login_required
@@ -284,7 +298,8 @@ def show_task(request, id):
                    'parent_task_title': parent_task_title,
                    'assigned_user': assigned_user,
                    'inner_tasks': inner_tasks,
-                   'creator': creator.username})
+                   'creator': creator.username,
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 @login_required
@@ -357,7 +372,8 @@ def edit_task(request, id):
                   'tasks/edit.html',
                   {'form': form.as_p,
                    'user': request.user,
-                   'nav_bar': 'tasks'})
+                   'nav_bar': 'tasks',
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 @login_required
@@ -390,7 +406,8 @@ def notifications(request):
                   'notifications/tasks.html',
                   {'tasks': tasks_with_start_time,
                    'user': request.user,
-                   'nav_bar': 'notifications'})
+                   'nav_bar': 'notifications',
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 @login_required
@@ -421,7 +438,8 @@ def create_notification(request, id):
                   'notifications/new.html',
                   {'form': form.as_p,
                    'user': request.user,
-                   'nav_bar': 'notifications'})
+                   'nav_bar': 'notifications',
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 @login_required
@@ -456,7 +474,8 @@ def edit_notification(request, id):
                   'notifications/edit.html',
                   {'form': form.as_p,
                    'user': request.user,
-                   'nav_bar': 'notifications'})
+                   'nav_bar': 'notifications',
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 @login_required
@@ -470,7 +489,8 @@ def all_notifications(request):
                   {'notifications': notifications,
                    'user': request.user,
                    'nav_bar': 'notifications',
-                   'header': 'All notifications'})
+                   'header': 'All notifications',
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 @login_required
@@ -485,7 +505,8 @@ def created_notifications(request):
                   {'notifications': notifications,
                    'user': request.user,
                    'nav_bar': 'notifications',
-                   'header': 'Created notifications'})
+                   'header': 'Created notifications',
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 @login_required
@@ -501,7 +522,8 @@ def pending_notifications(request):
                    'user': request.user,
                    'nav_bar': 'notifications',
                    'header': 'Pending notifications',
-                   'view': 'pending'})
+                   'view': 'pending',
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 @login_required
@@ -516,7 +538,8 @@ def shown_notifications(request):
                   {'notifications': notifications,
                    'user': request.user,
                    'nav_bar': 'notifications',
-                   'header': 'Shown notifications'})
+                   'header': 'Shown notifications',
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 @login_required
@@ -547,7 +570,8 @@ def templates(request):
                   'plans/templates.html',
                   {'tasks': tasks,
                    'user': request.user,
-                   'nav_bar': 'plans'})
+                   'nav_bar': 'plans',
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 @login_required
@@ -601,7 +625,8 @@ def create_template_task(request):
                   'tasks/new.html',
                   {'form': form.as_p,
                    'user': request.user,
-                   'nav_bar': 'plans'})
+                   'nav_bar': 'plans',
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 @login_required
@@ -613,7 +638,8 @@ def plans(request):
                   'plans/index.html',
                   {'plans': plans,
                    'user': request.user,
-                   'nav_bar': 'plans'})
+                   'nav_bar': 'plans',
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 @login_required
@@ -647,7 +673,8 @@ def create_plan(request, id):
                   'plans/new.html',
                   {'form': form.as_p,
                    'user': request.user,
-                   'nav_bar': 'plans'})
+                   'nav_bar': 'plans',
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 @login_required
@@ -686,7 +713,8 @@ def edit_plan(request, id):
                   'plans/edit.html',
                   {'form': form.as_p,
                    'user': request.user,
-                   'nav_bar': 'plans'})
+                   'nav_bar': 'plans',
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 @login_required
