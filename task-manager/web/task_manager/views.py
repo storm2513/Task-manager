@@ -22,7 +22,7 @@ def home(request):
     username = 'stranger'
     if request.user.is_authenticated():
         username = request.user.username
-    return render(request, 'home.html', {'user': username})
+    return render(request, 'home.html', {'username': username})
 
 
 def signup(request):
