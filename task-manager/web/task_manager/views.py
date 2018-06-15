@@ -23,7 +23,10 @@ def home(request):
     username = 'stranger'
     if request.user.is_authenticated():
         username = request.user.username
-    return render(request, 'home.html', {'username': username})
+    return render(
+        request, 'home.html',
+        {'username': username,
+         'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
 def signup(request):
