@@ -18,6 +18,7 @@
   		  <td scope="row">{{category.id}}</td>
   		  <td>{{category.name}}</td>
         <td>
+          <a href="{% url 'task_manager:tasks_by_category' category.id %}" class='btn btn-primary'>Show tasks</a>
           <a href="{% url 'task_manager:edit_category' category.id %}" class='btn btn-warning'>Edit</a>
           <form style='display: inline-block;' action="{% url 'task_manager:delete_category' category.id %}" method='post'>
             {% csrf_token %}

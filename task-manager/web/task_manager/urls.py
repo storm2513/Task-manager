@@ -27,6 +27,9 @@ tasks_patterns = [
     url(r'^assigned/$', views.assigned_tasks, name='assigned_tasks'),
     url(r'^can_read/$', views.can_read_tasks, name='can_read_tasks'),
     url(r'^can_write/$', views.can_write_tasks, name='can_write_tasks'),
+    url(r'^category/(?P<id>[0-9]+)/$', views.tasks_by_category, name='tasks_by_category'),
+    url(r'^status/(?P<id>[0-9]+)/$', views.tasks_by_status, name='tasks_by_status'),
+    url(r'^priority/(?P<id>[0-9]+)/$', views.tasks_by_priority, name='tasks_by_priority'),
 ]
 
 notifications_patterns = [

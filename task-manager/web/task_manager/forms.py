@@ -42,7 +42,7 @@ class TaskForm(forms.Form):
         widget=DateTimePicker(
             options={
                 'minDate': (datetime.date.today()).strftime('%Y-%m-%d'),
-                'useCurrent': False,
+                'useCurrent': True,
             }
         ), required=False
     )

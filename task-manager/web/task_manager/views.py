@@ -164,6 +164,53 @@ def tasks(request):
 
 @login_required
 @process_plans
+def tasks_by_category(request, id):
+    tasks_controller = _create_tasks_controller(request.user.id)
+    tasks = tmlib.commands.user_tasks(tasks_controller)
+    tasks = [task for task in tasks if task.category_id == int(id)]
+    categories_controller = _create_categories_controller(request.user.id)
+    category = tmlib.commands.get_category_by_id(categories_controller, id)
+    return render(request,
+                  'tasks/index.html',
+                  {'tasks': tasks,
+                   'user': request.user,
+                   'nav_bar': 'tasks',
+                   'header': 'Tasks with category "{}"'.format(category.name),
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
+
+
+@login_required
+@process_plans
+def tasks_by_status(request, id):
+    tasks_controller = _create_tasks_controller(request.user.id)
+    tasks = tmlib.commands.user_tasks(tasks_controller)
+    tasks = [task for task in tasks if task.status == int(id)]
+    return render(request,
+                  'tasks/index.html',
+                  {'tasks': tasks,
+                   'user': request.user,
+                   'nav_bar': 'tasks',
+                   'header': 'Tasks with status "{}"'.format(Status(int(id)).name),
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
+
+
+@login_required
+@process_plans
+def tasks_by_priority(request, id):
+    tasks_controller = _create_tasks_controller(request.user.id)
+    tasks = tmlib.commands.user_tasks(tasks_controller)
+    tasks = [task for task in tasks if task.priority == int(id)]
+    return render(request,
+                  'tasks/index.html',
+                  {'tasks': tasks,
+                   'user': request.user,
+                   'nav_bar': 'tasks',
+                   'header': 'Tasks with priority "{}"'.format(Priority(int(id)).name),
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
+
+
+@login_required
+@process_plans
 def assigned_tasks(request):
     tasks_controller = _create_tasks_controller(request.user.id)
     tasks = tmlib.commands.assigned_tasks(tasks_controller)

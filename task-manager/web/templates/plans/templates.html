@@ -23,9 +23,9 @@
         <td scope="row">{{task.id}}</td>
         <td>{{task.title}}</td>
         <td>{{task.note}}</td>
-        <td>{% get_category_name_by_id user.id task.category_id %}</td>
-        <td>{% get_status task.status %}</td>
-        <td>{% get_priority task.priority %}</td>
+        <td><a href="{% url 'task_manager:tasks_by_category' task.category_id %}">{% get_category_name_by_id user.id task.category_id %}</a></td>
+        <td><a href="{% url 'task_manager:tasks_by_status' task.status %}">{% get_status task.status %}</a></td>
+        <td><a href="{% url 'task_manager:tasks_by_priority' task.priority %}">{% get_priority task.priority %}</a></td>
         <td>
           <a href="{% url 'task_manager:new_plan' task.id %}" class='btn btn-success'>Add plan</a>
           <a href="{% url 'task_manager:show_task' task.id %}" class='btn btn-primary'>Show</a>
