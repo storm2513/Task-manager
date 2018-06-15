@@ -62,6 +62,12 @@ def delete_task(tasks_controller, task_id):
         raise UserHasNoRightError
 
 
+def delete_task_plan(task_plans_controller, task_plan_id):
+    task_plans_controller.delete(task_plan_id)
+    log.get_logger().info(
+        'Deleted task plan with ID {}'.format(task_plan_id))
+
+
 def create_inner_task(tasks_controller, parent_task_id, task):
     """Checks if parent task exists, then creates inner task"""
 
