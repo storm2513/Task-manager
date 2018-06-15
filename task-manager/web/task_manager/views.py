@@ -37,8 +37,7 @@ def signup(request):
             return redirect('task_manager:home')
     else:
         form = UserCreationForm()
-    return render(request, 'registration/signup.html',
-                  {'form': form, 'user': request.user})
+    return render(request, 'registration/signup.html', {'form': form})
 
 
 def users(request):
