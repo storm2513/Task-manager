@@ -4,5 +4,10 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-	<h1>Hello, {{ username }}</h1>
+  <div class='jumbotron'>
+  	<h1 class='display-1'>Hello, {{ username }}</h1>
+    <div class='display-4'>
+      It's time to complete <a href='{% url 'task_manager:tasks' %}'>your tasks</a>!
+    </div>
+  </div>
 {% endblock %}
