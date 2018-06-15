@@ -487,7 +487,7 @@ def create_notification(request, id):
         form = NotificationForm()
     return render(request,
                   'notifications/new.html',
-                  {'form': form.as_p,
+                  {'form': form,
                    'user': request.user,
                    'nav_bar': 'notifications',
                    'pending_notifications': _get_pending_notifications(request.user.id)})
@@ -523,7 +523,7 @@ def edit_notification(request, id):
                     seconds=notification.relative_start_time)})
     return render(request,
                   'notifications/edit.html',
-                  {'form': form.as_p,
+                  {'form': form,
                    'user': request.user,
                    'nav_bar': 'notifications',
                    'pending_notifications': _get_pending_notifications(request.user.id)})

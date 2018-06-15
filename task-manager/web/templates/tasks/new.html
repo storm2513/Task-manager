@@ -3,12 +3,15 @@
 {% block title %}New task{% endblock %}
 
 {% block content %}
+{% load bootstrap4 %}
 <h2>New task</h2>
 <div class='form' style="position: relative">
   <form method="post">
-      {% csrf_token %}
-      {{ form }}
-      <input type="submit" value="Submit" />
+    {% csrf_token %}
+    {{ form }}
+    {% buttons %}
+      <button type="submit" class="btn btn-success">Submit</button>
+    {% endbuttons %}
   </form>
 </div>
 <input class='btn btn-primary' type=button value="Back" onClick="javascript:history.go(-1);">

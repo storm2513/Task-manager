@@ -3,10 +3,13 @@
 {% block title %}Sign Up{% endblock %}
 
 {% block content %}
+{% load bootstrap4 %}
   <h2>Sign up</h2>
   <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Sign up</button>
+    {% bootstrap_form form %}
+    {% buttons %}
+      <button type="submit" class="btn btn-success">Sign up</button>
+    {% endbuttons %}
   </form>
 {% endblock %}

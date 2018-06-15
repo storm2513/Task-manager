@@ -3,11 +3,14 @@
 {% block title %}Edit category{% endblock %}
 
 {% block content %}
+{% load bootstrap4 %}
 <h2>Edit category</h2>
 <form method="post">
-    {% csrf_token %}
-    {{ form }}
-    <input type="submit" value="Update" />
+  {% csrf_token %}
+  {% bootstrap_form form %}
+  {% buttons %}
+    <button type="submit" class="btn btn-success">Update</button>
+  {% endbuttons %}
 </form>
 <input class='btn btn-primary' type=button value="Back" onClick="javascript:history.go(-1);">
 {% endblock %}
