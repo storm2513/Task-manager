@@ -10,7 +10,6 @@ class InvalidTaskTimeError(Error):
         super().__init__(
             'Start time {} greater than end time {}'.format(
                 start_time, end_time))
-        self.password = password
 
 
 class InvalidTaskPlanIntervalError(Error):
@@ -18,7 +17,6 @@ class InvalidTaskPlanIntervalError(Error):
 
     def __init__(self, interval):
         super().__init__('Interval should be more than 5 minutes (300 seconds). Your interval is {} seconds'.format(interval))
-        self.password = password
 
 
 class TaskDoesNotExistError(Error):
