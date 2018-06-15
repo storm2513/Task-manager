@@ -65,6 +65,24 @@ class TaskForm(forms.Form):
         queryset=User.objects.all(), required=False)
 
 
+class TaskFormWithoutStatus(TaskForm):
+    def __init__(self, *args, **kwargs):
+        super(TaskFormWithoutStatus, self).__init__(*args, **kwargs)
+        self.fields.pop('status')
+
+
 class NotificationForm(forms.Form):
     title = forms.CharField(max_length=200)
     relative_start_time = forms.CharField(max_length=50)
+
+
+class PlanForm(forms.Form):
+    interval = forms.CharField(max_length=50)
+    last_created_at = forms.DateTimeField(
+        widget=DateTimePicker(
+            options={
+                'minDate': (datetime.date.today()).strftime('%Y-%m-%d'),
+                'useCurrent': True,
+            }
+        ), required=False
+    )

@@ -41,10 +41,20 @@ notifications_patterns = [
     url(r'^set_as_shown/(?P<id>[0-9]+)/$', views.set_notification_as_shown, name='set_notification_as_shown'),
 ]
 
+plans_patterns = [
+    url(r'^templates/$', views.templates, name='templates'),
+    url(r'^templates/new$', views.create_template_task, name='new_template'),
+    url(r'^$', views.plans, name='plans'),
+    url(r'^new/(?P<id>[0-9]+)/$', views.create_plan, name='new_plan'),
+    url(r'^edit/(?P<id>[0-9]+)/$', views.edit_plan, name='edit_plan'),
+    url(r'^delete/(?P<id>[0-9]+)/$', views.delete_plan, name='delete_plan'),
+]
+
 urlpatterns = [
     url(r'^$', views.home, name='home'),
     url(r'^users/', include(users_patterns)),
     url(r'^categories/', include(categories_patterns)),
     url(r'^tasks/', include(tasks_patterns)),
     url(r'^notifications/', include(notifications_patterns)),
+    url(r'^plans/', include(plans_patterns))
 ]

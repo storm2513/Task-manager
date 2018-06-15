@@ -8,12 +8,14 @@ from django.conf import settings
 from tmlib.controllers.categories_controller import create_categories_controller
 from tmlib.controllers.tasks_controller import create_tasks_controller
 from tmlib.controllers.notifications_controller import create_notifications_controller
+from tmlib.controllers.task_plans_controller import create_task_plans_controller
 from tmlib.models.category import Category
 from tmlib.models.task import Task, Status, Priority
 from tmlib.models.notification import Notification, Status as NotificationStatus
+from tmlib.models.task_plan import TaskPlan
 import tmlib.commands
 from pytimeparse import parse
-from .forms import CategoryForm, TaskForm, NotificationForm
+from .forms import CategoryForm, TaskForm, TaskFormWithoutStatus, NotificationForm, PlanForm
 
 
 def home(request):
@@ -58,9 +60,23 @@ def _create_tasks_controller(user_id):
         user_id, settings.TASK_MANAGER_DATABASE_PATH)
 
 
+def _create_task_plans_controller(user_id):
+    return create_task_plans_controller(
+        user_id, settings.TASK_MANAGER_DATABASE_PATH)
+
+
 def _create_notifications_controller(user_id):
     return create_notifications_controller(
         user_id, settings.TASK_MANAGER_DATABASE_PATH)
+
+
+def process_plans(function):
+    def wrap(request, *args, **kwargs):
+        _create_task_plans_controller(
+            request.user.id).process_plans(_create_tasks_controller(
+                request.user.id))
+        return function(request, *args, **kwargs)
+    return wrap
 
 
 @login_required
@@ -124,9 +140,11 @@ def delete_category(request, id):
 
 
 @login_required
+@process_plans
 def tasks(request):
     tasks_controller = _create_tasks_controller(request.user.id)
     tasks = tmlib.commands.user_tasks(tasks_controller)
+    tasks = [task for task in tasks if task.status != Status.TEMPLATE.value]
     return render(request,
                   'tasks/index.html',
                   {'tasks': tasks,
@@ -137,6 +155,7 @@ def tasks(request):
 
 
 @login_required
+@process_plans
 def assigned_tasks(request):
     tasks_controller = _create_tasks_controller(request.user.id)
     tasks = tmlib.commands.assigned_tasks(tasks_controller)
@@ -150,6 +169,7 @@ def assigned_tasks(request):
 
 
 @login_required
+@process_plans
 def can_read_tasks(request):
     tasks_controller = _create_tasks_controller(request.user.id)
     tasks = tmlib.commands.can_read_tasks(tasks_controller)
@@ -164,6 +184,7 @@ def can_read_tasks(request):
 
 
 @login_required
+@process_plans
 def can_write_tasks(request):
     tasks_controller = _create_tasks_controller(request.user.id)
     tasks = tmlib.commands.can_write_tasks(tasks_controller)
@@ -177,6 +198,7 @@ def can_write_tasks(request):
 
 
 @login_required
+@process_plans
 def create_task(request):
     if request.method == 'POST':
         form = TaskForm(request.user.id, request.POST)
@@ -270,6 +292,7 @@ def show_task(request, id):
 
 
 @login_required
+@process_plans
 def edit_task(request, id):
     tasks_controller = _create_tasks_controller(request.user.id)
     task = tmlib.commands.get_task_by_id(tasks_controller, id)
@@ -339,6 +362,7 @@ def edit_task(request, id):
 
 
 @login_required
+@process_plans
 def delete_task(request, id):
     tasks_controller = _create_tasks_controller(request.user.id)
     if request.method == 'POST' and tmlib.commands.user_can_write_task(
@@ -357,6 +381,7 @@ def process_notifications(function):
 
 @login_required
 @process_notifications
+@process_plans
 def notifications(request):
     tasks_controller = _create_tasks_controller(request.user.id)
     tasks = tmlib.commands.user_tasks(tasks_controller)
@@ -395,7 +420,7 @@ def create_notification(request, id):
         form = NotificationForm()
     return render(request,
                   'notifications/new.html',
-                  {'form': form,
+                  {'form': form.as_p,
                    'username': request.user.username,
                    'nav_bar': 'notifications'})
 
@@ -430,7 +455,7 @@ def edit_notification(request, id):
                     seconds=notification.relative_start_time)})
     return render(request,
                   'notifications/edit.html',
-                  {'form': form,
+                  {'form': form.as_p,
                    'username': request.user.username,
                    'nav_bar': 'notifications'})
 
@@ -512,3 +537,166 @@ def set_notification_as_shown(request, id):
             request.user.id)
         tmlib.commands.set_notification_as_shown(notifications_controller, id)
     return redirect('task_manager:all_notifications')
+
+
+@login_required
+def templates(request):
+    tasks_controller = _create_tasks_controller(request.user.id)
+    all_tasks = tmlib.commands.user_tasks(tasks_controller)
+    tasks = [task for task in all_tasks if task.status == Status.TEMPLATE.value]
+    return render(request,
+                  'plans/templates.html',
+                  {'tasks': tasks,
+                   'username': request.user.username,
+                   'nav_bar': 'plans',
+                   'user_id': request.user.id})
+
+
+@login_required
+def create_template_task(request):
+    if request.method == 'POST':
+        form = TaskFormWithoutStatus(request.user.id, request.POST)
+        if form.is_valid():
+            title = form.cleaned_data['title']
+            note = form.cleaned_data['note']
+            category_id = form.cleaned_data['category']
+            priority = form.cleaned_data['priority']
+            is_event = form.cleaned_data['event']
+            start_time = form.cleaned_data['start_time']
+            end_time = form.cleaned_data['end_time']
+            parent_task_id = form.cleaned_data['parent_task']
+            parent_task_id = None if not parent_task_id else parent_task_id
+            assigned_user = form.cleaned_data['assigned_user']
+            assigned_user_id = assigned_user.id if assigned_user is not None else None
+            task = Task(
+                title=title,
+                note=note,
+                category_id=category_id,
+                priority=priority,
+                status=Status.TEMPLATE.value,
+                is_event=is_event,
+                start_time=start_time,
+                end_time=end_time,
+                parent_task_id=parent_task_id,
+                assigned_user_id=assigned_user_id)
+            tasks_controller = _create_tasks_controller(request.user.id)
+            task.id = tmlib.commands.add_task(tasks_controller, task).id
+            can_read_users = form.cleaned_data['can_read']
+            can_write_users = form.cleaned_data['can_write']
+            tmlib.commands.remove_all_users_for_read(tasks_controller, task.id)
+            if can_read_users is not None:
+                user_ids = [user.id for user in can_read_users]
+                for user_id in user_ids:
+                    tmlib.commands.add_user_for_read(
+                        tasks_controller, user_id, task.id)
+            tmlib.commands.remove_all_users_for_write(
+                tasks_controller, task.id)
+            if can_write_users is not None:
+                user_ids = [user.id for user in can_write_users]
+                for user_id in user_ids:
+                    tmlib.commands.add_user_for_write(
+                        tasks_controller, user_id, task.id)
+            return redirect('task_manager:templates')
+    else:
+        form = TaskFormWithoutStatus(request.user.id)
+    return render(request,
+                  'tasks/new.html',
+                  {'form': form.as_p,
+                   'username': request.user.username,
+                   'nav_bar': 'plans'})
+
+
+@login_required
+@process_plans
+def plans(request):
+    task_plans_controller = _create_task_plans_controller(request.user.id)
+    plans = tmlib.commands.get_task_plans(task_plans_controller)
+    return render(request,
+                  'plans/index.html',
+                  {'plans': plans,
+                   'username': request.user.username,
+                   'nav_bar': 'plans',
+                   'user_id': request.user.id})
+
+
+@login_required
+@process_plans
+def create_plan(request, id):
+    if request.method == 'POST':
+        form = PlanForm(request.POST)
+        str_interval = form.data['interval']
+        interval = parse(str_interval)
+        if interval is None:
+            form.add_error(None, "Interval is incorrect")
+        if interval < 300:  # 5 minutes
+            form.add_error(None, "Interval should be more than 5 minutes")
+        if form.is_valid():
+            last_created_at = form.cleaned_data['last_created_at']
+            if last_created_at is None:
+                last_created_at = datetime.datetime.now() - datetime.timedelta(seconds=interval)
+            task_plans_controller = _create_task_plans_controller(
+                request.user.id)
+            plan = TaskPlan(
+                interval=interval,
+                last_created_at=last_created_at,
+                user_id=request.user.id,
+                task_id=id)
+            tmlib.commands.add_task_plan(
+                task_plans_controller, plan)
+            return redirect('task_manager:plans')
+    else:
+        form = PlanForm()
+    return render(request,
+                  'plans/new.html',
+                  {'form': form.as_p,
+                   'username': request.user.username,
+                   'nav_bar': 'plans'})
+
+
+@login_required
+@process_plans
+def edit_plan(request, id):
+    task_plans_controller = _create_task_plans_controller(
+        request.user.id)
+    plan = tmlib.commands.get_task_plan_by_id(
+        task_plans_controller, id)
+    if plan is None:
+        return redirect('task_manager:plans')
+    if request.method == 'POST':
+        form = PlanForm(request.POST)
+        str_interval = form.data['interval']
+        interval = parse(str_interval)
+        if interval is None:
+            form.add_error(None, "Interval is incorrect")
+        if interval < 300:  # 5 minutes
+            form.add_error(None, "Interval should be more than 5 minutes")
+        if form.is_valid():
+            last_created_at = form.cleaned_data['last_created_at']
+            if last_created_at is None:
+                last_created_at = datetime.datetime.now() - datetime.timedelta(seconds=interval)
+            plan.last_created_at = last_created_at
+            plan.interval = interval
+            tmlib.commands.update_task_plan(
+                task_plans_controller, plan)
+            return redirect('task_manager:plans')
+    else:
+        form = PlanForm(
+            initial={
+                'last_created_at': plan.last_created_at,
+                'interval': datetime.timedelta(
+                    seconds=plan.interval)})
+    return render(request,
+                  'plans/edit.html',
+                  {'form': form.as_p,
+                   'username': request.user.username,
+                   'nav_bar': 'plans'})
+
+
+@login_required
+@process_plans
+def delete_plan(request, id):
+    if request.method == 'POST':
+        task_plans_controller = _create_task_plans_controller(
+            request.user.id)
+        tmlib.commands.delete_task_plan(task_plans_controller, id)
+    return redirect('task_manager:plans')
