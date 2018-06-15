@@ -54,4 +54,16 @@ $ task-manager notification
 
 ### For documentation add '-h' ###
 
+
+### Configuring library logging: ###
+```python
+from tmlib.logger import setup_lib_logging
+
+setup_lib_logging(
+	enabled=True,
+	log_all_levels=True,
+	log_file_path='/path/to/log/file',
+	log_format='%(asctime)s, %(name)s, [%(levelname)s]: %(message)s')
+```
+
 Made by Maksim Shylov.
