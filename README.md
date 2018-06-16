@@ -1,4 +1,11 @@
 # Task Manager. Library and Console version. #
+
+## What is it? ##
+
+It's a simple task manager. It allows you to create and edit tasks, track their progress, assign categories to tasks, set dedlines, create notifications for important tasks and events, create inner tasks! Moreover you can work together with your friends and colleagues: just assign task on someone or give read/write access for task!
+
+If you don't like how this console application looks and feels, you can create your own by using task manager library.
+
 ## How to install? ##
 
 ### Make sure you have installed setuptools: ###
