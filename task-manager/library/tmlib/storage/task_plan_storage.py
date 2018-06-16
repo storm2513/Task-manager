@@ -55,6 +55,7 @@ class TaskPlanStorage(DatabaseConnector):
                         plan.task_id)  # template task
                     task.id = None
                     task.status = Status.TODO.value  # change status from TEMPLATE to TODO
+                    task.plan_id = plan.id
                     task_storage.create(task)
                     """
                     last_created_at shouldn't offset the interval.

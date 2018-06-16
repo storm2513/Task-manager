@@ -124,3 +124,6 @@ class TasksController(BaseController):
         """
 
         return self.storage.filter(args)
+
+    def created_by_task_plan(self, plan_id):
+        return self.storage.created_by_task_plan(self.user_id, plan_id)

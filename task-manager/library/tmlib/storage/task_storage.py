@@ -21,7 +21,8 @@ class TaskStorage(DatabaseConnector):
                 is_event=task.is_event,
                 category_id=task.category_id,
                 priority=task.priority,
-                status=task.status))
+                status=task.status,
+                plan_id=task.plan_id))
 
     def delete_by_id(self, task_id):
         Task.delete().where(Task.id == task_id).execute()
@@ -195,3 +196,7 @@ class TaskStorage(DatabaseConnector):
 
         return list(map(self.to_task_instance,
                         list(Task.select().where(args))))
+
+    def created_by_task_plan(self, user_id, plan_id):
+        return list(map(self.to_task_instance, list(Task.select().where(
+            Task.user_id == user_id, Task.plan_id == plan_id))))

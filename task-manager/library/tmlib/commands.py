@@ -27,6 +27,10 @@ def get_task_plans(task_plans_controller):
     return task_plans_controller.all()
 
 
+def get_tasks_created_by_task_plan(tasks_controller, plan_id):
+    return tasks_controller.created_by_task_plan(plan_id)
+
+
 def update_task(tasks_controller, task):
     validate_task(task)
     if user_can_write_task(tasks_controller, task.id):
