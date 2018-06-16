@@ -1,4 +1,5 @@
 import datetime
+from collections import deque
 from peewee import DoesNotExist
 from tmlib.storage.storage_models import (
     Task, UsersReadTasks, UsersWriteTasks, TaskPlan, DatabaseConnector)
@@ -88,11 +89,31 @@ class TaskStorage(DatabaseConnector):
         return list(map(self.to_task_instance, list(Task.select().join(UsersWriteTasks).where(
             UsersWriteTasks.task_id == Task.id, UsersWriteTasks.user_id == user_id))))
 
-    def inner(self, task_id):
+    def inner(self, task_id, recursive=False):
         """Returns inner tasks for task with ID == task_id"""
+        if recursive:
+            queue = deque()
+            queue.append(self.get_by_id(task_id))
+            inner_tasks = []
+            return self.recursive_inner(queue, inner_tasks)
 
         return list(map(self.to_task_instance, list(
             Task.select().where(Task.parent_task_id == task_id))))
+
+    def recursive_inner(self, queue, inner_tasks):
+        """
+        Returns all inner tasks using BFS
+        """
+
+        if not queue:
+            return inner_tasks
+
+        task = queue.popleft()
+        for inner_task in self.inner(task.id):
+            inner_tasks.append(inner_task)
+            queue.append(inner_task)
+
+        return self.recursive_inner(queue, inner_tasks)
 
     def add_user_for_read(self, user_id, task_id):
         """Allows user with ID == user_id to read task with ID == task_id"""
@@ -161,3 +182,16 @@ class TaskStorage(DatabaseConnector):
         return UsersWriteTasks.select().where(
             UsersWriteTasks.task_id == task_id,
             UsersWriteTasks.user_id == user_id).count() == 1
+
+    def filter(self, *args):
+        """
+        Before usage you should import Task from tmlib.storage.storage_models module.
+        Then you can pass filter query.
+        If you want to filter multiple fields use bitwise operators (& and |) rather than logical operators (and and or).
+
+        Example:
+        filter(Task.title.contains('title') & Task.created_at > datetime.datetime.now())
+        """
+
+        return list(map(self.to_task_instance,
+                        list(Task.select().where(args))))

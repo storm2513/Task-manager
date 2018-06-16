@@ -111,6 +111,17 @@ class StorageTest(unittest.TestCase):
         inner_tasks = self.task_storage.inner(task_id)
         self.assertEqual(len(inner_tasks), 1)
 
+    def test_returns_inner_tasks_recursive(self):
+        task_id = self.task_storage.create(self.task).id
+        inner_task = TaskFactory()
+        inner_task.parent_task_id = task_id
+        inner_task_id = self.task_storage.create(inner_task).id
+        second_level_inner_task = TaskFactory()
+        second_level_inner_task.parent_task_id = inner_task_id
+        self.task_storage.create(second_level_inner_task)
+        inner_tasks = self.task_storage.inner(task_id, True)
+        self.assertEqual(len(inner_tasks), 2)
+
     def test_adds_user_for_read(self):
         user_id = 10
         task_id = self.task_storage.create(self.task).id
