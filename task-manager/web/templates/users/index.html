@@ -2,7 +2,8 @@
 {% block title %}Users{% endblock %}
 
 {% block content %}
-<h2>Users</h2>
+{% load fontawesome %}
+<h2>Users {% fontawesome_icon 'users' %}</h2>
 <div class='table-responsive' id='table'>
   <div class="input-group col-md-3" style='padding-left: 0'>
     <input class="form-control search" placeholder="Search...">

@@ -3,7 +3,7 @@ html {
 }
 
 body {
-   background-image: url("../images/todo.jpg");
+   background-image: url("../images/background.png");
    background-position: right bottom;
    background-repeat: no-repeat;
    background-attachment: fixed;

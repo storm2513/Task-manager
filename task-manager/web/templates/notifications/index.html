@@ -3,7 +3,8 @@
 
 {% block content %}
 {% load notification_tags %}
-<h2>{{header}}</h2>
+{% load fontawesome %}
+<h2>{{header}} {% fontawesome_icon 'bell-o' color='red' %}</h2>
 <div class='table-responsive' id='table'>
   <div class="input-group col-md-3" style='padding-left: 0'>
     <input class="form-control search" placeholder="Search...">
