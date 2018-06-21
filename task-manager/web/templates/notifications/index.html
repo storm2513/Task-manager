@@ -4,26 +4,34 @@
 {% block content %}
 {% load notification_tags %}
 <h2>{{header}}</h2>
-<div class='table-responsive'>
+<div class='table-responsive' id='table'>
+  <div class="input-group col-md-3" style='padding-left: 0'>
+    <input class="form-control search" placeholder="Search...">
+    <span class="input-group-append">
+      <button class="btn btn-outline-secondary" type="button">
+        <i class="fa fa-search"></i>
+      </button>
+    </span>
+  </div>
   <table class="table table-hover" style="width: inherit;">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>Title</th>
-        <th>Relative start time</th>
-        <th>Status</th>
-        <th>Task</th>
+        <th class="sort" data-sort="id">ID</th>
+        <th class="sort" data-sort="title">Title</th>
+        <th class="sort" data-sort="relative_start_time">Relative start time</th>
+        <th class="sort" data-sort="status">Status</th>
+        <th class="sort" data-sort="task">Task</th>
         <th>Action</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody class="list">
       {% for notification in notifications %}
       <tr>
-        <td scope="row">{{notification.id}}</td>
-        <td>{{notification.title}}</td>
-        <td>{% get_timedelta notification.relative_start_time %}</td>
-        <td>{% get_status notification.status %}</td>
-        <td>
+        <td class="id" scope="row">{{notification.id}}</td>
+        <td class="title">{{notification.title}}</td>
+        <td class="relative_start_time">{% get_timedelta notification.relative_start_time %}</td>
+        <td class="status">{% get_status notification.status %}</td>
+        <td class="task">
           <a href="{% url 'task_manager:show_task' notification.task_id %}">
             {% get_task_title_by_id notification.user_id notification.task_id %}
           </a>
@@ -45,5 +53,17 @@
     {% endfor %}
     </tbody>
   </table>
+  <ul class='pagination'></ul>
 </div>
+<script>
+var options = {
+  valueNames: [ 'id', 'title', 'relative_start_time', 'status', 'task' ],
+  pagination: true,
+  page: 7,
+};
+var list = new List('table', options);
+if(list.size() / list.page <= 1){
+  document.getElementsByClassName('pagination')[0].style.display = 'none';
+}
+</script>
 {% endblock %}

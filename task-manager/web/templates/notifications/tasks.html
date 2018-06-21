@@ -4,30 +4,38 @@
 {% block content %}
 {% load task_tags %}
 <h2>Tasks that can have notifications</h2>
-<div class='table-responsive'>
+<div class='table-responsive' id='table'>
+  <div class="input-group col-md-3" style='padding-left: 0'>
+    <input class="form-control search" placeholder="Search...">
+    <span class="input-group-append">
+      <button class="btn btn-outline-secondary" type="button">
+        <i class="fa fa-search"></i>
+      </button>
+    </span>
+  </div>
   <table class="table table-hover" style="width: inherit;">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>Title</th>
-        <th>Note</th>
-        <th>Category</th>
-        <th>Status</th>
-        <th>Priority</th>
-        <th>Start time</th>
+        <th class="sort" data-sort="id">ID</th>
+        <th class="sort" data-sort="title">Title</th>
+        <th class="sort" data-sort="note">Note</th>
+        <th class="sort" data-sort="category">Category</th>
+        <th class="sort" data-sort="status">Status</th>
+        <th class="sort" data-sort="priority">Priority</th>
+        <th class="sort" data-sort="start_time">Start time</th>
         <th>Action</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody class="list">
       {% for task in tasks %}
       <tr>
-        <td scope="row">{{task.id}}</td>
-        <td>{{task.title}}</td>
-        <td>{{task.note}}</td>
-        <td>{% get_category_name_by_id user_id task.category_id %}</td>
-        <td>{% get_status task.status %}</td>
-        <td>{% get_priority task.priority %}</td>
-        <td>{{task.start_time}}</td>
+        <td class="id" scope="row">{{task.id}}</td>
+        <td class="title">{{task.title}}</td>
+        <td class="note">{{task.note}}</td>
+        <td class="category">{% get_category_name_by_id user_id task.category_id %}</td>
+        <td class="status">{% get_status task.status %}</td>
+        <td class="priority">{% get_priority task.priority %}</td>
+        <td class="start_time">{{task.start_time}}</td>
         <td>
           <a href="{% url 'task_manager:edit_task' task.id %}" class='btn btn-warning'>Edit task</a>
           <a href="{% url 'task_manager:add_notification' task.id %}" class='btn btn-primary'>Add notification</a>
@@ -37,4 +45,15 @@
     </tbody>
   </table>
 </div>
+<script>
+var options = {
+  valueNames: [ 'id', 'title', 'note', 'category', 'status', 'priority', 'start_time' ],
+  pagination: true,
+  page: 7,
+};
+var list = new List('table', options);
+if(list.size() / list.page <= 1){
+  document.getElementsByClassName('pagination')[0].style.display = 'none';
+}
+</script>
 {% endblock %}

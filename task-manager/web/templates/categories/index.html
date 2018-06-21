@@ -3,20 +3,28 @@
 
 {% block content %}
 <h2>Categories</h2>
-<div class='table-responsive'>
+<div class='table-responsive' id='table'>
+  <div class="input-group col-md-3" style='padding-left: 0'>
+    <input class="form-control search" placeholder="Search...">
+    <span class="input-group-append">
+      <button class="btn btn-outline-secondary" type="button">
+        <i class="fa fa-search"></i>
+      </button>
+    </span>
+  </div>
   <table class="table table-hover" style="width: inherit;">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>Name</th>
+        <th class="sort" data-sort="id">ID</th>
+        <th class="sort" data-sort="name">Name</th>
         <th>Action</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody class="list">
     	{% for category in categories %}
   		<tr>
-  		  <td scope="row">{{category.id}}</td>
-  		  <td>{{category.name}}</td>
+  		  <td class="id" scope="row">{{category.id}}</td>
+  		  <td class="name">{{category.name}}</td>
         <td>
           <a href="{% url 'task_manager:tasks_by_category' category.id %}" class='btn btn-info'>Show tasks</a>
           <a href="{% url 'task_manager:edit_category' category.id %}" class='btn btn-warning'>Edit</a>
@@ -29,6 +37,18 @@
   	{% endfor %}
     </tbody>
   </table>
+  <ul class='pagination'></ul>
 </div>
 <a href="{% url 'task_manager:new_category' %}" class='btn btn-primary'>Add category</a>
+<script>
+var options = {
+  valueNames: [ 'id', 'name' ],
+  pagination: true,
+  page: 7,
+};
+var list = new List('table', options);
+if(list.size() / list.page <= 1){
+  document.getElementsByClassName('pagination')[0].style.display = 'none';
+}
+</script>
 {% endblock %}
