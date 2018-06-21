@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 {% block title %}Tasks{% endblock %}
-
 {% block content %}
 {% load task_tags %}
-<h2>{{header}}</h2>
+{% load fontawesome %}
+<h2>{{header}} {% fontawesome_icon 'thumb-tack' color='red' %}</h2>
 <div class='table-responsive' id='table'>
   <table class="table table-hover" style="width: inherit;">
     <div class="input-group col-md-3" style='padding-left: 0'>
