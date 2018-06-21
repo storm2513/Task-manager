@@ -58,7 +58,8 @@ class TaskStorage(DatabaseConnector):
             priority=task.priority,
             status=task.status,
             created_at=task.created_at,
-            updated_at=task.updated_at)
+            updated_at=task.updated_at,
+            plan_id=task.plan_id)
 
     def get_by_id(self, task_id):
         try:
