@@ -12,7 +12,7 @@ class Level(models.Model):
     def current_level(self):
         """Returns user's current level"""
 
-        return math.floor((-1 + math.sqrt(self.experience * 8 + 1)) / 2)
+        return math.floor((-1 + math.sqrt(self.experience * 8 + 1)) / 2) + 1
 
     def next_level_experience(self):
         """Returns amount of experience required for next level"""

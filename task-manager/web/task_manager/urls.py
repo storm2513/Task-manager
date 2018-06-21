@@ -30,6 +30,7 @@ tasks_patterns = [
     url(r'^category/(?P<id>[0-9]+)/$', views.tasks_by_category, name='tasks_by_category'),
     url(r'^status/(?P<id>[0-9]+)/$', views.tasks_by_status, name='tasks_by_status'),
     url(r'^priority/(?P<id>[0-9]+)/$', views.tasks_by_priority, name='tasks_by_priority'),
+    url(r'^plan/(?P<id>[0-9]+)/$', views.tasks_by_plan, name='tasks_by_plan'),
 ]
 
 notifications_patterns = [
@@ -48,7 +49,7 @@ plans_patterns = [
     url(r'^templates/$', views.templates, name='templates'),
     url(r'^templates/new$', views.create_template_task, name='new_template'),
     url(r'^$', views.plans, name='plans'),
-    url(r'^new/(?P<id>[0-9]+)/$', views.create_plan, name='new_plan'),
+    url(r'^new/$', views.create_plan, name='new_plan'),
     url(r'^edit/(?P<id>[0-9]+)/$', views.edit_plan, name='edit_plan'),
     url(r'^delete/(?P<id>[0-9]+)/$', views.delete_plan, name='delete_plan'),
 ]

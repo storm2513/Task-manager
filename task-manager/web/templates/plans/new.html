@@ -6,7 +6,8 @@
 {% load bootstrap4 %}
 
 <h2>New plan</h2>
-<div class='form' style="position: relative">
+<a href="{% url 'task_manager:new_template' %}" class='btn btn-warning'>Add task template</a>
+<div class='form' style="position: relative; margin-top: 20px">
   <form method="post">
     {% csrf_token %}
     {{ form }}

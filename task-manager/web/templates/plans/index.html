@@ -12,7 +12,7 @@
         <th>Interval</th>
         <th>Last created at</th>
         <th>Task</th>
-        <th colspan="1"></th>
+        <th>Action</th>
       </tr>
     </thead>
     <tbody>
@@ -27,6 +27,7 @@
           </a>
         </td>
         <td>
+          <a href="{% url 'task_manager:tasks_by_plan' plan.id %}" class='btn btn-info'>Created tasks</a>
           <a href="{% url 'task_manager:edit_plan' plan.id %}" class='btn btn-warning'>Edit</a>
           <form style='display: inline-block;' action="{% url 'task_manager:delete_plan' plan.id %}" method='post'>
             {% csrf_token %}
@@ -38,4 +39,6 @@
     </tbody>
   </table>
 </div>
+<a href="{% url 'task_manager:new_plan' %}" class='btn btn-primary'>Add plan</a>
+<a href="{% url 'task_manager:templates' %}" class='btn btn-info'>Manage task templates</a>
 {% endblock %}

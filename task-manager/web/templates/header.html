@@ -30,12 +30,8 @@
             <a class="dropdown-item" href='{% url 'task_manager:shown_notifications' %}'>Shown</a>
           </div>
         </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle {% if nav_bar == 'plans' %}active{% endif %}" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{% fontawesome_icon 'paperclip' %} Task plans</a>
-          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" href='{% url 'task_manager:templates' %}'>Task temlates</a>
-            <a class="dropdown-item" href='{% url 'task_manager:plans' %}'>Plans</a>
-          </div>
+        <li class="nav-item">
+          <a class="nav-link {% if nav_bar == 'plans' %}active{% endif %}" href="{% url 'task_manager:plans' %}">{% fontawesome_icon 'paperclip' %} Task plans</a>
         </li>
         <li class="nav-item">
           <a class="nav-link {% if nav_bar == 'users' %}active{% endif %}" href='{% url 'task_manager:users' %}'>{% fontawesome_icon 'users' %} Users<span class="sr-only">(current)</span></a>

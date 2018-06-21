@@ -6,6 +6,7 @@ from tmlib.controllers.categories_controller import create_categories_controller
 from tmlib.controllers.tasks_controller import create_tasks_controller
 import tmlib.commands
 from tmlib.models.task import Status, Priority
+from tmlib.storage.storage_models import Task
 from tempus_dominus.widgets import DateTimePicker
 
 
@@ -21,18 +22,26 @@ class TaskForm(forms.Form):
                 user_id, settings.TASK_MANAGER_DATABASE_PATH))
         categories_tuple = [(category.id, category.name)
                             for category in categories]
-        tasks = tmlib.commands.user_tasks(
+        tasks = tmlib.commands.filter_tasks(
             create_tasks_controller(
-                user_id, settings.TASK_MANAGER_DATABASE_PATH))
+                user_id,
+                settings.TASK_MANAGER_DATABASE_PATH),
+            Task.status != Status.TEMPLATE.value)
         tasks_tuple = [(task.id, task.title) for task in tasks]
         tasks_tuple.insert(0, ('', '---------'))  # required for default value
-        self.fields['category'] = forms.ChoiceField(choices=categories_tuple)
+        self.fields['category'] = forms.ChoiceField(
+            choices=categories_tuple, required=False)
         self.fields['parent_task'] = forms.ChoiceField(
             choices=tasks_tuple, required=False)
 
-    title = forms.CharField(max_length=200)
-    note = forms.CharField(required=False)
-    category = forms.ChoiceField()
+    title = forms.CharField(max_length=200, widget=forms.TextInput(
+        attrs={'placeholder': 'Your amazing task title'}))
+    note = forms.CharField(
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                'placeholder': 'Your amazing note'}))
+    category = forms.ChoiceField(required=False)
     status = forms.ChoiceField(
         choices=[(e.value, Status(e).name) for e in Status])
     priority = forms.ChoiceField(
@@ -77,7 +86,24 @@ class NotificationForm(forms.Form):
 
 
 class PlanForm(forms.Form):
-    interval = forms.CharField(max_length=50)
+    def __init__(self, user_id=None, *args, **kwargs):
+        super(PlanForm, self).__init__(*args, **kwargs)
+
+        tasks = tmlib.commands.filter_tasks(
+            create_tasks_controller(
+                user_id, settings.TASK_MANAGER_DATABASE_PATH),
+            Task.status == Status.TEMPLATE.value)
+        tasks_tuple = [(task.id, task.title) for task in tasks]
+        self.fields['task_template'] = forms.ChoiceField(
+            choices=tasks_tuple, required=False)
+
+    task_template = forms.ChoiceField(required=False)
+    interval = forms.CharField(
+        max_length=50,
+        widget=forms.TextInput(
+            attrs={
+                'placeholder': '1 day'}),
+        required=False)
     last_created_at = forms.DateTimeField(
         widget=DateTimePicker(
             options={

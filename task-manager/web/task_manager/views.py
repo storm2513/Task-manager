@@ -13,6 +13,7 @@ from tmlib.models.category import Category
 from tmlib.models.task import Task, Status, Priority
 from tmlib.models.notification import Notification, Status as NotificationStatus
 from tmlib.models.task_plan import TaskPlan
+from tmlib.storage.storage_models import Task as TaskFilter
 import tmlib.commands
 from pytimeparse import parse
 from .forms import CategoryForm, TaskForm, TaskFormWithoutStatus, NotificationForm, PlanForm
@@ -156,8 +157,9 @@ def delete_category(request, id):
 @process_plans
 def tasks(request):
     tasks_controller = _create_tasks_controller(request.user.id)
-    tasks = tmlib.commands.user_tasks(tasks_controller)
-    tasks = [task for task in tasks if task.status != Status.TEMPLATE.value]
+    tasks = tmlib.commands.filter_tasks(
+        tasks_controller,
+        TaskFilter.status != Status.TEMPLATE.value)
     return render(request,
                   'tasks/index.html',
                   {'tasks': tasks,
@@ -171,16 +173,18 @@ def tasks(request):
 @process_plans
 def tasks_by_category(request, id):
     tasks_controller = _create_tasks_controller(request.user.id)
-    tasks = tmlib.commands.user_tasks(tasks_controller)
-    tasks = [task for task in tasks if task.category_id == int(id)]
+    tasks = tmlib.commands.filter_tasks(
+        tasks_controller, TaskFilter.category_id == int(id))
     categories_controller = _create_categories_controller(request.user.id)
     category = tmlib.commands.get_category_by_id(categories_controller, id)
+    query = '?category={}'.format(id)
     return render(request,
                   'tasks/index.html',
                   {'tasks': tasks,
                    'user': request.user,
                    'nav_bar': 'tasks',
                    'header': 'Tasks with category "{}"'.format(category.name),
+                   'query': query,
                    'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
@@ -188,14 +192,16 @@ def tasks_by_category(request, id):
 @process_plans
 def tasks_by_status(request, id):
     tasks_controller = _create_tasks_controller(request.user.id)
-    tasks = tmlib.commands.user_tasks(tasks_controller)
-    tasks = [task for task in tasks if task.status == int(id)]
+    tasks = tmlib.commands.filter_tasks(
+        tasks_controller, TaskFilter.status == int(id))
+    query = '?status={}'.format(id)
     return render(request,
                   'tasks/index.html',
                   {'tasks': tasks,
                    'user': request.user,
                    'nav_bar': 'tasks',
                    'header': 'Tasks with status "{}"'.format(Status(int(id)).name),
+                   'query': query,
                    'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
@@ -203,14 +209,31 @@ def tasks_by_status(request, id):
 @process_plans
 def tasks_by_priority(request, id):
     tasks_controller = _create_tasks_controller(request.user.id)
-    tasks = tmlib.commands.user_tasks(tasks_controller)
-    tasks = [task for task in tasks if task.priority == int(id)]
+    tasks = tmlib.commands.filter_tasks(
+        tasks_controller, TaskFilter.priority == int(id))
+    query = '?priority={}'.format(id)
     return render(request,
                   'tasks/index.html',
                   {'tasks': tasks,
                    'user': request.user,
                    'nav_bar': 'tasks',
                    'header': 'Tasks with priority "{}"'.format(Priority(int(id)).name),
+                   'query': query,
+                   'pending_notifications': _get_pending_notifications(request.user.id)})
+
+
+@login_required
+@process_plans
+def tasks_by_plan(request, id):
+    tasks_controller = _create_tasks_controller(request.user.id)
+    tasks = tmlib.commands.filter_tasks(
+        tasks_controller, TaskFilter.plan_id == int(id))
+    return render(request,
+                  'tasks/index.html',
+                  {'tasks': tasks,
+                   'user': request.user,
+                   'nav_bar': 'tasks',
+                   'header': 'Tasks created by plan with ID {}'.format(id),
                    'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
@@ -305,7 +328,16 @@ def create_task(request):
                         tasks_controller, user_id, task.id)
             return redirect('task_manager:tasks')
     else:
-        form = TaskForm(request.user.id)
+        initial = {
+            'status': Status.TODO.value,
+            'priority': Priority.MEDIUM.value}
+        if request.GET.get('category') is not None:
+            initial['category'] = request.GET.get('category')
+        if request.GET.get('status') is not None:
+            initial['status'] = request.GET.get('status')
+        if request.GET.get('priority') is not None:
+            initial['priority'] = request.GET.get('priority')
+        form = TaskForm(request.user.id, initial)
     return render(request,
                   'tasks/new.html',
                   {'form': form.as_p,
@@ -335,7 +367,8 @@ def show_task(request, id):
             assigned_user = User.objects.get(id=task.assigned_user_id).username
         except User.DoesNotExist:
             pass
-    inner_tasks = tmlib.commands.get_inner_tasks(tasks_controller, task.id)
+    inner_tasks = tmlib.commands.get_inner_tasks(
+        tasks_controller, task.id, recursive=True)
     creator = User.objects.get(id=task.user_id)
 
     return render(request,
@@ -450,9 +483,8 @@ def process_notifications(function):
 @process_plans
 def notifications(request):
     tasks_controller = _create_tasks_controller(request.user.id)
-    tasks = tmlib.commands.user_tasks(tasks_controller)
-    tasks_with_start_time = [
-        task for task in tasks if task.start_time is not None and task.start_time > datetime.datetime.now()]
+    tasks_with_start_time = tmlib.commands.filter_tasks(
+        tasks_controller, TaskFilter.start_time > datetime.datetime.now())
     return render(request,
                   'notifications/tasks.html',
                   {'tasks': tasks_with_start_time,
@@ -695,9 +727,9 @@ def plans(request):
 
 @login_required
 @process_plans
-def create_plan(request, id):
+def create_plan(request):
     if request.method == 'POST':
-        form = PlanForm(request.POST)
+        form = PlanForm(request.user.id, request.POST)
         str_interval = form.data['interval']
         interval = parse(str_interval)
         if interval is None:
@@ -708,18 +740,22 @@ def create_plan(request, id):
             last_created_at = form.cleaned_data['last_created_at']
             if last_created_at is None:
                 last_created_at = datetime.datetime.now() - datetime.timedelta(seconds=interval)
+            task_id = int(form.cleaned_data['task_template'])
             task_plans_controller = _create_task_plans_controller(
                 request.user.id)
             plan = TaskPlan(
                 interval=interval,
                 last_created_at=last_created_at,
                 user_id=request.user.id,
-                task_id=id)
+                task_id=task_id)
             tmlib.commands.add_task_plan(
                 task_plans_controller, plan)
             return redirect('task_manager:plans')
     else:
-        form = PlanForm()
+        initial = {}
+        if request.GET.get('task_template') is not None:
+            initial['task_template'] = request.GET.get('task_template')
+        form = PlanForm(request.user.id, initial)
     return render(request,
                   'plans/new.html',
                   {'form': form.as_p,
@@ -738,7 +774,7 @@ def edit_plan(request, id):
     if plan is None:
         return redirect('task_manager:plans')
     if request.method == 'POST':
-        form = PlanForm(request.POST)
+        form = PlanForm(request.user.id, request.POST)
         str_interval = form.data['interval']
         interval = parse(str_interval)
         if interval is None:
@@ -755,11 +791,11 @@ def edit_plan(request, id):
                 task_plans_controller, plan)
             return redirect('task_manager:plans')
     else:
-        form = PlanForm(
-            initial={
-                'last_created_at': plan.last_created_at,
-                'interval': datetime.timedelta(
-                    seconds=plan.interval)})
+        form = PlanForm(request.user.id,
+                        initial={
+                            'last_created_at': plan.last_created_at,
+                            'interval': datetime.timedelta(
+                                seconds=plan.interval)})
     return render(request,
                   'plans/edit.html',
                   {'form': form.as_p,
