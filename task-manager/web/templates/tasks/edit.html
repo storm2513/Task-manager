@@ -4,11 +4,13 @@
 
 {% block content %}
 {% load bootstrap4 %}
+{{ form.media }}
+
 <h2>Edit task</h2>
 <div class='form' style="position: relative">
   <form method="post">
     {% csrf_token %}
-    {{ form }}
+    {% bootstrap_form form %}
     {% buttons %}
       <button type="submit" class="btn btn-success">Update</button>
     {% endbuttons %}

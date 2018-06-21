@@ -336,19 +336,23 @@ def create_task(request):
                         tasks_controller, user_id, task.id)
             return redirect('task_manager:tasks')
     else:
-        initial = {
-            'status': Status.TODO.value,
-            'priority': Priority.MEDIUM.value}
+        status = Status.TODO.value,
+        priority = Priority.MEDIUM.value
+        category = None
         if request.GET.get('category') is not None:
-            initial['category'] = request.GET.get('category')
+            category = request.GET.get('category')
         if request.GET.get('status') is not None:
-            initial['status'] = request.GET.get('status')
+            status = request.GET.get('status')
         if request.GET.get('priority') is not None:
-            initial['priority'] = request.GET.get('priority')
-        form = TaskForm(request.user.id, initial)
+            priority = request.GET.get('priority')
+        form = TaskForm(request.user.id)
+        form.fields["status"].initial = status
+        form.fields["priority"].initial = priority
+        if category is not None:
+            form.fields["category"].initial = category
     return render(request,
                   'tasks/new.html',
-                  {'form': form.as_p,
+                  {'form': form,
                    'user': request.user,
                    'nav_bar': 'tasks',
                    'pending_notifications': _get_pending_notifications(request.user.id)})
@@ -463,7 +467,7 @@ def edit_task(request, id):
 
     return render(request,
                   'tasks/edit.html',
-                  {'form': form.as_p,
+                  {'form': form,
                    'user': request.user,
                    'nav_bar': 'tasks',
                    'pending_notifications': _get_pending_notifications(request.user.id)})
@@ -716,7 +720,7 @@ def create_template_task(request):
         form = TaskFormWithoutStatus(request.user.id)
     return render(request,
                   'tasks/new.html',
-                  {'form': form.as_p,
+                  {'form': form,
                    'user': request.user,
                    'nav_bar': 'plans',
                    'pending_notifications': _get_pending_notifications(request.user.id)})
@@ -762,13 +766,15 @@ def create_plan(request):
                 task_plans_controller, plan)
             return redirect('task_manager:plans')
     else:
-        initial = {}
+        task_template = None
         if request.GET.get('task_template') is not None:
-            initial['task_template'] = request.GET.get('task_template')
-        form = PlanForm(request.user.id, initial)
+            task_template = request.GET.get('task_template')
+        form = PlanForm(request.user.id)
+        if task_template is not None:
+            form.fields['task_template'].initial = task_template
     return render(request,
                   'plans/new.html',
-                  {'form': form.as_p,
+                  {'form': form,
                    'user': request.user,
                    'nav_bar': 'plans',
                    'pending_notifications': _get_pending_notifications(request.user.id)})
@@ -808,7 +814,7 @@ def edit_plan(request, id):
                                 seconds=plan.interval)})
     return render(request,
                   'plans/edit.html',
-                  {'form': form.as_p,
+                  {'form': form,
                    'user': request.user,
                    'nav_bar': 'plans',
                    'pending_notifications': _get_pending_notifications(request.user.id)})

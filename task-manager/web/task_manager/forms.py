@@ -82,7 +82,11 @@ class TaskFormWithoutStatus(TaskForm):
 
 class NotificationForm(forms.Form):
     title = forms.CharField(max_length=200)
-    relative_start_time = forms.CharField(max_length=50)
+    relative_start_time = forms.CharField(
+        max_length=50,
+        widget=forms.TextInput(
+            attrs={
+                'placeholder': '1 hour'}))
 
 
 class PlanForm(forms.Form):
@@ -95,15 +99,14 @@ class PlanForm(forms.Form):
             (Task.status == Status.TEMPLATE.value) & (Task.user_id == user_id))
         tasks_tuple = [(task.id, task.title) for task in tasks]
         self.fields['task_template'] = forms.ChoiceField(
-            choices=tasks_tuple, required=False)
+            choices=tasks_tuple)
 
     task_template = forms.ChoiceField(required=False)
     interval = forms.CharField(
         max_length=50,
         widget=forms.TextInput(
             attrs={
-                'placeholder': '1 day'}),
-        required=False)
+                'placeholder': '1 day'}))
     last_created_at = forms.DateTimeField(
         widget=DateTimePicker(
             options={

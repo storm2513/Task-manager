@@ -4,13 +4,14 @@
 
 {% block content %}
 {% load bootstrap4 %}
+{{ form.media }}
 
 <h2>New plan</h2>
 <a href="{% url 'task_manager:new_template' %}" class='btn btn-warning'>Add task template</a>
 <div class='form' style="position: relative; margin-top: 20px">
   <form method="post">
     {% csrf_token %}
-    {{ form }}
+    {% bootstrap_form form %}
     {% buttons %}
       <button type="submit" class="btn btn-success">Submit</button>
     {% endbuttons %}
