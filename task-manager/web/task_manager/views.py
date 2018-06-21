@@ -159,7 +159,8 @@ def tasks(request):
     tasks_controller = _create_tasks_controller(request.user.id)
     tasks = tmlib.commands.filter_tasks(
         tasks_controller,
-        TaskFilter.status != Status.TEMPLATE.value)
+        (TaskFilter.status != Status.TEMPLATE.value) & (
+            TaskFilter.user_id == request.user.id))
     return render(request,
                   'tasks/index.html',
                   {'tasks': tasks,
@@ -174,7 +175,8 @@ def tasks(request):
 def tasks_by_category(request, id):
     tasks_controller = _create_tasks_controller(request.user.id)
     tasks = tmlib.commands.filter_tasks(
-        tasks_controller, TaskFilter.category_id == int(id))
+        tasks_controller, (TaskFilter.category_id == int(id)) & (
+            TaskFilter.user_id == request.user.id))
     categories_controller = _create_categories_controller(request.user.id)
     category = tmlib.commands.get_category_by_id(categories_controller, id)
     query = '?category={}'.format(id)
@@ -193,7 +195,8 @@ def tasks_by_category(request, id):
 def tasks_by_status(request, id):
     tasks_controller = _create_tasks_controller(request.user.id)
     tasks = tmlib.commands.filter_tasks(
-        tasks_controller, TaskFilter.status == int(id))
+        tasks_controller, (TaskFilter.status == int(id)) & (
+            TaskFilter.user_id == request.user.id))
     query = '?status={}'.format(id)
     return render(request,
                   'tasks/index.html',
@@ -210,7 +213,8 @@ def tasks_by_status(request, id):
 def tasks_by_priority(request, id):
     tasks_controller = _create_tasks_controller(request.user.id)
     tasks = tmlib.commands.filter_tasks(
-        tasks_controller, TaskFilter.priority == int(id))
+        tasks_controller, (TaskFilter.priority == int(id)) & (
+            TaskFilter.user_id == request.user.id))
     query = '?priority={}'.format(id)
     return render(request,
                   'tasks/index.html',
@@ -227,7 +231,8 @@ def tasks_by_priority(request, id):
 def tasks_by_plan(request, id):
     tasks_controller = _create_tasks_controller(request.user.id)
     tasks = tmlib.commands.filter_tasks(
-        tasks_controller, TaskFilter.plan_id == int(id))
+        tasks_controller, (TaskFilter.plan_id == int(id)) & (
+            TaskFilter.user_id == request.user.id))
     return render(request,
                   'tasks/index.html',
                   {'tasks': tasks,
@@ -248,6 +253,7 @@ def assigned_tasks(request):
                    'user': request.user,
                    'nav_bar': 'tasks',
                    'header': 'Assigned on me tasks',
+                   'foreign_category': True,
                    'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
@@ -263,6 +269,7 @@ def can_read_tasks(request):
                    'nav_bar': 'tasks',
                    'header': 'Other tasks that I can read',
                    'view': 'can_read',
+                   'foreign_category': True,
                    'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
@@ -276,6 +283,7 @@ def can_write_tasks(request):
                   {'tasks': tasks,
                    'user': request.user,
                    'nav_bar': 'tasks',
+                   'foreign_category': True,
                    'header': 'Other tasks that I can write',
                    'pending_notifications': _get_pending_notifications(request.user.id)})
 
@@ -383,6 +391,7 @@ def show_task(request, id):
                    'assigned_user': assigned_user,
                    'inner_tasks': inner_tasks,
                    'creator': creator.username,
+                   'foreign_category': category.user_id != request.user.id,
                    'pending_notifications': _get_pending_notifications(request.user.id)})
 
 
@@ -484,7 +493,8 @@ def process_notifications(function):
 def notifications(request):
     tasks_controller = _create_tasks_controller(request.user.id)
     tasks_with_start_time = tmlib.commands.filter_tasks(
-        tasks_controller, TaskFilter.start_time > datetime.datetime.now())
+        tasks_controller, (TaskFilter.start_time > datetime.datetime.now()) & (
+            TaskFilter.user_id == request.user.id))
     return render(request,
                   'notifications/tasks.html',
                   {'tasks': tasks_with_start_time,

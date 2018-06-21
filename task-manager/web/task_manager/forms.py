@@ -26,7 +26,7 @@ class TaskForm(forms.Form):
             create_tasks_controller(
                 user_id,
                 settings.TASK_MANAGER_DATABASE_PATH),
-            Task.status != Status.TEMPLATE.value)
+            (Task.status != Status.TEMPLATE.value) & (Task.user_id == user_id))
         tasks_tuple = [(task.id, task.title) for task in tasks]
         tasks_tuple.insert(0, ('', '---------'))  # required for default value
         self.fields['category'] = forms.ChoiceField(
@@ -92,7 +92,7 @@ class PlanForm(forms.Form):
         tasks = tmlib.commands.filter_tasks(
             create_tasks_controller(
                 user_id, settings.TASK_MANAGER_DATABASE_PATH),
-            Task.status == Status.TEMPLATE.value)
+            (Task.status == Status.TEMPLATE.value) & (Task.user_id == user_id))
         tasks_tuple = [(task.id, task.title) for task in tasks]
         self.fields['task_template'] = forms.ChoiceField(
             choices=tasks_tuple, required=False)

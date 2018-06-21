@@ -31,7 +31,13 @@
         <td class="id" scope="row">{{task.id}}</td>
         <td class="title">{{task.title}}</td>
         <td class="note">{{task.note}}</td>
-        <td class="category"><a href="{% url 'task_manager:tasks_by_category' task.category_id %}">{% get_category_name_by_id user.id task.category_id %}</a></td>
+        <td class="category">
+          {% if foreign_category %}
+          {% get_category_name_by_id user.id task.category_id %}
+          {% else %}
+          <a href="{% url 'task_manager:tasks_by_category' task.category_id %}">{% get_category_name_by_id user.id task.category_id %}</a>
+          {% endif %}
+        </td>
         <td class="status"><a href="{% url 'task_manager:tasks_by_status' task.status %}">{% get_status task.status %}</a></td>
         <td class="priority"><a href="{% url 'task_manager:tasks_by_priority' task.priority %}">{% get_priority task.priority %}</a></td>
         <td>

@@ -7,7 +7,13 @@
 <h3><span class="badge badge-secondary">ID</span> {{task.id}}</h3>
 <h3><span class="badge badge-secondary">Title</span> {{task.title}}</h3>
 <h3><span class="badge badge-secondary">Note</span> {{task.note}}</h3>
-<h3><span class="badge badge-secondary">Category</span><a href="{% url 'task_manager:tasks_by_category' category.id %}"> {{category.name}}</a></h3>
+<h3><span class="badge badge-secondary">Category</span>
+  {% if foreign_category %}
+  {{category.name}}
+  {% else %}
+  <a href="{% url 'task_manager:tasks_by_category' category.id %}"> {{category.name}}</a>
+  {% endif %}
+</h3>
 <h3><span class="badge badge-secondary">Priority</span><a href="{% url 'task_manager:tasks_by_priority' task.priority %}"> {{priority}}</a></h3>
 <h3><span class="badge badge-secondary">Status</span><a href="{% url 'task_manager:tasks_by_status' task.status %}"> {{status}}</a></h3>
 <h3><span class="badge badge-secondary">Created at</span> {{task.created_at}}</h3>
