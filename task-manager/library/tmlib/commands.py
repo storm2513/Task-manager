@@ -27,6 +27,10 @@ def get_task_plans(task_plans_controller):
     return task_plans_controller.all()
 
 
+def get_tasks_created_by_task_plan(tasks_controller, plan_id):
+    return tasks_controller.created_by_task_plan(plan_id)
+
+
 def update_task(tasks_controller, task):
     validate_task(task)
     if user_can_write_task(tasks_controller, task.id):
@@ -86,11 +90,26 @@ def create_inner_task(tasks_controller, parent_task_id, task):
         raise UserHasNoRightError
 
 
-def get_inner_tasks(tasks_controller, task_id):
+def filter_tasks(tasks_controller, *args):
+    """
+    Before usage you should import Task from tmlib.storage.storage_models module.
+    Then you can pass 2 arguments: tasks_controller and filter query.
+    If you want to filter multiple fields use bitwise operators (& and |) rather than logical operators (and and or).
+
+    Example:
+    filter_tasks(
+        controller,
+        Task.title.contains('title') & Task.created_at > datetime.datetime.now())
+    """
+
+    return tasks_controller.filter(args)
+
+
+def get_inner_tasks(tasks_controller, task_id, recursive=False):
     """Returns inner tasks for task with ID == task_id"""
 
     if user_can_read_task(tasks_controller, task_id):
-        return tasks_controller.inner(task_id)
+        return tasks_controller.inner(task_id, recursive)
     else:
         log.get_logger().error(
             'User has no right for getting inner task')

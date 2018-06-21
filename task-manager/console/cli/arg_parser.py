@@ -770,7 +770,7 @@ def create_inner_task(args, user):
 
 def show_inner_tasks(args, user):
     print('Inner tasks:')
-    tasks = commands.get_inner_tasks(create_tasks_controller(user), args.pid)
+    tasks = commands.get_inner_tasks(create_tasks_controller(user), args.pid, True)
     print_task_list(tasks, user)
 
 

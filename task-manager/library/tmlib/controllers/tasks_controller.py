@@ -38,10 +38,10 @@ class TasksController(BaseController):
         task.parent_task_id = parent_task_id
         return self.create(task)
 
-    def inner(self, task_id):
+    def inner(self, task_id, recursive=False):
         """Returns inner tasks for task with ID == task_id"""
 
-        return self.storage.inner(task_id)
+        return self.storage.inner(task_id, recursive)
 
     def assign_task_on_user(self, task_id, user_id):
         task = self.get_by_id(task_id)
@@ -112,3 +112,18 @@ class TasksController(BaseController):
         """
 
         return self.storage.user_can_write(self.user_id, task_id)
+
+    def filter(self, *args):
+        """
+        Before usage you should import Task from tmlib.storage.storage_models module.
+        Then you can pass filter query.
+        If you want to filter multiple fields use bitwise operators (& and |) rather than logical operators (and and or).
+
+        Example:
+        filter(Task.title.contains('title') & Task.created_at > datetime.datetime.now())
+        """
+
+        return self.storage.filter(args)
+
+    def created_by_task_plan(self, plan_id):
+        return self.storage.created_by_task_plan(self.user_id, plan_id)

@@ -43,6 +43,7 @@ class Task(BaseModel):
     status = IntegerField(default=Status.TODO.value)
     created_at = DateTimeField(default=datetime.datetime.now)
     updated_at = DateTimeField(default=datetime.datetime.now)
+    plan_id = IntegerField(null=True)
 
     def save(self, *args, **kwargs):
         self.updated_at = datetime.datetime.now()

@@ -36,6 +36,7 @@ class Task:
             category_id=None,
             priority=Priority.MEDIUM.value,
             status=Status.TODO.value,
+            plan_id=None,
             created_at=None,
             updated_at=None):
         self.id = id
@@ -50,5 +51,6 @@ class Task:
         self.category_id = category_id
         self.priority = priority
         self.status = status
+        self.plan_id = plan_id
         self.created_at = created_at
         self.updated_at = updated_at
