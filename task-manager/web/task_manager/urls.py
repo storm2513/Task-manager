@@ -23,6 +23,7 @@ tasks_patterns = [
     url(r'^new/$', views.create_task, name='new_task'),
     url(r'^(?P<id>[0-9]+)/$', views.show_task, name='show_task'),
     url(r'^edit/(?P<id>[0-9]+)/$', views.edit_task, name='edit_task'),
+    url(r'^update/(?P<id>[0-9]+)/$', views.update_task, name='update_task'),
     url(r'^delete/(?P<id>[0-9]+)/$', views.delete_task, name='delete_task'),
     url(r'^assigned/$', views.assigned_tasks, name='assigned_tasks'),
     url(r'^can_read/$', views.can_read_tasks, name='can_read_tasks'),

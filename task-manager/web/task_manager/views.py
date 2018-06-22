@@ -339,17 +339,22 @@ def create_task(request):
         status = Status.TODO.value,
         priority = Priority.MEDIUM.value
         category = None
+        parent_task = None
         if request.GET.get('category') is not None:
             category = request.GET.get('category')
         if request.GET.get('status') is not None:
             status = request.GET.get('status')
         if request.GET.get('priority') is not None:
             priority = request.GET.get('priority')
+        if request.GET.get('parent_task_id') is not None:
+            parent_task = request.GET.get('parent_task_id')
         form = TaskForm(request.user.id)
         form.fields["status"].initial = status
         form.fields["priority"].initial = priority
         if category is not None:
             form.fields["category"].initial = category
+        if parent_task is not None:
+            form.fields["parent_task"].initial = parent_task
     return render(request,
                   'tasks/new.html',
                   {'form': form,
@@ -471,6 +476,24 @@ def edit_task(request, id):
                    'user': request.user,
                    'nav_bar': 'tasks',
                    'pending_notifications': _get_pending_notifications(request.user.id)})
+
+
+@login_required
+@process_plans
+def update_task(request, id):
+    tasks_controller = _create_tasks_controller(request.user.id)
+    task = tmlib.commands.get_task_by_id(tasks_controller, id)
+    if task is None or not tmlib.commands.user_can_write_task(
+            tasks_controller, id):
+        return redirect('task_manager:tasks')
+    if request.method == 'POST':
+        previous_status = task.status
+        task.status = int(request.POST.get('status'))
+        if previous_status == Status.IN_PROGRESS.value and task.status == Status.DONE.value:
+            request.user.level.increase()
+        task.priority = int(request.POST.get('priority'))
+        tmlib.commands.update_task(tasks_controller, task)
+    return redirect('task_manager:tasks')
 
 
 @login_required

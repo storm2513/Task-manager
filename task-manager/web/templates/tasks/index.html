@@ -27,7 +27,7 @@
     </thead>
     <tbody class="list">
       {% for task in tasks %}
-      <tr>
+      <tr data-toggle="modal" data-id="{{task.id}}" data-title="{{task.title}}" data-target="#modal" data-status="{{task.status}}" data-priority="{{task.priority}}">
         <td class="id" scope="row">{{task.id}}</td>
         <td class="title">{{task.title}}</td>
         <td class="note">{{task.note}}</td>
@@ -57,6 +57,50 @@
   <ul class='pagination'></ul>
 </div>
 <a href="{% url 'task_manager:new_task' %}{{query}}" class='btn btn-primary'>Add task</a>
+{% if view != 'can_read' %}
+<!-- Modal -->
+<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modal" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="title">Modal title</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <h5>Set status:</h5>
+        <div class="set-status">
+          <button class='btn btn-outline-secondary' data-value="0">TODO</button>
+          <button class='btn btn-outline-info' data-value="1">IN PROGRESS</button>
+          <button class='btn btn-outline-success' data-value="2">DONE</button>
+        </div>
+        <hr>
+        <h5>Set priority:</h5>
+        <div class='set-priority'>
+          <button class="btn btn-outline-secondary" data-value="0">MIN</button>
+          <button class="btn btn-outline-info" data-value="1">LOW</button>
+          <button class="btn btn-outline-primary" data-value="2">MEDIUM</button>
+          <button class="btn btn-outline-warning" data-value="3">HIGH</button>
+          <button class="btn btn-outline-danger" data-value="4">MAX</button>
+        </div>
+        <hr>
+        <h5>Actions:</h5>
+        <a href="{% url 'task_manager:new_task' %}?parent_task_id=" class="btn btn-primary" id="add-parent">Add inner task</a>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <form id='update-form' method="post">
+          {% csrf_token %}
+          <input type="hidden" id="status" name="status" value="">
+          <input type="hidden" id="priority" name="priority" value="">
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
 <script>
 var options = {
   valueNames: [ 'id', 'title', 'note', 'category', 'status', 'priority' ],
@@ -67,5 +111,33 @@ var list = new List('table', options);
 if(list.size() / list.page <= 1){
   document.getElementsByClassName('pagination')[0].style.display = 'none';
 }
+{% if view != 'can_read' %}
+$('#modal').on('show.bs.modal', function (event) {
+  var row = $(event.relatedTarget)
+  var id = row.data('id')
+  var title = row.data('title')
+  var status = row.data('status')
+  var priority = row.data('priority')
+  var modal = $(this)
+  modal.find('.modal-title').text(title)
+  modal.find('#add-parent').attr('href', modal.find('#add-parent').attr('href') + id)
+  modal.find('#update-form').attr('action', '/tasks/update/' + id + '/')
+
+  $('.set-status button').siblings().removeClass('active')
+  $('.set-priority button').siblings().removeClass('active')
+  $(`.set-status button[data-value='${status}']`).addClass('active')
+  $(`.set-priority button[data-value='${priority}']`).addClass('active')
+  $('#status').attr('value', status)
+  $('#priority').attr('value', priority)
+})
+$('.set-status button').click(function() {
+  $(this).addClass('active').siblings().removeClass('active');
+  $('#status').attr('value', $(this).data('value'))
+});
+$('.set-priority button').click(function() {
+  $(this).addClass('active').siblings().removeClass('active');
+  $('#priority').attr('value', $(this).data('value'))
+});
+{% endif %}
 </script>
 {% endblock %}

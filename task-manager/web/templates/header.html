@@ -62,7 +62,9 @@
                     </div>
                   </div>
                 </div>
+                {% if not forloop.last %}
                 <div class="dropdown-divider"></div>
+                {% endif %}
               {% endfor %}
               {% if not pending_notifications %}
                 <div class="dropdown-item">
