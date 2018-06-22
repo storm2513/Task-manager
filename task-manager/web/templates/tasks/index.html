@@ -120,7 +120,7 @@ $('#modal').on('show.bs.modal', function (event) {
   var priority = row.data('priority')
   var modal = $(this)
   modal.find('.modal-title').text(title)
-  modal.find('#add-parent').attr('href', modal.find('#add-parent').attr('href') + id)
+  modal.find('#add-parent').attr('href', "{% url 'task_manager:new_task' %}?parent_task_id=" + id)
   modal.find('#update-form').attr('action', '/tasks/update/' + id + '/')
 
   $('.set-status button').siblings().removeClass('active')
