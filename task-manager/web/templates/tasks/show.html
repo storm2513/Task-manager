@@ -31,13 +31,13 @@
     <tr>
       <td class="title">Priority</td>
       <td>
-        <a href="{% url 'task_manager:tasks_by_priority' task.priority %}"> {{priority}}</a>
+        <h5><a class="badge badge-{% get_priority_badge_class task.priority %}" href="{% url 'task_manager:tasks_by_priority' task.priority %}"> {{priority}}</a></h5>
       </td>
     </tr>
     <tr>
       <td class="title">Status</td>
       <td>
-        <a href="{% url 'task_manager:tasks_by_status' task.status %}"> {{status}}</a>
+        <h5><a class="badge badge-{% get_status_badge_class task.status %}" href="{% url 'task_manager:tasks_by_status' task.status %}"> {{status}}</a></h5>
       </td>
     </tr>
     <tr>

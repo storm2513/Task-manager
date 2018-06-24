@@ -38,7 +38,8 @@ def get_status_badge_class(status):
     classes = {'TODO': 'secondary',
                'IN_PROGRESS': 'primary',
                'DONE': 'success',
-               'TEMPLATE': 'info'}
+               'TEMPLATE': 'info',
+               'ARCHIVED': 'light'}
     return classes.get(Status(status).name, "")
 
 

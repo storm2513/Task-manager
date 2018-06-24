@@ -19,6 +19,7 @@ import tmlib.commands
 from pytimeparse import parse
 from .forms import CategoryForm, TaskForm, TaskFormWithoutStatus, NotificationForm, PlanForm
 from .models import Level
+from .templatetags import task_tags
 
 
 def home(request):
@@ -161,7 +162,8 @@ def tasks(request):
     tasks = tmlib.commands.filter_tasks(
         tasks_controller,
         (TaskFilter.status != Status.TEMPLATE.value) & (
-            TaskFilter.user_id == request.user.id))
+            TaskFilter.user_id == request.user.id) & (
+            TaskFilter.status != Status.ARCHIVED.value))
     return render(request,
                   'tasks/index.html',
                   {'tasks': tasks,
@@ -199,14 +201,21 @@ def tasks_by_status(request, id):
         tasks_controller, (TaskFilter.status == int(id)) & (
             TaskFilter.user_id == request.user.id))
     query = '?status={}'.format(id)
-    return render(request,
-                  'tasks/index.html',
-                  {'tasks': tasks,
-                   'user': request.user,
-                   'nav_bar': 'tasks',
-                   'header': 'Tasks with status "{}"'.format(Status(int(id)).name),
-                   'query': query,
-                   'pending_notifications': _get_pending_notifications(request.user.id)})
+    return render(
+        request,
+        'tasks/index.html',
+        {
+            'tasks': tasks,
+            'user': request.user,
+            'nav_bar': 'tasks',
+            'header': 'Tasks with status <span class="badge badge-' + task_tags.get_status_badge_class(
+                int(id)) + '">{}</span>'.format(
+                Status(
+                    int(id)).name),
+            'query': query,
+            'status_id': id,
+            'pending_notifications': _get_pending_notifications(
+                request.user.id)})
 
 
 @login_required
@@ -217,14 +226,20 @@ def tasks_by_priority(request, id):
         tasks_controller, (TaskFilter.priority == int(id)) & (
             TaskFilter.user_id == request.user.id))
     query = '?priority={}'.format(id)
-    return render(request,
-                  'tasks/index.html',
-                  {'tasks': tasks,
-                   'user': request.user,
-                   'nav_bar': 'tasks',
-                   'header': 'Tasks with priority "{}"'.format(Priority(int(id)).name),
-                   'query': query,
-                   'pending_notifications': _get_pending_notifications(request.user.id)})
+    return render(
+        request,
+        'tasks/index.html',
+        {
+            'tasks': tasks,
+            'user': request.user,
+            'nav_bar': 'tasks',
+            'header': 'Tasks with priority <span class="badge badge-' + task_tags.get_priority_badge_class(
+                int(id)) + '">{}</span>'.format(
+                Priority(
+                    int(id)).name),
+            'query': query,
+            'pending_notifications': _get_pending_notifications(
+                request.user.id)})
 
 
 @login_required
@@ -528,6 +543,18 @@ def update_task(request, id):
 @login_required
 @process_plans
 def delete_task(request, id):
+    tasks_controller = _create_tasks_controller(request.user.id)
+    if request.method == 'POST' and tmlib.commands.user_can_write_task(
+            tasks_controller, id):
+        task = tmlib.commands.get_task_by_id(tasks_controller, id)
+        task.status = Status.ARCHIVED.value
+        tmlib.commands.update_task(tasks_controller, task)
+    return redirect('task_manager:tasks')
+
+
+@login_required
+@process_plans
+def delete_archived_task(request, id):
     tasks_controller = _create_tasks_controller(request.user.id)
     if request.method == 'POST' and tmlib.commands.user_can_write_task(
             tasks_controller, id):
