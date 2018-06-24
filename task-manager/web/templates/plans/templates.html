@@ -32,8 +32,12 @@
         <td class="title">{{task.title}}</td>
         <td class="note">{{task.note}}</td>
         <td class="category"><a href="{% url 'task_manager:tasks_by_category' task.category_id %}">{% get_category_name_by_id user.id task.category_id %}</a></td>
-        <td class="status"><a href="{% url 'task_manager:tasks_by_status' task.status %}">{% get_status task.status %}</a></td>
-        <td class="priority"><a href="{% url 'task_manager:tasks_by_priority' task.priority %}">{% get_priority task.priority %}</a></td>
+        <td class="status" value={{task.status}}>
+          <h5><a class="badge badge-{% get_status_badge_class task.status %}" href="{% url 'task_manager:tasks_by_status' task.status %}">{% get_status task.status %}</a></h5>
+        </td>
+        <td class="priority" value={{task.priority}}>
+          <h5><a class="badge badge-{% get_priority_badge_class task.priority %}" href="{% url 'task_manager:tasks_by_priority' task.priority %}">{% get_priority task.priority %}</a></h5>
+        </td>
         <td>
           <a href="{% url 'task_manager:new_plan'%}?task_template={{task.id}}" class='btn btn-success'>Add plan</a>
           <a href="{% url 'task_manager:show_task' task.id %}" class='btn btn-primary'>Show</a>
@@ -52,7 +56,13 @@
 <a href="{% url 'task_manager:new_template' %}" class='btn btn-primary'>Add template task</a>
 <script>
 var options = {
-  valueNames: [ 'id', 'title', 'note', 'category', 'status', 'priority' ],
+  valueNames: [ 'id', 'title', 'note', 'category', {
+    name: 'status',
+    attr: 'value'
+  }, {
+    name: 'priority',
+    attr: 'value'
+  }],
   pagination: true,
   page: 7,
 };

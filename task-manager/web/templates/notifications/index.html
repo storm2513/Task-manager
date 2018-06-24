@@ -31,7 +31,9 @@
         <td class="id" scope="row">{{notification.id}}</td>
         <td class="title">{{notification.title}}</td>
         <td class="relative_start_time">{% get_timedelta notification.relative_start_time %}</td>
-        <td class="status">{% get_status notification.status %}</td>
+        <td class="status" value={{notification.status}}>
+          <h5><span class="badge badge-{% get_status_badge_class notification.status %}">{% get_status notification.status %}</span></h5>
+        </td>
         <td class="task">
           <a href="{% url 'task_manager:show_task' notification.task_id %}">
             {% get_task_title_by_id notification.user_id notification.task_id %}
@@ -58,7 +60,10 @@
 </div>
 <script>
 var options = {
-  valueNames: [ 'id', 'title', 'relative_start_time', 'status', 'task' ],
+  valueNames: [ 'id', 'title', 'relative_start_time', {
+    name: 'status',
+    attr: 'value'
+  }, 'task' ],
   pagination: true,
   page: 7,
 };

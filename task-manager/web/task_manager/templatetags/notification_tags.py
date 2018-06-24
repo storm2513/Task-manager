@@ -28,5 +28,13 @@ def get_status(status):
 
 
 @register.simple_tag
+def get_status_badge_class(status):
+    classes = {'CREATED': 'secondary',
+               'PENDING': 'primary',
+               'SHOWN': 'success'}
+    return classes.get(Status(status).name, "")
+
+
+@register.simple_tag
 def get_timedelta(seconds):
     return datetime.timedelta(seconds=seconds)

@@ -4,42 +4,90 @@
 {% load task_tags %}
 {% block content %}
 <h2>Task info</h2>
-<h3><span class="badge badge-secondary">ID</span> {{task.id}}</h3>
-<h3><span class="badge badge-secondary">Title</span> {{task.title}}</h3>
-<h3><span class="badge badge-secondary">Note</span> {{task.note}}</h3>
-<h3><span class="badge badge-secondary">Category</span>
-  {% if foreign_category %}
-  {{category.name}}
-  {% else %}
-  <a href="{% url 'task_manager:tasks_by_category' category.id %}"> {{category.name}}</a>
-  {% endif %}
-</h3>
-<h3><span class="badge badge-secondary">Priority</span><a href="{% url 'task_manager:tasks_by_priority' task.priority %}"> {{priority}}</a></h3>
-<h3><span class="badge badge-secondary">Status</span><a href="{% url 'task_manager:tasks_by_status' task.status %}"> {{status}}</a></h3>
-<h3><span class="badge badge-secondary">Created at</span> {{task.created_at}}</h3>
-<h3><span class="badge badge-secondary">Updated at</span> {{task.updated_at}}</h3>
-<h3><span class="badge badge-secondary">Event</span> {{task.is_event}}</h3>
-<h3><span class="badge badge-secondary">Start time</span> {{task.start_time}}</h3>
-<h3><span class="badge badge-secondary">End time</span> {{task.end_time}}</h3>
-<h3><span class="badge badge-secondary">Parent task</span>
-{% if parent_task_title is not None %}
-<a href="{% url 'task_manager:show_task' task.parent_task_id%}">{{ parent_task_title }}</a>
-{% else %}
-{{ parent_task_title }}
-{% endif %}
-</h3>
-<h3><span class="badge badge-secondary">Assigned user</span> {{assigned_user}}</h3>
-{% if inner_tasks %}
-  <h3><span class="badge badge-secondary">Inner tasks</span>
-    {% for inner_task in inner_tasks %}
-      <a href="{% url 'task_manager:show_task' inner_task.id%}">{{ inner_task.title }}</a>{% if not forloop.last %},{% endif %}
-    {% endfor %}
-  </h3>
-{% endif %}
-<h3><span class="badge badge-secondary">Creator</span> {{creator}}</h3>
-{% if task.plan_id is not None %}
-<h3><span class="badge badge-secondary">Plan ID</span> <a href="{% url 'task_manager:edit_plan' task.plan_id%}">{{task.plan_id}}</a></h3>
-{% endif %}
+<table class="table table-striped">
+  <tbody>
+    <tr>
+      <td class="title">ID</td>
+      <td>{{task.id}}</td>
+    </tr>
+    <tr>
+      <td class="title">Title</td>
+      <td>{{task.title}}</td>
+    </tr>
+    <tr>
+      <td class="title">Note</td>
+      <td>{{task.note}}</td>
+    </tr>
+    <tr>
+      <td class="title">Category</td>
+      <td>
+        {% if foreign_category %}
+        {{category.name}}
+        {% else %}
+        <a href="{% url 'task_manager:tasks_by_category' category.id %}"> {{category.name}}</a>
+        {% endif %}
+      </td>
+    </tr>
+    <tr>
+      <td class="title">Priority</td>
+      <td>
+        <a href="{% url 'task_manager:tasks_by_priority' task.priority %}"> {{priority}}</a>
+      </td>
+    </tr>
+    <tr>
+      <td class="title">Status</td>
+      <td>
+        <a href="{% url 'task_manager:tasks_by_status' task.status %}"> {{status}}</a>
+      </td>
+    </tr>
+    <tr>
+      <td class="title">Created at</td>
+      <td>{{task.created_at}}</td>
+    </tr>
+    <tr>
+      <td class="title">Updated at</td>
+      <td>{{task.updated_at}}</td>
+    </tr>
+    <tr>
+      <td class="title">Event</td>
+      <td>{{task.is_event}}</td>
+    </tr>
+    <tr>
+      <td class="title">Start time</td>
+      <td>{{task.start_time}}</td>
+    </tr>
+    <tr>
+      <td class="title">End time</td>
+      <td>{{task.end_time}}</td>
+    </tr>
+    <tr>
+      <td class="title">Parent task</td>
+      <td>
+        {% if parent_task_title is not None %}
+        <a href="{% url 'task_manager:show_task' task.parent_task_id%}">{{ parent_task_title }}</a>
+        {% else %}
+        {{ parent_task_title }}
+        {% endif %}
+      </td>
+    </tr>
+    <tr>
+      <td class="title">Assigned user</td>
+      <td>{{assigned_user}}</td>
+    </tr>
+    <tr>
+      <td class="title">Inner tasks</td>
+      <td>
+        {% for inner_task in inner_tasks %}
+          <a href="{% url 'task_manager:show_task' inner_task.id%}">{{ inner_task.title }}</a>{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      </td>
+    </tr>
+    <tr>
+      <td class="title">Creator</td>
+      <td>{{creator}}</td>
+    </tr>
+  </tbody>
+</table>
 <input class='btn btn-primary' type=button value="Back" onClick="javascript:history.go(-1);">
 <div class='right'>
   <a href="{% url 'task_manager:edit_task' task.id %}" class='btn btn-warning'>Edit</a>

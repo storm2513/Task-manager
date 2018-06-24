@@ -14,6 +14,7 @@ from tmlib.models.task import Task, Status, Priority
 from tmlib.models.notification import Notification, Status as NotificationStatus
 from tmlib.models.task_plan import TaskPlan
 from tmlib.storage.storage_models import Task as TaskFilter
+from tmlib.exceptions.exceptions import InvalidTaskTimeError
 import tmlib.commands
 from pytimeparse import parse
 from .forms import CategoryForm, TaskForm, TaskFormWithoutStatus, NotificationForm, PlanForm
@@ -318,7 +319,21 @@ def create_task(request):
                 parent_task_id=parent_task_id,
                 assigned_user_id=assigned_user_id)
             tasks_controller = _create_tasks_controller(request.user.id)
-            task.id = tmlib.commands.add_task(tasks_controller, task).id
+            try:
+                task.id = tmlib.commands.add_task(tasks_controller, task).id
+            except InvalidTaskTimeError:
+                form.add_error(
+                    'start_time',
+                    'Time is invalid: start time is more than end time')
+                return render(
+                    request,
+                    'tasks/new.html',
+                    {
+                        'form': form,
+                        'user': request.user,
+                        'nav_bar': 'tasks',
+                        'pending_notifications': _get_pending_notifications(
+                            request.user.id)})
             can_read_users = form.cleaned_data['can_read']
             can_write_users = form.cleaned_data['can_write']
             tmlib.commands.remove_all_users_for_read(tasks_controller, task.id)
@@ -430,7 +445,21 @@ def edit_task(request, id):
             task.parent_task_id = None if not parent_task_id else parent_task_id
             assigned_user = form.cleaned_data['assigned_user']
             task.assigned_user_id = assigned_user.id if assigned_user is not None else None
-            tmlib.commands.update_task(tasks_controller, task)
+            try:
+                tmlib.commands.update_task(tasks_controller, task)
+            except InvalidTaskTimeError:
+                form.add_error(
+                    'start_time',
+                    'Time is invalid: start time is more than end time')
+                return render(
+                    request,
+                    'tasks/edit.html',
+                    {
+                        'form': form,
+                        'user': request.user,
+                        'nav_bar': 'tasks',
+                        'pending_notifications': _get_pending_notifications(
+                            request.user.id)})
             can_read_users = form.cleaned_data['can_read']
             can_write_users = form.cleaned_data['can_write']
             tmlib.commands.remove_all_users_for_read(tasks_controller, task.id)
@@ -538,7 +567,9 @@ def create_notification(request, id):
         str_relative_start_time = form.data['relative_start_time']
         relative_start_time = parse(str_relative_start_time)
         if relative_start_time is None:
-            form.add_error(None, "Relative start time is incorrect")
+            form.add_error(
+                'relative_start_time',
+                "Relative start time is incorrect")
         if form.is_valid():
             title = form.cleaned_data['title']
             notifications_controller = _create_notifications_controller(
@@ -576,7 +607,9 @@ def edit_notification(request, id):
         str_relative_start_time = form.data['relative_start_time']
         relative_start_time = parse(str_relative_start_time)
         if relative_start_time is None:
-            form.add_error(None, "Relative start time is incorrect")
+            form.add_error(
+                'relative_start_time',
+                "Relative start time is incorrect")
         if form.is_valid():
             notification.title = form.cleaned_data['title']
             notification.relative_start_time = relative_start_time
@@ -770,9 +803,11 @@ def create_plan(request):
         str_interval = form.data['interval']
         interval = parse(str_interval)
         if interval is None:
-            form.add_error(None, "Interval is incorrect")
-        if interval < 300:  # 5 minutes
-            form.add_error(None, "Interval should be more than 5 minutes")
+            form.add_error('interval', "Interval is incorrect")
+        elif interval < 300:  # 5 minutes
+            form.add_error(
+                'interval',
+                "Interval should be more than 5 minutes")
         if form.is_valid():
             last_created_at = form.cleaned_data['last_created_at']
             if last_created_at is None:
@@ -817,9 +852,11 @@ def edit_plan(request, id):
         str_interval = form.data['interval']
         interval = parse(str_interval)
         if interval is None:
-            form.add_error(None, "Interval is incorrect")
-        if interval < 300:  # 5 minutes
-            form.add_error(None, "Interval should be more than 5 minutes")
+            form.add_error('interval', "Interval is incorrect")
+        elif interval < 300:  # 5 minutes
+            form.add_error(
+                'interval',
+                "Interval should be more than 5 minutes")
         if form.is_valid():
             last_created_at = form.cleaned_data['last_created_at']
             if last_created_at is None:

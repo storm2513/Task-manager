@@ -33,8 +33,12 @@
         <td class="title">{{task.title}}</td>
         <td class="note">{{task.note}}</td>
         <td class="category">{% get_category_name_by_id user_id task.category_id %}</td>
-        <td class="status">{% get_status task.status %}</td>
-        <td class="priority">{% get_priority task.priority %}</td>
+        <td class="status" value={{task.status}}>
+          <h5><a class="badge badge-{% get_status_badge_class task.status %}" href="{% url 'task_manager:tasks_by_status' task.status %}">{% get_status task.status %}</a></h5>
+        </td>
+        <td class="priority" value={{task.priority}}>
+          <h5><a class="badge badge-{% get_priority_badge_class task.priority %}" href="{% url 'task_manager:tasks_by_priority' task.priority %}">{% get_priority task.priority %}</a></h5>
+        </td>
         <td class="start_time">{{task.start_time}}</td>
         <td>
           <a href="{% url 'task_manager:edit_task' task.id %}" class='btn btn-warning'>Edit task</a>
@@ -47,7 +51,13 @@
 </div>
 <script>
 var options = {
-  valueNames: [ 'id', 'title', 'note', 'category', 'status', 'priority', 'start_time' ],
+  valueNames: [ 'id', 'title', 'note', 'category', {
+    name: 'status',
+    attr: 'value'
+  }, {
+    name: 'priority',
+    attr: 'value'
+  }],
   pagination: true,
   page: 7,
 };

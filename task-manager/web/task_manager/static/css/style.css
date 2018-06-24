@@ -55,7 +55,17 @@ body {
   background-color: #ddd;
 }
 
-.background-gray:active{
+.background-gray:active {
   background-color: #ddd;
   color: black;
+}
+
+[data-toggle|=modal],
+.sort:hover {
+  cursor: pointer;
+}
+
+td.title {
+  font-weight: bold;
+  width: 150px;
 }
