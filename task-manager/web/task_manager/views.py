@@ -179,7 +179,9 @@ def tasks_by_category(request, id):
     tasks_controller = _create_tasks_controller(request.user.id)
     tasks = tmlib.commands.filter_tasks(
         tasks_controller, (TaskFilter.category_id == int(id)) & (
-            TaskFilter.user_id == request.user.id))
+            TaskFilter.user_id == request.user.id) & (
+            TaskFilter.status != Status.ARCHIVED.value) & (
+            TaskFilter.status != Status.TEMPLATE.value))
     categories_controller = _create_categories_controller(request.user.id)
     category = tmlib.commands.get_category_by_id(categories_controller, id)
     query = '?category={}'.format(id)
@@ -224,7 +226,9 @@ def tasks_by_priority(request, id):
     tasks_controller = _create_tasks_controller(request.user.id)
     tasks = tmlib.commands.filter_tasks(
         tasks_controller, (TaskFilter.priority == int(id)) & (
-            TaskFilter.user_id == request.user.id))
+            TaskFilter.user_id == request.user.id) & (
+            TaskFilter.status != Status.ARCHIVED.value) & (
+            TaskFilter.status != Status.TEMPLATE.value))
     query = '?priority={}'.format(id)
     return render(
         request,
