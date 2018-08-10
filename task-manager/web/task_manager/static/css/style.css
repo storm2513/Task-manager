@@ -1,0 +1,71 @@
+html {
+  height: 100%;
+}
+
+body {
+   background-image: url("../images/background.png");
+   background-position: right bottom;
+   background-repeat: no-repeat;
+   background-attachment: fixed;
+   background-size: 10%;
+}
+
+.container {
+	margin-top: 20px;
+}
+
+.inline {
+  display: inline-block;
+}
+
+.title {
+	margin-right: 10px;
+}
+
+.task {
+	margin-right: 20px;
+}
+
+.right {
+	float: right;
+}
+
+.pagination a {
+    color: black;
+    float: left;
+    padding: 8px 16px;
+    text-decoration: none;
+}
+
+.pagination li {
+  transition: background-color .3s;
+  border: .1px solid #ddd;
+}
+
+.pagination li.active {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.pagination li.active a {
+  color: white;
+}
+
+.pagination li:hover:not(.active) { 
+  background-color: #ddd;
+}
+
+.background-gray:active {
+  background-color: #ddd;
+  color: black;
+}
+
+[data-toggle|=modal],
+.sort:hover {
+  cursor: pointer;
+}
+
+td.title {
+  font-weight: bold;
+  width: 150px;
+}

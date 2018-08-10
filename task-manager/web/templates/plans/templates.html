@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}Templates{% endblock %}
+
+{% block content %}
+{% load task_tags %}
+<h2>Task templates</h2>
+<div class='table-responsive' id='table'>
+  <div class="input-group col-md-3" style='padding-left: 0'>
+    <input class="form-control search" placeholder="Search...">
+    <span class="input-group-append">
+      <button class="btn btn-outline-secondary" type="button">
+        <i class="fa fa-search"></i>
+      </button>
+    </span>
+  </div>
+  <table class="table table-hover" style="width: inherit;">
+    <thead>
+      <tr>
+        <th class="sort" data-sort="id">ID</th>
+        <th class="sort" data-sort="title">Title</th>
+        <th class="sort" data-sort="note">Note</th>
+        <th class="sort" data-sort="category">Category</th>
+        <th class="sort" data-sort="status">Status</th>
+        <th class="sort" data-sort="priority">Priority</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody class="list">
+      {% for task in tasks %}
+      <tr>
+        <td class="id" scope="row">{{task.id}}</td>
+        <td class="title">{{task.title}}</td>
+        <td class="note">{{task.note}}</td>
+        <td class="category"><a href="{% url 'task_manager:tasks_by_category' task.category_id %}">{% get_category_name_by_id user.id task.category_id %}</a></td>
+        <td class="status" value={{task.status}}>
+          <h5><a class="badge badge-{% get_status_badge_class task.status %}" href="{% url 'task_manager:tasks_by_status' task.status %}">{% get_status task.status %}</a></h5>
+        </td>
+        <td class="priority" value={{task.priority}}>
+          <h5><a class="badge badge-{% get_priority_badge_class task.priority %}" href="{% url 'task_manager:tasks_by_priority' task.priority %}">{% get_priority task.priority %}</a></h5>
+        </td>
+        <td>
+          <a href="{% url 'task_manager:new_plan'%}?task_template={{task.id}}" class='btn btn-success'>Add plan</a>
+          <a href="{% url 'task_manager:show_task' task.id %}" class='btn btn-primary'>Show</a>
+          <a href="{% url 'task_manager:edit_task' task.id %}" class='btn btn-warning'>Edit</a>
+          <form style='display: inline-block;' action="{% url 'task_manager:delete_task' task.id %}" method='post'>
+            {% csrf_token %}
+            <button type='submit' class='btn btn-danger' onclick="return confirm('Are you sure you want to delete this task?')">Delete</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <ul class='pagination'></ul>
+</div>
+<a href="{% url 'task_manager:new_template' %}" class='btn btn-primary'>Add template task</a>
+<script>
+var options = {
+  valueNames: [ 'id', 'title', 'note', 'category', {
+    name: 'status',
+    attr: 'value'
+  }, {
+    name: 'priority',
+    attr: 'value'
+  }],
+  pagination: true,
+  page: 7,
+};
+var list = new List('table', options);
+if(list.size() / list.page <= 1){
+  document.getElementsByClassName('pagination')[0].style.display = 'none';
+}
+</script>
+{% endblock %}

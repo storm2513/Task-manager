@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+{% load notification_tags %}
+{% load fontawesome %}
+<h2>{{header}} {% fontawesome_icon 'bell-o' color='red' %}</h2>
+<div class='table-responsive' id='table'>
+  <div class="input-group col-md-3" style='padding-left: 0'>
+    <input class="form-control search" placeholder="Search...">
+    <span class="input-group-append">
+      <button class="btn btn-outline-secondary" type="button">
+        <i class="fa fa-search"></i>
+      </button>
+    </span>
+  </div>
+  <table class="table table-hover" style="width: inherit;">
+    <thead>
+      <tr>
+        <th class="sort" data-sort="id">ID</th>
+        <th class="sort" data-sort="title">Title</th>
+        <th class="sort" data-sort="relative_start_time">Relative start time</th>
+        <th class="sort" data-sort="status">Status</th>
+        <th class="sort" data-sort="task">Task</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody class="list">
+      {% for notification in notifications %}
+      <tr>
+        <td class="id" scope="row">{{notification.id}}</td>
+        <td class="title">{{notification.title}}</td>
+        <td class="relative_start_time">{% get_timedelta notification.relative_start_time %}</td>
+        <td class="status" value={{notification.status}}>
+          <h5><span class="badge badge-{% get_status_badge_class notification.status %}">{% get_status notification.status %}</span></h5>
+        </td>
+        <td class="task">
+          <a href="{% url 'task_manager:show_task' notification.task_id %}">
+            {% get_task_title_by_id notification.user_id notification.task_id %}
+          </a>
+        </td>
+        <td>
+          {% if view == 'pending' %}
+          <form style='display: inline-block;' action="{% url 'task_manager:set_notification_as_shown' notification.id %}" method='post'>
+            {% csrf_token %}
+            <button type='submit' class='btn btn-primary'>Set as shown</button>
+          </form>
+          {% endif %}
+          <a href="{% url 'task_manager:edit_notification' notification.id %}" class='btn btn-warning'>Edit</a>
+          <form style='display: inline-block;' action="{% url 'task_manager:delete_notification' notification.id %}" method='post'>
+            {% csrf_token %}
+            <button type='submit' class='btn btn-danger' onclick="return confirm('Are you sure you want to delete this notification?')">Delete</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <ul class='pagination'></ul>
+</div>
+<script>
+var options = {
+  valueNames: [ 'id', 'title', 'relative_start_time', {
+    name: 'status',
+    attr: 'value'
+  }, 'task' ],
+  pagination: true,
+  page: 7,
+};
+var list = new List('table', options);
+if(list.size() / list.page <= 1){
+  document.getElementsByClassName('pagination')[0].style.display = 'none';
+}
+</script>
+{% endblock %}

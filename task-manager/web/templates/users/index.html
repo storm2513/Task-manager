@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Users{% endblock %}
+
+{% block content %}
+{% load fontawesome %}
+<h2>Users {% fontawesome_icon 'users' %}</h2>
+<div class='table-responsive' id='table'>
+  <div class="input-group col-md-3" style='padding-left: 0'>
+    <input class="form-control search" placeholder="Search...">
+    <span class="input-group-append">
+      <button class="btn btn-outline-secondary" type="button">
+        <i class="fa fa-search"></i>
+      </button>
+    </span>
+  </div>
+  <table class="table table-hover" style="width: inherit;">
+    <thead>
+      <tr>
+        <th class="sort" data-sort="id">ID</th>
+        <th class="sort" data-sort="username">Username</th>
+        <th class="sort" data-sort="level">Level</th>
+      </tr>
+    </thead>
+    <tbody class="list">
+      {% for user in users %}
+      <tr>
+        <td class="id" scope="row">{{user.id}}</td>
+        <td class="username">{{user.username}}</td>
+        <td class="level">{{user.level.current_level}}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <ul class='pagination'></ul>
+</div>
+<script>
+var options = {
+  valueNames: [ 'id', 'username', 'level' ],
+  pagination: true,
+  page: 7,
+};
+var list = new List('table', options);
+if(list.size() / list.page <= 1){
+  document.getElementsByClassName('pagination')[0].style.display = 'none';
+}
+</script>
+{% endblock %}
