@@ -73,4 +73,9 @@ setup_lib_logging(
 	log_format='%(asctime)s, %(name)s, [%(levelname)s]: %(message)s')
 ```
 
+### Running web version: ###
+```bash
+$ python3 manage.py runserver
+```
+
 Made by Maksim Shylov.
